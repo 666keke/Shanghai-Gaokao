@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Search, TrendingUp, BarChart3, Users, GraduationCap, Star, Filter, ChevronRight, X } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import TrendChart from '../components/TrendChart'
+import { getDataPath } from '../lib/utils'
 
 interface UniversityData {
   组名: string
@@ -33,7 +34,7 @@ export default function HomePage() {
 
   useEffect(() => {
     // Load data from JSON file
-    fetch('/data.json')
+    fetch(getDataPath())
       .then(res => res.json())
       .then((jsonData: UniversityData[]) => {
         setData(jsonData)

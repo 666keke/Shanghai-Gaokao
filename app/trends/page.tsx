@@ -6,6 +6,7 @@ import TrendChart from '../../components/TrendChart'
 import HelpSection from '../../components/HelpSection'
 import { Search, TrendingUp, BarChart3, Filter, Users, GraduationCap } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { getDataPath } from '../../lib/utils'
 
 interface UniversityData {
   组名: string
@@ -38,7 +39,7 @@ export default function TrendsPage() {
   const [viewMode, setViewMode] = useState<'university' | 'majorGroup'>('university')
 
   useEffect(() => {
-    fetch('/data.json')
+    fetch(getDataPath())
       .then(res => res.json())
       .then((jsonData: UniversityData[]) => {
         setData(jsonData)

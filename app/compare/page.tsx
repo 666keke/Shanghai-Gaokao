@@ -6,6 +6,7 @@ import UnifiedCompare from '../../components/UnifiedCompare'
 import HelpSection from '../../components/HelpSection'
 import { GitCompare, Users, BarChart3 } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { getDataPath } from '../../lib/utils'
 
 interface UniversityData {
   组名: string
@@ -33,7 +34,7 @@ export default function ComparePage() {
   const [compareMode, setCompareMode] = useState<'universities' | 'majorGroups'>('universities')
 
   useEffect(() => {
-    fetch('/data.json')
+    fetch(getDataPath())
       .then(res => res.json())
       .then((jsonData: UniversityData[]) => {
         setData(jsonData)

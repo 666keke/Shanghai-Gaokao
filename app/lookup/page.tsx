@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import HelpSection from '../../components/HelpSection'
 import { Search, Target, TrendingUp, ChevronRight, Star, Filter } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { getDataPath } from '../../lib/utils'
 
 interface UniversityData {
   组名: string
@@ -41,7 +42,7 @@ export default function LookupPage() {
   const [searchResults, setSearchResults] = useState<AvailableOption[]>([])
 
   useEffect(() => {
-    fetch('/data.json')
+    fetch(getDataPath())
       .then(res => res.json())
       .then((jsonData: UniversityData[]) => {
         setData(jsonData)

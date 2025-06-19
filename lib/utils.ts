@@ -5,6 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Get the correct path for static assets accounting for basePath
+export function getDataPath(): string {
+  const basePath = process.env.NODE_ENV === 'production' ? '/Shanghai-Gaokao' : ''
+  return `${basePath}/data.json`
+}
+
 export function formatNumber(num: number | null): string {
   if (num === null || num === undefined) return 'N/A'
   return num.toLocaleString()
