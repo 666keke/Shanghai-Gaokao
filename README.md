@@ -4,7 +4,7 @@
 
 ## 🚀 在线访问
 
-**网站**: https://shanghai-gaokao.vercel.app/
+**网站**: https://666keke.github.io/Shanghai-Gaokao/
 
 ## ✨ 主要功能
 
