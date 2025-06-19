@@ -11,6 +11,12 @@ export function getDataPath(): string {
   return `${basePath}/data.json`
 }
 
+// Get the correct path for SVG assets accounting for basePath
+export function getSvgPath(filename: string): string {
+  const basePath = process.env.NODE_ENV === 'production' ? '/Shanghai-Gaokao' : ''
+  return `${basePath}/univ_svg/${filename}`
+}
+
 export function formatNumber(num: number | null): string {
   if (num === null || num === undefined) return 'N/A'
   return num.toLocaleString()

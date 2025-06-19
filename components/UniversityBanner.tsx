@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { getSvgPath } from '../lib/utils'
 
 const universities = [
   { name: 'Tsinghua', file: 'Tsinghua.svg' },
@@ -57,7 +58,7 @@ export default function UniversityBanner() {
             >
               <div className="h-28 w-28 flex items-center justify-center mx-3 md:mx-6">
                 <img
-                  src={`/univ_svg/${university.file}`}
+                  src={getSvgPath(university.file)}
                   alt={`${university.name} logo`}
                   className="h-full w-full object-contain opacity-40 hover:opacity-60 transition-opacity duration-300 filter grayscale hover:filter-none"
                   style={{
