@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Search, TrendingUp, BarChart3, Users, GraduationCap, Star, Filter, ChevronRight, X } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import TrendChart from '../components/TrendChart'
+import UniversityBanner from '../components/UniversityBanner'
 import { getDataPath } from '../lib/utils'
 
 interface UniversityData {
@@ -98,7 +99,19 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-5xl font-bold text-gray-900 mb-6">
-              {t('dashboard.title')}
+              {t('dashboard.title') === '大学录取智能分析' ? (
+                <span className="leading-tight sm:leading-normal">
+                  大学录取<br className="sm:hidden" />
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">智能</span>
+                  分析
+                </span>
+              ) : t('dashboard.title') === 'University Admission Intelligence' ? (
+                <span className="leading-tight sm:leading-normal">
+                  University Admission <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Intelligence</span>
+                </span>
+              ) : (
+                t('dashboard.title')
+              )}
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               {t('dashboard.subtitle', { count: data.length.toLocaleString(), years: stats.yearsCovered })}
@@ -110,17 +123,33 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl mx-auto mb-12"
+            className="max-w-2xl mx-auto mb-10"
           >
-            <div className="relative">
-              <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder={t('dashboard.search.placeholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg backdrop-blur-sm bg-white/90"
-              />
+            <div className="relative flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={t('dashboard.search.placeholder')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
+                  className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg backdrop-blur-sm bg-white/90"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl shadow-lg transition-all duration-200 flex items-center gap-2"
+              >
+                <Search className="h-5 w-5" />
+                <span className="hidden sm:inline">{t('dashboard.search.button')}</span>
+              </button>
             </div>
           </motion.div>
 
@@ -129,7 +158,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16"
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-0"
           >
             <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg card-hover">
               <Users className="h-8 w-8 text-blue-600 mb-3" />
@@ -154,6 +183,9 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* University Banner */}
+      <UniversityBanner />
 
       {/* Search Results */}
       <section id="search" className="py-16 px-4">
