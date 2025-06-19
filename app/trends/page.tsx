@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import TrendChart from '../../components/TrendChart'
+import MajorGroupsTable from '../../components/MajorGroupsTable'
 import HelpSection from '../../components/HelpSection'
 import { Search, TrendingUp, BarChart3, Filter, Users, GraduationCap } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
@@ -254,17 +255,25 @@ export default function TrendsPage() {
 
         {/* Main Trend Charts */}
         {viewMode === 'university' && selectedUniversity && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-12"
-          >
-            <TrendChart
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-8"
+            >
+              <TrendChart
+                universityName={selectedUniversity}
+                data={data}
+              />
+            </motion.div>
+            
+            {/* Major Groups Table */}
+            <MajorGroupsTable
               universityName={selectedUniversity}
               data={data}
             />
-          </motion.div>
+          </>
         )}
 
         {viewMode === 'majorGroup' && selectedMajorGroups.length > 0 && (
@@ -296,7 +305,7 @@ export default function TrendsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-12"
+            className="mt-8"
           >
             <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('trends.popularUniversities')}</h2>
             

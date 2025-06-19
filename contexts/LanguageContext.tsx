@@ -17,7 +17,7 @@ const translations = {
   zh: {
     // Navigation
     'nav.dashboard': '仪表板',
-    'nav.trends': '趋势分析',
+    'nav.trends': '院校聚焦',
     'nav.compare': '对比分析',
     'nav.lookup': '排名查询',
     'nav.title': '上海高考录取分析',
@@ -52,7 +52,7 @@ const translations = {
     'dashboard.loadMore': '加载更多 ({remaining} 条剩余)',
     
     // Trends Page
-    'trends.title': '录取趋势分析',
+    'trends.title': '院校和专业组聚焦',
     'trends.subtitle': '分析大学录取趋势变化',
     'trends.analysisMode': '分析模式',
     'trends.byUniversity': '按大学分析',
@@ -70,6 +70,15 @@ const translations = {
     'trends.totalUniversities': '大学总数',
     'trends.historicalCoverage': '历史数据覆盖',
     'trends.years': '年',
+    'trends.majorGroupsTable': '专业组详情',
+    'trends.majorGroupsTable.subtitle': '该大学在不同年份的所有专业组',
+    'trends.majorGroupsTable.groupName': '专业组名称',
+    'trends.majorGroupsTable.groupNumber': '组号',
+    'trends.majorGroupsTable.admissionScore': '投档线',
+    'trends.majorGroupsTable.minRanking': '最低排名',
+    'trends.majorGroupsTable.year': '年份',
+    'trends.majorGroupsTable.filterByYear': '按年份筛选',
+    'trends.majorGroupsTable.allYears': '所有年份',
     
     // Compare Page
     'compare.title': '大学对比分析',
@@ -234,7 +243,7 @@ const translations = {
     'dashboard.loadMore': 'Load More ({remaining} remaining)',
     
     // Trends Page
-    'trends.title': 'Admission Trends',
+    'trends.title': 'Spotlight on Schools and Major Groups',
     'trends.subtitle': 'Analyze university admission patterns over time',
     'trends.analysisMode': 'Analysis Mode',
     'trends.byUniversity': 'By University',
@@ -252,6 +261,15 @@ const translations = {
     'trends.totalUniversities': 'Total Universities',
     'trends.historicalCoverage': 'Historical Data Coverage',
     'trends.years': 'Years',
+    'trends.majorGroupsTable': 'Major Groups Details',
+    'trends.majorGroupsTable.subtitle': 'All major groups for this university across different years',
+    'trends.majorGroupsTable.groupName': 'Major Group Name',
+    'trends.majorGroupsTable.groupNumber': 'Group Number',
+    'trends.majorGroupsTable.admissionScore': 'Admission Score',
+    'trends.majorGroupsTable.minRanking': 'Min Ranking',
+    'trends.majorGroupsTable.year': 'Year',
+    'trends.majorGroupsTable.filterByYear': 'Filter by Year',
+    'trends.majorGroupsTable.allYears': 'All Years',
     
     // Compare Page
     'compare.title': 'University Comparison',
