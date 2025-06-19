@@ -1,0 +1,54 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build application
+      run: npm run build
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./out
+        
+    - name: Upload to Hugging Face (Optional)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # Uncomment and configure if you want to deploy to Hugging Face Spaces
+        # pip install huggingface_hub
+        # python -c "
+        # from huggingface_hub import HfApi
+        # api = HfApi()
+        # api.upload_folder(
+        #     folder_path='./out',
+        #     repo_id='your-username/gaokao-analytics',
+        #     repo_type='space',
+        #     token='${{ secrets.HF_TOKEN }}'
+        # )
+        # "
+        echo "Hugging Face deployment skipped. Configure if needed." 
