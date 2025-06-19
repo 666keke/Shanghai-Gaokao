@@ -5,8 +5,8 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/gaokao-analytics' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/gaokao-analytics/' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '/Shanghai-Gaokao' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/Shanghai-Gaokao/' : '',
 }
 
 module.exports = nextConfig 
