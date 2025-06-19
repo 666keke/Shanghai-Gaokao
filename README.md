@@ -1,142 +1,80 @@
 # Shanghai Gaokao Analytics 上海高考录取分析
 
-A comprehensive web application for analyzing Shanghai university admission data with bilingual support (Chinese/English).
+一个用于分析上海高考招生数据的 Web 应用，为考生和家长提供全面的数据洞察。
 
-## 🌟 Features
+## 🚀 在线访问
 
-### **📊 Dashboard**
-- Interactive university search with real-time filtering
-- Click on any university to view trend popup modals
-- Load more functionality for browsing large datasets
-- University statistics overview
+**网站**: https://shanghai-gaokao.vercel.app/
 
-### **📈 Trends Analysis**
-- **By University Mode**: Analyze individual university admission trends
-- **By Major Group Mode**: Compare up to 6 major groups side-by-side
-- Auto-search functionality - results appear immediately as you type
-- Interactive charts with line/bar view toggles
-- Historical trend analysis across multiple years
+## ✨ 主要功能
 
-### **⚖️ Compare Analysis**
-- **University Comparison**: Compare multiple universities side-by-side
-- **Major Group Comparison**: Detailed major group analysis
-- **Interactive Detail Modals**: Click on universities to customize:
-  - Select specific major groups to include
-  - Choose particular years for analysis
-  - Real-time statistics updates based on filters
-- **Filter Persistence**: Applied filters are saved and reflected in comparison stats
-- **Visual Indicators**: See which universities have custom filters applied
+- **📊 交互式仪表板**:
+  - 实时搜索和筛选高校。
+  - 点击高校卡片可查看历年分数线趋势。
+- **📈 趋势分析**:
+  - **按院校**: 分析单个院校的录取趋势。
+  - **按专业组**: 同时比较多达6个专业组。
+  - 实时搜索，即时显示结果。
+- **⚖️ 对比分析**:
+  - **院校对比**: 并排比较多个院校的录取数据。
+  - **专业组对比**: 详细的专业组数据分析。
+  - **自定义筛选**: 可针对特定院校筛选专业组和年份。
+- **🎯 位次查询**:
+  - 输入你的高考位次，查询可能录取的专业组。
+  - 根据位次差距提供"安全"、"冲刺"、"危险"三种建议。
 
-### **🎯 Ranking Lookup**
-- Input your ranking to find available major groups
-- **Safety Level System**:
-  - 🟢 **Safe**: 1000+ ranking margin
-  - 🟡 **Moderate**: 500-1000 ranking margin  
-  - 🔴 **Risky**: <500 ranking margin
-- Sorted results by competitiveness
-- Year-specific searches for accurate analysis
+## 📁 目录结构
 
-### **🌍 Internationalization**
-- **Complete Bilingual Support**: Chinese (default) & English
-- 200+ translation keys covering entire application
-- **Persistent Language Settings**: Choice saved in localStorage
-- **Context-Aware Translations**: Smart parameter interpolation
-- **SSR-Safe**: No hydration errors with server-side rendering
-
-### **📱 User Experience**
-- **Responsive Design**: Mobile-friendly layouts
-- **Modern UI**: Tailwind CSS with Framer Motion animations
-- **Collapsible Help Sections**: Contextual guidance on every page
-- **Consistent Navigation**: Unified header and footer across all pages
-- **Interactive Elements**: Hover effects, smooth transitions, visual feedback
-
-## 🛠️ Technical Stack
-
-- **Frontend**: Next.js 14 with TypeScript
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **Data**: Local JSON with university admission records
-- **Deployment**: GitHub Pages with GitHub Actions
-
-## 🚀 Live Demo
-
-**Website**: https://666keke.github.io/Shanghai-Gaokao/
-
-## 📊 Data Coverage
-
-- **Universities**: 100+ Shanghai universities
-- **Years**: 2020-2024 admission data
-- **Records**: 10,000+ admission records
-- **Major Groups**: Comprehensive coverage of all major categories
-
-## 🔧 Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Export static site
-npm run export
+```
+gaokao/
+├── app/                      # Next.js 路由
+│   ├── compare/              # 对比分析页面
+│   ├── lookup/               # 位次查询页面
+│   ├── trends/               # 趋势分析页面
+│   ├── layout.tsx            # 全局布局
+│   └── page.tsx              # 首页（仪表板）
+├── components/               # React 组件
+│   ├── ui/                   # 通用 UI 组件 (例如按钮)
+│   ├── Navigation.tsx        # 导航栏
+│   ├── TrendChart.tsx        # 趋势图表
+│   └── ...                   # 其他页面特定组件
+├── contexts/                 # React Context
+│   └── LanguageContext.tsx   # 语言切换 Context
+├── lib/                      # 辅助函数和工具
+│   └── utils.ts              # 通用工具函数
+├── public/                   # 静态资源
+│   └── data.json             # 本地录取数据
+├── scripts/                  # 脚本
+│   └── deploy-hf.py          # 部署脚本
+├── README.md                 # 项目说明（中文）
+└── README.en.md              # 项目说明（英文）
 ```
 
-## 📝 Usage Guide
+## 🛠️ 技术栈
 
-### Dashboard
-1. Search for universities using the search bar
-2. Click on any university card to view trend popup modal
-3. Use "Load More" to browse additional results
+- **前端**: Next.js 14 (App Router) & TypeScript
+- **样式**: Tailwind CSS
+- **图表**: Recharts
+- **动画**: Framer Motion
+- **数据**: 本地 JSON 文件
+- **部署**: Vercel
 
-### Trends Analysis
-1. Toggle between "By University" and "By Major Group" modes
-2. Search for specific universities or major groups
-3. In Major Group mode, select up to 6 groups for comparison
-4. View interactive charts with line/bar toggle options
+## 🔧 本地开发
 
-### Compare Analysis
-1. Select comparison mode: Universities or Major Groups
-2. Add items using the "Add" button and search functionality
-3. **For Universities**: Click on any university card to open detailed customization
-4. **Customize Filters**: Select specific major groups and years
-5. **View Updated Stats**: All statistics reflect your custom filters
-6. **Visual Indicators**: See "已筛选" (Filtered) badges on customized universities
+首先，安装依赖：
 
-### Ranking Lookup
-1. Enter your ranking position (lower number = better ranking)
-2. Select the academic year for analysis
-3. Review results with safety level indicators
-4. Use margin information to assess admission probability
+```bash
+npm install
+```
 
-## 🌏 Language Support
+然后，运行开发服务器：
 
-The application defaults to Chinese but supports seamless language switching:
+```bash
+npm run dev
+```
 
-- **Chinese (中文)**: Complete localization for Chinese users
-- **English**: Full English interface for international users
-- **Dynamic Switching**: Change language anytime via globe icon in navigation
-- **Persistent Preference**: Language choice saved across sessions
-
-## 📈 Recent Updates
-
-- ✅ Complete bilingual internationalization system
-- ✅ University detail modals with filter customization
-- ✅ Filter persistence in comparison views  
-- ✅ Auto-search functionality in trends page
-- ✅ Safety-coded ranking lookup system
-- ✅ Responsive design improvements
-- ✅ SSR compatibility fixes
-- ✅ Collapsible help sections
-- ✅ Full-width footer consistency
+在浏览器中打开 [http://localhost:3000](http://localhost:3000) 查看结果。
 
 ---
 
-**Last Updated**: $(date '+%Y-%m-%d %H:%M:%S')
-
-*Built with ❤️ for Shanghai students and parents*
+*为上海考生和家长倾情打造 ❤️*
