@@ -179,10 +179,15 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <label htmlFor="year-select" className="sr-only">
+                {t('common.year')}
+              </label>
               <select
+                id="year-select"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                aria-label={t('common.year')}
               >
                 {years.map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -194,13 +199,14 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
           <div className="grid gap-4">
             {filteredData.slice(0, displayLimit).map((university, index) => (
-              <motion.div
+              <motion.button
                 key={`${university.组名}-${index}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-md hover:shadow-lg transition-all card-hover cursor-pointer"
+                className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-md hover:shadow-lg transition-all card-hover cursor-pointer text-left w-full"
                 onClick={() => openTrendModal(university.组名, university.院校名)}
+                aria-label={`${university.院校名} - ${university.组名}`}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -229,7 +235,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   </div>
                   <ChevronRight className="h-5 w-5 text-gray-400" />
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
 
@@ -273,6 +279,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 <button
                   onClick={closeTrendModal}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label={t('common.close')}
                 >
                   <X className="h-6 w-6" />
                 </button>

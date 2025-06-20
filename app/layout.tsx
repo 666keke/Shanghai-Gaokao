@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Navigation from '../components/Navigation'
 import { LanguageProvider } from '../contexts/LanguageContext'
+import DynamicLayout from '../components/DynamicLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,10 +27,12 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={inter.className}>
         <LanguageProvider>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-            <Navigation />
-            {children}
-          </div>
+          <DynamicLayout>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+              <Navigation />
+              {children}
+            </div>
+          </DynamicLayout>
         </LanguageProvider>
       </body>
     </html>

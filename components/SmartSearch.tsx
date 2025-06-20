@@ -286,6 +286,7 @@ export default function SmartSearch({
             <button
               onClick={clearSearch}
               className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-gray-600 z-10"
+              aria-label={t('common.clearSearch')}
             >
               <X className="h-5 w-5" />
             </button>
@@ -295,6 +296,7 @@ export default function SmartSearch({
         <button
           onClick={() => handleSearch()}
           className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl shadow-lg transition-all duration-200 flex items-center gap-2"
+          aria-label={t('common.search')}
         >
           <Search className="h-5 w-5" />
           <span className="hidden sm:inline">{t('dashboard.search.button')}</span>

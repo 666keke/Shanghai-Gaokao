@@ -36,6 +36,7 @@ const translations = {
     'common.close': '关闭',
     'common.expand': '展开',
     'common.collapse': '收起',
+    'common.clearSearch': '清除搜索',
     
     // Dashboard
     'dashboard.title': '大学录取智能分析',
@@ -236,6 +237,7 @@ const translations = {
     'common.close': 'Close',
     'common.expand': 'Expand',
     'common.collapse': 'Collapse',
+    'common.clearSearch': 'Clear search',
     
     // Dashboard
     'dashboard.title': 'University Admission Intelligence',
