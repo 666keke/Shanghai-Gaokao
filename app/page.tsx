@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, TrendingUp, BarChart3, Users, GraduationCap, Star, Filter, ChevronRight, X } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import TrendChart from '../components/TrendChart'
 import UniversityBanner from '../components/UniversityBanner'
+import SmartSearch from '../components/SmartSearch'
+
 import { getDataPath } from '../lib/utils'
 
 interface UniversityData {
@@ -34,6 +36,10 @@ export default function HomePage() {
   const [showTrendModal, setShowTrendModal] = useState(false)
 
   useEffect(() => {
+    document.title = t('nav.title')
+  }, [t])
+
+  useEffect(() => {
     // Load data from JSON file
     fetch(getDataPath())
       .then(res => res.json())
@@ -47,10 +53,19 @@ export default function HomePage() {
       })
   }, [])
 
-  const filteredData = data.filter(item => 
-    item.院校名.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    item.年份 === selectedYear
-  )
+  const filteredData = useMemo(() => {
+    return data.filter(item => {
+      // Basic search term matching (university name or major group)
+      const matchesSearch = !searchTerm || 
+        item.院校名.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.组名.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      // Year filtering
+      const matchesYear = item.年份 === selectedYear
+      
+      return matchesSearch && matchesYear
+    })
+  }, [data, searchTerm, selectedYear])
 
   // Reset display limit when search/filter changes
   useEffect(() => {
@@ -118,39 +133,25 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          {/* Search Bar */}
+          {/* Smart Search Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl mx-auto mb-10"
+            className="mb-10"
           >
-            <div className="relative flex gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={t('dashboard.search.placeholder')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' })
-                    }
-                  }}
-                  className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg backdrop-blur-sm bg-white/90"
-                />
-              </div>
-              <button
-                onClick={() => {
-                  document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' })
-                }}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl shadow-lg transition-all duration-200 flex items-center gap-2"
-              >
-                <Search className="h-5 w-5" />
-                <span className="hidden sm:inline">{t('dashboard.search.button')}</span>
-              </button>
-            </div>
+            <SmartSearch
+              data={data}
+              onSearch={(term) => {
+                setSearchTerm(term)
+                document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' })
+              }}
+              onSelectUniversity={(university) => {
+                setSearchTerm(university)
+                document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' })
+              }}
+              placeholder={t('dashboard.search.placeholder')}
+            />
           </motion.div>
 
           {/* Stats Cards */}
@@ -192,7 +193,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             <div className="flex-1">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('dashboard.search.results')}</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('dashboard.search.results')}</h3>
+              <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+                <span>{t('dashboard.searchResults.count', { count: filteredData.length.toLocaleString() })}</span>
+                {searchTerm && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                    {t('dashboard.searchResults.query', { query: searchTerm })}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <select

@@ -51,6 +51,14 @@ const translations = {
     'dashboard.university.minRanking': '最低排名',
     'dashboard.university.group': '专业组',
     'dashboard.loadMore': '加载更多 ({remaining} 条剩余)',
+    'dashboard.searchResults.count': '找到 {count} 个结果',
+    'dashboard.searchResults.query': '搜索: "{query}"',
+    
+    // Smart Search
+    'smartSearch.avgRanking': '平均排名: {rank}',
+    'smartSearch.programsCount': '{count} 项',
+    'smartSearch.tip': '请使用官方四字简称进行搜索。例：北京航空航天大学 -> 北京航大',
+    'smartSearch.noResults': '找不到与 "{query}" 相关的结果。',
     
     // Trends Page
     'trends.title': '院校和专业组聚焦',
@@ -243,6 +251,14 @@ const translations = {
     'dashboard.university.minRanking': 'Min Ranking',
     'dashboard.university.group': 'Group',
     'dashboard.loadMore': 'Load More ({remaining} remaining)',
+    'dashboard.searchResults.count': 'Found {count} results',
+    'dashboard.searchResults.query': 'Search: "{query}"',
+    
+    // Smart Search
+    'smartSearch.avgRanking': 'Avg. Ranking: {rank}',
+    'smartSearch.programsCount': '{count} programs',
+    'smartSearch.tip': 'Tip: You should search with the official 4-word abbreviation.',
+    'smartSearch.noResults': 'No results found for "{query}".',
     
     // Trends Page
     'trends.title': 'Spotlight on Schools and Major Groups',

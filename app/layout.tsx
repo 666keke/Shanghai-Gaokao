@@ -7,7 +7,6 @@ import { LanguageProvider } from '../contexts/LanguageContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Gaokao Analytics - University Admission Intelligence',
   description: 'Modern analytics platform for Chinese university admission data, trends, and predictions',
   keywords: 'gaokao, university, admission, analytics, china, education',
   authors: [{ name: 'Gaokao Analytics Team' }],
