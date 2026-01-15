@@ -149,8 +149,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
   return (
     <div className="min-h-screen pb-16">
-      <section className="pt-20 pb-14 px-4">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center">
+      <section className="min-h-[calc(100svh-96px)] md:min-h-[calc(100vh-96px)] px-4 py-12 sm:py-16 flex items-center">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-[1.05fr_0.95fr] lg:grid-cols-[1.2fr_0.8fr] gap-10 md:gap-12 lg:gap-16 items-center w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -184,7 +184,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               }}
               className="mb-6"
             >
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 md:grid-cols-4 lg:grid-cols-6">
                 {logoCloud.map((logo, index) => (
                   <motion.div
                     key={logo.file}
@@ -276,19 +276,19 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <div className="relative mt-8 grid grid-cols-2 gap-4">
               <div className="rounded-2xl bg-white/80 px-4 py-4 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.6)]">
                 <p className="text-xs text-slate-500">{t('dashboard.stats.records')}</p>
-                <p className="text-3xl font-semibold text-slate-900">{stats.totalRecords.toLocaleString()}</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{stats.totalRecords.toLocaleString()}</p>
               </div>
               <div className="rounded-2xl bg-white/80 px-4 py-4 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.6)]">
                 <p className="text-xs text-slate-500">{t('dashboard.stats.universities')}</p>
-                <p className="text-3xl font-semibold text-slate-900">{stats.totalUniversities}</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{stats.totalUniversities}</p>
               </div>
               <div className="rounded-2xl bg-white/80 px-4 py-4 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.6)]">
                 <p className="text-xs text-slate-500">{t('dashboard.heroInsights.ranked')}</p>
-                <p className="text-3xl font-semibold text-slate-900">{rankedCount.toLocaleString()}</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{rankedCount.toLocaleString()}</p>
               </div>
               <div className="rounded-2xl bg-white/80 px-4 py-4 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.6)]">
                 <p className="text-xs text-slate-500">{t('dashboard.stats.years')}</p>
-                <p className="text-3xl font-semibold text-slate-900">{stats.yearsCovered}</p>
+                <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{stats.yearsCovered}</p>
               </div>
             </div>
 
