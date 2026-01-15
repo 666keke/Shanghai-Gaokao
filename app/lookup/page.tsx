@@ -1,9 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import HelpSection from '../../components/HelpSection'
-import { Target, ChevronRight, Filter, Sparkles } from 'lucide-react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+import {
+  Target,
+  ChevronRight,
+  Filter,
+  Shield,
+  AlertTriangle,
+  AlertCircle,
+  Search,
+  SlidersHorizontal,
+  ArrowUpDown,
+  GraduationCap,
+  BarChart3,
+  Home,
+} from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { getDataPath } from '../../lib/utils'
 
@@ -29,73 +43,170 @@ interface AvailableOption {
   投档线: string
   最低排名: number
   年份: number
-  marginRanking: number
+  margin: number
+  safetyLevel: 'safe' | 'moderate' | 'risky'
 }
 
-export default function LookupPage() {
+function LookupContent() {
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
+
   const [data, setData] = useState<UniversityData[]>([])
   const [loading, setLoading] = useState(true)
   const [userRanking, setUserRanking] = useState<string>('')
   const [selectedYear, setSelectedYear] = useState<number>(2024)
-  const [availableOptions, setAvailableOptions] = useState<AvailableOption[]>([])
-  const [searchResults, setSearchResults] = useState<AvailableOption[]>([])
+  const [safetyFilter, setSafetyFilter] = useState<'all' | 'safe' | 'moderate' | 'risky'>('all')
+  const [sortBy, setSortBy] = useState<'ranking' | 'margin' | 'university'>('ranking')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [displayLimit, setDisplayLimit] = useState(30)
+
+  // Initialize from URL params
+  useEffect(() => {
+    const rankingParam = searchParams.get('ranking')
+    const yearParam = searchParams.get('year')
+    const filterParam = searchParams.get('filter') as 'safe' | 'moderate' | 'risky' | null
+
+    if (rankingParam) setUserRanking(rankingParam)
+    if (yearParam) setSelectedYear(parseInt(yearParam))
+    if (filterParam && ['safe', 'moderate', 'risky'].includes(filterParam)) {
+      setSafetyFilter(filterParam)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     fetch(getDataPath())
-      .then(res => res.json())
+      .then((res) => res.json())
       .then((jsonData: UniversityData[]) => {
         setData(jsonData)
         setLoading(false)
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Error loading data:', err)
         setLoading(false)
       })
   }, [])
 
-  const years = Array.from(new Set(data.map(item => item.年份))).sort((a, b) => b - a)
+  const years = useMemo(
+    () => Array.from(new Set(data.map((item) => item.年份))).sort((a, b) => b - a),
+    [data]
+  )
 
-  const searchByRanking = () => {
+  // Calculate results
+  const searchResults = useMemo(() => {
     const ranking = parseInt(userRanking)
-    if (isNaN(ranking) || ranking <= 0) {
-      setSearchResults([])
-      return
-    }
+    if (isNaN(ranking) || ranking <= 0) return []
 
-    // Find all major groups where the user's ranking is better than or equal to the minimum ranking
-    const options = data
-      .filter(item => 
-        item.年份 === selectedYear && 
-        item.最低排名 && 
-        ranking <= item.最低排名
+    const options: AvailableOption[] = data
+      .filter(
+        (item) =>
+          item.年份 === selectedYear && item.最低排名 && ranking <= item.最低排名
       )
-      .map(item => ({
-        组名: item.组名,
-        院校名: item.院校名,
-        组号: item.组号,
-        投档线: item.投档线,
-        最低排名: item.最低排名!,
-        年份: item.年份,
-        marginRanking: item.最低排名! - ranking // How much margin the student has
-      }))
-      .sort((a, b) => a.最低排名 - b.最低排名) // Sort by competitiveness (lower ranking = more competitive)
+      .map((item) => {
+        const margin = item.最低排名! - ranking
+        let safetyLevel: 'safe' | 'moderate' | 'risky'
+        if (margin > 1000) safetyLevel = 'safe'
+        else if (margin > 500) safetyLevel = 'moderate'
+        else safetyLevel = 'risky'
 
-    setSearchResults(options)
-  }
+        return {
+          组名: item.组名,
+          院校名: item.院校名,
+          组号: item.组号,
+          投档线: item.投档线,
+          最低排名: item.最低排名!,
+          年份: item.年份,
+          margin,
+          safetyLevel,
+        }
+      })
 
-  useEffect(() => {
-    if (userRanking) {
-      searchByRanking()
-    }
+    return options
   }, [userRanking, selectedYear, data])
+
+  // Apply filters and sorting
+  const filteredResults = useMemo(() => {
+    let results = [...searchResults]
+
+    // Safety filter
+    if (safetyFilter !== 'all') {
+      results = results.filter((r) => r.safetyLevel === safetyFilter)
+    }
+
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      results = results.filter(
+        (r) =>
+          r.院校名.toLowerCase().includes(term) ||
+          r.组名.toLowerCase().includes(term)
+      )
+    }
+
+    // Sort
+    switch (sortBy) {
+      case 'ranking':
+        results.sort((a, b) => a.最低排名 - b.最低排名)
+        break
+      case 'margin':
+        results.sort((a, b) => b.margin - a.margin)
+        break
+      case 'university':
+        results.sort((a, b) => a.院校名.localeCompare(b.院校名))
+        break
+    }
+
+    return results
+  }, [searchResults, safetyFilter, searchTerm, sortBy])
+
+  // Stats
+  const stats = useMemo(() => {
+    return {
+      total: searchResults.length,
+      safe: searchResults.filter((r) => r.safetyLevel === 'safe').length,
+      moderate: searchResults.filter((r) => r.safetyLevel === 'moderate').length,
+      risky: searchResults.filter((r) => r.safetyLevel === 'risky').length,
+      universities: new Set(searchResults.map((r) => r.院校名)).size,
+    }
+  }, [searchResults])
+
+  const getSafetyConfig = (level: 'safe' | 'moderate' | 'risky') => {
+    switch (level) {
+      case 'safe':
+        return {
+          icon: Shield,
+          bgClass: 'bg-emerald-50',
+          borderClass: 'border-emerald-200',
+          textClass: 'text-emerald-700',
+          badgeClass: 'bg-emerald-100 text-emerald-700',
+          label: t('calc.safe'),
+        }
+      case 'moderate':
+        return {
+          icon: AlertTriangle,
+          bgClass: 'bg-amber-50',
+          borderClass: 'border-amber-200',
+          textClass: 'text-amber-700',
+          badgeClass: 'bg-amber-100 text-amber-700',
+          label: t('calc.moderate'),
+        }
+      case 'risky':
+        return {
+          icon: AlertCircle,
+          bgClass: 'bg-rose-50',
+          borderClass: 'border-rose-200',
+          textClass: 'text-rose-700',
+          badgeClass: 'bg-rose-100 text-rose-700',
+          label: t('calc.risky'),
+        }
+    }
+  }
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('common.loading')}</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-slate-600">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -103,197 +214,324 @@ export default function LookupPage() {
 
   return (
     <div className="min-h-screen pb-16">
-      <section className="pt-16 pb-10 px-4">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
-          <div>
-            <div className="pill mb-4">
-              <Sparkles className="h-4 w-4 text-blue-600" />
-              <span>{t('lookup.title')}</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900">{t('lookup.title')}</h1>
-            <p className="mt-3 text-slate-600">{t('lookup.subtitle')}</p>
+      {/* Header */}
+      <section className="pt-8 pb-6 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+            <Link href="/" className="hover:text-blue-600 flex items-center gap-1">
+              <Home className="h-4 w-4" />
+              {t('nav.dashboard')}
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-slate-900">{t('lookup.title')}</span>
           </div>
-          <div className="surface-card rounded-3xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500">{t('lookup.enterRanking')}</p>
-                <h3 className="text-lg font-semibold text-slate-900">{searchResults.length}</h3>
-              </div>
-              <Target className="h-6 w-6 text-blue-600" />
+
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
+                <Target className="h-8 w-8 text-blue-600" />
+                {t('lookup.title')}
+              </h1>
+              <p className="text-slate-600 mt-1">{t('lookup.subtitle')}</p>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <p className="text-xs text-slate-500">{t('lookup.academicYear')}</p>
-                <p className="font-semibold text-slate-900">{selectedYear}</p>
+
+            {userRanking && stats.total > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm">
+                  <Shield className="h-4 w-4 text-emerald-600" />
+                  <span className="font-medium text-emerald-700">{stats.safe}</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-sm">
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  <span className="font-medium text-amber-700">{stats.moderate}</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-rose-100 px-4 py-2 text-sm">
+                  <AlertCircle className="h-4 w-4 text-rose-600" />
+                  <span className="font-medium text-rose-700">{stats.risky}</span>
+                </div>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <p className="text-xs text-slate-500">{t('dashboard.stats.records')}</p>
-                <p className="font-semibold text-slate-900">{data.length.toLocaleString()}</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="px-4 pb-10">
-        <div className="max-w-6xl mx-auto space-y-6">
+      {/* Search Controls */}
+      <section className="px-4 pb-6">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card rounded-3xl p-6"
+            className="glass-card rounded-2xl p-5"
           >
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">{t('lookup.enterRanking')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm text-slate-600 mb-2">
-                  {t('lookup.yourRanking')}
+            <div className="grid gap-4 md:grid-cols-[1fr_auto_auto_auto]">
+              {/* Ranking Input */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('calc.yourRanking')}
                 </label>
                 <div className="relative">
-                  <Target className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Target className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="number"
-                    placeholder={t('lookup.yourRanking.placeholder')}
+                    placeholder={t('calc.placeholder')}
                     value={userRanking}
-                    onChange={(e) => setUserRanking(e.target.value)}
-                    className="focus-ring w-full rounded-2xl border border-slate-200 bg-white/80 py-2.5 pl-10 pr-4 text-sm"
+                    onChange={(e) => {
+                      setUserRanking(e.target.value)
+                      setDisplayLimit(30)
+                    }}
+                    className="focus-ring w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min="1"
                   />
                 </div>
-                <p className="text-xs text-slate-500 mt-2">
-                  {t('lookup.yourRanking.help')}
-                </p>
               </div>
+
+              {/* Year Selector */}
               <div>
-                <label className="block text-sm text-slate-600 mb-2">
-                  {t('lookup.academicYear')}
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('calc.referenceYear')}
                 </label>
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="focus-ring w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-2.5 text-sm"
+                  className="focus-ring h-[46px] rounded-xl border border-slate-200 bg-white px-4 text-sm"
                 >
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
                   ))}
+                </select>
+              </div>
+
+              {/* Safety Filter */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('lookup.safetyLevel')}
+                </label>
+                <select
+                  value={safetyFilter}
+                  onChange={(e) =>
+                    setSafetyFilter(e.target.value as typeof safetyFilter)
+                  }
+                  className="focus-ring h-[46px] rounded-xl border border-slate-200 bg-white px-4 text-sm"
+                >
+                  <option value="all">{t('trends.majorGroupsTable.allYears')}</option>
+                  <option value="safe">{t('calc.safe')}</option>
+                  <option value="moderate">{t('calc.moderate')}</option>
+                  <option value="risky">{t('calc.risky')}</option>
+                </select>
+              </div>
+
+              {/* Sort */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('dashboard.sortBy')}
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="focus-ring h-[46px] rounded-xl border border-slate-200 bg-white px-4 text-sm"
+                >
+                  <option value="ranking">{t('lookup.minRanking')}</option>
+                  <option value="margin">{t('lookup.yourMargin')}</option>
+                  <option value="university">{t('common.university')}</option>
                 </select>
               </div>
             </div>
 
-            {userRanking && (
-              <div className="mt-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">
-                {t('lookup.searchResults', { count: searchResults.length, ranking: userRanking, year: selectedYear })}
+            {/* Search within results */}
+            {userRanking && searchResults.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder={t('dashboard.search.placeholder')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="focus-ring w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm"
+                  />
+                </div>
               </div>
             )}
           </motion.div>
-
-          {searchResults.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="glass-card rounded-3xl p-6"
-            >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
-                <h2 className="text-lg font-semibold text-slate-900">{t('lookup.availableMajorGroups')}</h2>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Filter className="h-4 w-4" />
-                  <span>{t('lookup.sortedByCompetitiveness')}</span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {searchResults.slice(0, 50).map((option, index) => (
-                  <motion.div
-                    key={`${option.组名}-${index}`}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.03 }}
-                    className="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-white/80 p-4 md:flex-row md:items-center md:justify-between"
-                  >
-                    <div className="flex-1 space-y-1">
-                      <h3 className="font-semibold text-slate-900">{option.院校名}</h3>
-                      <p className="text-sm text-slate-500">{option.组名}</p>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-xs text-slate-400">{t('lookup.minRanking')}</span>
-                        <p className="font-medium text-slate-800">{option.最低排名.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <span className="text-xs text-slate-400">{t('lookup.yourMargin')}</span>
-                        <p className={`font-medium ${option.marginRanking > 1000 ? 'text-emerald-600' : option.marginRanking > 500 ? 'text-amber-600' : 'text-rose-600'}`}>
-                          {option.marginRanking.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-xs text-slate-400">{t('lookup.scoreLine')}</span>
-                        <p className="font-medium text-slate-800">{option.投档线}</p>
-                      </div>
-                      <div>
-                        <span className="text-xs text-slate-400">{t('lookup.safetyLevel')}</span>
-                        <p className={`font-medium ${option.marginRanking > 1000 ? 'text-emerald-600' : option.marginRanking > 500 ? 'text-amber-600' : 'text-rose-600'}`}>
-                          {option.marginRanking > 1000 ? t('lookup.safe') : option.marginRanking > 500 ? t('lookup.moderate') : t('lookup.risky')}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-slate-400" />
-                  </motion.div>
-                ))}
-              </div>
-
-              {searchResults.length > 50 && (
-                <div className="text-center mt-6 text-sm text-slate-500">
-                  {t('lookup.showingResults', { total: searchResults.length })}
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {userRanking && searchResults.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass-card rounded-3xl p-8 text-center"
-            >
-              <Target className="h-14 w-14 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('lookup.noResults')}</h3>
-              <p className="text-sm text-slate-600">
-                {t('lookup.noResults.message', { ranking: userRanking, year: selectedYear })}
-              </p>
-            </motion.div>
-          )}
-
-          <HelpSection
-            title={t('help.howToUse')}
-            type="howToUse"
-            className="mt-4"
-            defaultExpanded={false}
-          >
-            <div className="text-sm space-y-1">
-              <p>{t('help.lookup.instruction1')}</p>
-              <p>{t('help.lookup.instruction2')}</p>
-              <p>{t('help.lookup.instruction3')}</p>
-              <p>{t('help.lookup.instruction4')}</p>
-            </div>
-          </HelpSection>
         </div>
       </section>
 
+      {/* Results */}
+      <section className="px-4 pb-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Results Header */}
+          {userRanking && (
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-slate-600">
+                {t('lookup.searchResults', {
+                  count: filteredResults.length,
+                  ranking: userRanking,
+                  year: selectedYear,
+                })}
+              </p>
+              {filteredResults.length !== searchResults.length && (
+                <button
+                  onClick={() => {
+                    setSafetyFilter('all')
+                    setSearchTerm('')
+                  }}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  {t('common.clearSearch')}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Results List */}
+          <AnimatePresence mode="wait">
+            {filteredResults.length > 0 ? (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
+              >
+                {filteredResults.slice(0, displayLimit).map((option, index) => {
+                  const config = getSafetyConfig(option.safetyLevel)
+                  const Icon = config.icon
+
+                  return (
+                    <motion.div
+                      key={`${option.组名}-${index}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(index * 0.02, 0.3) }}
+                      className={`rounded-2xl border ${config.borderClass} ${config.bgClass} p-4 transition-all hover:shadow-md`}
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-slate-900 truncate">
+                              {option.院校名}
+                            </h3>
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${config.badgeClass}`}
+                            >
+                              <Icon className="h-3 w-3" />
+                              {config.label}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600 truncate">
+                            {option.组名} · {option.组号}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="text-center">
+                            <p className="text-xs text-slate-500">
+                              {t('lookup.minRanking')}
+                            </p>
+                            <p className="font-semibold text-slate-900">
+                              {option.最低排名.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-slate-500">
+                              {t('lookup.yourMargin')}
+                            </p>
+                            <p className={`font-semibold ${config.textClass}`}>
+                              +{option.margin.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-slate-500">
+                              {t('lookup.scoreLine')}
+                            </p>
+                            <p className="font-semibold text-slate-900">
+                              {option.投档线}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+
+                {/* Load More */}
+                {filteredResults.length > displayLimit && (
+                  <div className="text-center pt-4">
+                    <button
+                      onClick={() => setDisplayLimit((prev) => prev + 30)}
+                      className="focus-ring inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+                    >
+                      {t('dashboard.loadMore', {
+                        remaining: filteredResults.length - displayLimit,
+                      })}
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            ) : userRanking ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="glass-card rounded-2xl p-8 text-center"
+              >
+                <Target className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  {t('lookup.noResults')}
+                </h3>
+                <p className="text-sm text-slate-600">
+                  {t('lookup.noResults.message', {
+                    ranking: userRanking,
+                    year: selectedYear,
+                  })}
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="prompt"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="glass-card rounded-2xl p-8 text-center"
+              >
+                <Target className="h-12 w-12 text-blue-600/40 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  {t('calc.empty.title')}
+                </h3>
+                <p className="text-sm text-slate-600 max-w-md mx-auto">
+                  {t('calc.empty.desc')}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Footer */}
       <footer className="mt-10 border-t border-white/50 bg-white/60 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-4 py-10 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-3 text-slate-700">
-            <Target className="h-5 w-5" />
+        <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-2 text-slate-700">
+            <GraduationCap className="h-5 w-5" />
             <span className="text-base font-semibold">{t('nav.title')}</span>
           </div>
           <p className="text-sm text-slate-500">{t('lookup.subtitle')}</p>
-          <div className="mt-4 text-xs text-slate-400">
-            {userRanking && searchResults.length > 0
-              ? `${t('lookup.yourRanking')}: ${userRanking} • ${t('lookup.availableMajorGroups')}: ${searchResults.length}`
-              : `${data.length.toLocaleString()} ${t('dashboard.stats.records').toLowerCase()}`
-            }
-          </div>
         </div>
       </footer>
     </div>
   )
-} 
+}
+
+export default function LookupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-2 border-blue-600 border-t-transparent"></div>
+        </div>
+      }
+    >
+      <LookupContent />
+    </Suspense>
+  )
+}

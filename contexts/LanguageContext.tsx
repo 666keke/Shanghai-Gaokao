@@ -16,11 +16,34 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const translations = {
   zh: {
     // Navigation
-    'nav.dashboard': '仪表板',
-    'nav.trends': '院校聚焦',
-    'nav.compare': '对比分析',
-    'nav.lookup': '排名查询',
-    'nav.title': '上海高考录取分析',
+    'nav.dashboard': '首页',
+    'nav.trends': '趋势分析',
+    'nav.compare': '对比',
+    'nav.lookup': '详细查询',
+    'nav.title': '高考志愿分析',
+
+    // Admission Chance Calculator
+    'calc.title': '录取概率分析',
+    'calc.subtitle': '输入排名并确认，生成结果',
+    'calc.yourRanking': '您的高考排名',
+    'calc.placeholder': '例如：5000',
+    'calc.hint': '排名越小越好，1为最高',
+    'calc.referenceYear': '参考年份',
+    'calc.viewAll': '查看完整列表',
+    'calc.confirm': '确认',
+    'calc.safe': '安全',
+    'calc.safe.desc': '余量 > 1000名，录取概率很高',
+    'calc.moderate': '稳妥',
+    'calc.moderate.desc': '余量 500-1000名，有较大把握',
+    'calc.risky': '冲刺',
+    'calc.risky.desc': '余量 < 500名，有一定风险',
+    'calc.stats.accessible': '可选专业占比',
+    'calc.stats.safe': '安全选项',
+    'calc.stats.universities': '可选院校',
+    'calc.stats.totalPrograms': '可选专业组',
+    'calc.viewMore': '查看更多 +{count}',
+    'calc.empty.title': '开始分析您的录取机会',
+    'calc.empty.desc': '输入您的高考排名，我们将为您分析所有可选的专业组，并按录取安全程度分类展示',
     
     // Common
     'common.loading': '加载中...',
@@ -251,11 +274,34 @@ const translations = {
   },
   en: {
     // Navigation
-    'nav.dashboard': 'Dashboard',
+    'nav.dashboard': 'Home',
     'nav.trends': 'Trends',
     'nav.compare': 'Compare',
-    'nav.lookup': 'Lookup',
+    'nav.lookup': 'Full List',
     'nav.title': 'Gaokao Analytics',
+
+    // Admission Chance Calculator
+    'calc.title': 'Admission Chance Calculator',
+    'calc.subtitle': 'Enter ranking and confirm to generate results',
+    'calc.yourRanking': 'Your Gaokao Ranking',
+    'calc.placeholder': 'e.g., 5000',
+    'calc.hint': 'Lower ranking = better (1 is the best)',
+    'calc.referenceYear': 'Reference Year',
+    'calc.viewAll': 'View Full List',
+    'calc.confirm': 'Confirm & generate results',
+    'calc.safe': 'Safe',
+    'calc.safe.desc': 'Margin > 1000, very high admission chance',
+    'calc.moderate': 'Moderate',
+    'calc.moderate.desc': 'Margin 500-1000, good admission chance',
+    'calc.risky': 'Reach',
+    'calc.risky.desc': 'Margin < 500, some risk involved',
+    'calc.stats.accessible': 'Accessible Programs',
+    'calc.stats.safe': 'Safe Options',
+    'calc.stats.universities': 'Universities',
+    'calc.stats.totalPrograms': 'Total Programs',
+    'calc.viewMore': 'View More +{count}',
+    'calc.empty.title': 'Start Analyzing Your Chances',
+    'calc.empty.desc': 'Enter your gaokao ranking to see all available programs, categorized by admission safety level',
     
     // Common
     'common.loading': 'Loading...',

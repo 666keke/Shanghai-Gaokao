@@ -15,9 +15,9 @@ export default function Navigation() {
 
   const navItems = [
     { href: '/', label: t('nav.dashboard'), icon: Home },
+    { href: '/lookup', label: t('nav.lookup'), icon: Target },
     { href: '/trends', label: t('nav.trends'), icon: TrendingUp },
     { href: '/compare', label: t('nav.compare'), icon: GitCompare },
-    { href: '/lookup', label: t('nav.lookup'), icon: Target },
   ]
 
   const isActiveRoute = (href: string) => {
