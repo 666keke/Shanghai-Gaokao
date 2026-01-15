@@ -52,7 +52,7 @@ export default function MajorGroupsTable({ universityName, data }: MajorGroupsTa
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-xl p-6 shadow-lg mt-8"
+      className="glass-card rounded-3xl p-6 mt-8"
     >
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -73,7 +73,7 @@ export default function MajorGroupsTable({ universityName, data }: MajorGroupsTa
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[120px]"
+              className="focus-ring min-w-[120px] rounded-2xl border border-slate-200 bg-white/80 px-3 py-2 text-sm"
             >
               <option value="all">{t('trends.majorGroupsTable.allYears')}</option>
               {availableYears.map(year => (
@@ -85,22 +85,22 @@ export default function MajorGroupsTable({ universityName, data }: MajorGroupsTa
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-4 font-medium text-gray-700">
+            <tr className="border-b border-slate-200">
+              <th className="text-left py-3 px-4 font-medium text-slate-600">
                 {t('trends.majorGroupsTable.year')}
               </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">
+              <th className="text-left py-3 px-4 font-medium text-slate-600">
                 {t('trends.majorGroupsTable.groupNumber')}
               </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">
+              <th className="text-left py-3 px-4 font-medium text-slate-600">
                 {t('trends.majorGroupsTable.groupName')}
               </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">
+              <th className="text-left py-3 px-4 font-medium text-slate-600">
                 {t('trends.majorGroupsTable.admissionScore')}
               </th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700">
+              <th className="text-left py-3 px-4 font-medium text-slate-600">
                 {t('trends.majorGroupsTable.minRanking')}
               </th>
             </tr>
@@ -112,7 +112,7 @@ export default function MajorGroupsTable({ universityName, data }: MajorGroupsTa
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
               >
                 <td className="py-3 px-4">
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -120,16 +120,16 @@ export default function MajorGroupsTable({ universityName, data }: MajorGroupsTa
                   </span>
                 </td>
                 <td className="py-3 px-4">
-                  <span className="font-medium text-gray-900">{item.组号}</span>
+                  <span className="font-medium text-slate-900">{item.组号}</span>
                 </td>
                 <td className="py-3 px-4">
-                  <span className="text-gray-700">{item.组名}</span>
+                  <span className="text-slate-700">{item.组名}</span>
                 </td>
                 <td className="py-3 px-4">
-                  <span className="font-medium text-green-600">{item.投档线}</span>
+                  <span className="font-medium text-emerald-600">{item.投档线}</span>
                 </td>
                 <td className="py-3 px-4">
-                  <span className="font-medium text-purple-600">
+                  <span className="font-medium text-indigo-600">
                     {item.最低排名 ? item.最低排名.toLocaleString() : 'N/A'}
                   </span>
                 </td>
@@ -139,7 +139,7 @@ export default function MajorGroupsTable({ universityName, data }: MajorGroupsTa
         </table>
       </div>
 
-      <div className="mt-4 flex justify-between text-sm text-gray-500">
+      <div className="mt-4 flex justify-between text-xs text-slate-500">
         <span>
           {t('dashboard.stats.records')}: {filteredData.length}
           {selectedYear !== 'all' && (

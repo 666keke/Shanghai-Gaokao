@@ -34,7 +34,7 @@ export default function UniversityBanner() {
   }, [])
 
   return (
-    <div className="w-full overflow-hidden py-1">
+    <div className="w-full overflow-hidden py-6">
       <div className="relative">
         <motion.div
           className="flex items-center gap-6 md:gap-12"
@@ -60,7 +60,7 @@ export default function UniversityBanner() {
                 <img
                   src={getSvgPath(university.file)}
                   alt={`${university.name} logo`}
-                  className="h-full w-full object-contain opacity-40 hover:opacity-60 transition-opacity duration-300 filter grayscale hover:filter-none"
+                  className="h-full w-full object-contain opacity-40 hover:opacity-70 transition-opacity duration-300 filter grayscale hover:filter-none"
                   style={{
                     maxHeight: '112px',
                     maxWidth: '112px',

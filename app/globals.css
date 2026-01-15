@@ -54,7 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
 
@@ -76,3 +76,73 @@
   transform: translateY(-4px);
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 } 
+
+@layer utilities {
+  .app-shell {
+    background:
+      radial-gradient(1200px 800px at 10% -10%, rgba(59, 130, 246, 0.18), transparent 55%),
+      radial-gradient(900px 700px at 110% 10%, rgba(99, 102, 241, 0.18), transparent 55%),
+      radial-gradient(700px 600px at 50% 120%, rgba(14, 116, 144, 0.14), transparent 60%);
+  }
+
+  .grid-overlay {
+    background-image:
+      linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .surface-card {
+    @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.35)];
+  }
+
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-2xl border border-white/40 shadow-[0_25px_70px_-45px_rgba(30,41,59,0.4)];
+  }
+
+  .soft-shadow {
+    box-shadow: 0 18px 45px -35px rgba(15, 23, 42, 0.55);
+  }
+
+  .hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 70px -45px rgba(15, 23, 42, 0.6);
+    border-color: rgba(99, 102, 241, 0.4);
+  }
+
+  .text-gradient {
+    background: linear-gradient(120deg, #2563eb 0%, #7c3aed 40%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-4 py-1 text-xs font-medium text-slate-600 shadow-sm;
+  }
+
+  .section-title {
+    @apply text-2xl sm:text-3xl font-semibold text-slate-900;
+  }
+
+  .section-subtitle {
+    @apply text-sm sm:text-base text-slate-600;
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+  }
+}

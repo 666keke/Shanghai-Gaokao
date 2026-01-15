@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { motion } from 'framer-motion'
+import { useLanguage } from '../contexts/LanguageContext'
 
 interface TrendData {
   year: number
@@ -24,6 +25,7 @@ interface TrendChartProps {
 }
 
 export default function TrendChart({ universityName, data, title }: TrendChartProps) {
+  const { t } = useLanguage()
   const [chartData, setChartData] = useState<TrendData[]>([])
   const [chartType, setChartType] = useState<'line' | 'bar'>('line')
 
@@ -57,10 +59,10 @@ export default function TrendChart({ universityName, data, title }: TrendChartPr
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-4">Admission Trends</h3>
-        <div className="text-center text-gray-500 py-8">
-          No trend data available for {title || universityName}
+      <div className="glass-card rounded-3xl p-6">
+        <h3 className="text-lg font-semibold mb-4">{t('chart.admissionTrends')}</h3>
+        <div className="text-center text-slate-500 py-8">
+          {t('chart.noData', { name: title || universityName })}
         </div>
       </div>
     )
@@ -71,30 +73,32 @@ export default function TrendChart({ universityName, data, title }: TrendChartPr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-xl p-6 shadow-lg"
+      className="glass-card rounded-3xl p-6"
     >
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold">Admission Trends - {title || universityName}</h3>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
+        <h3 className="text-lg font-semibold text-slate-900">
+          {t('chart.admissionTrends')} - {title || universityName}
+        </h3>
         <div className="flex space-x-2">
           <button
             onClick={() => setChartType('line')}
-            className={`px-3 py-1 rounded-md text-sm transition-colors ${
-              chartType === 'line' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
+              chartType === 'line'
+                ? 'bg-blue-600 text-white shadow shadow-blue-600/30'
+                : 'border border-slate-200 bg-white/70 text-slate-600 hover:text-blue-600'
             }`}
           >
-            Line
+            {t('chart.line')}
           </button>
           <button
             onClick={() => setChartType('bar')}
-            className={`px-3 py-1 rounded-md text-sm transition-colors ${
-              chartType === 'bar' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
+              chartType === 'bar'
+                ? 'bg-blue-600 text-white shadow shadow-blue-600/30'
+                : 'border border-slate-200 bg-white/70 text-slate-600 hover:text-blue-600'
             }`}
           >
-            Bar
+            {t('chart.bar')}
           </button>
         </div>
       </div>
@@ -103,27 +107,27 @@ export default function TrendChart({ universityName, data, title }: TrendChartPr
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'line' ? (
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis 
                 dataKey="year" 
-                stroke="#666"
+                stroke="#64748b"
                 fontSize={12}
               />
               <YAxis 
-                stroke="#666"
+                stroke="#64748b"
                 fontSize={12}
                 domain={['dataMin - 500', 'dataMax + 500']}
               />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 30px -20px rgba(15, 23, 42, 0.35)'
                 }}
                 formatter={(value: number, name: string) => [
                   value.toLocaleString(),
-                  name === 'averageRanking' ? 'Average Ranking' : 'Applications'
+                  name === 'averageRanking' ? t('chart.averageRanking') : t('chart.applications')
                 ]}
               />
               <Line
@@ -137,25 +141,25 @@ export default function TrendChart({ universityName, data, title }: TrendChartPr
             </LineChart>
           ) : (
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis 
                 dataKey="year" 
-                stroke="#666"
+                stroke="#64748b"
                 fontSize={12}
               />
               <YAxis 
-                stroke="#666"
+                stroke="#64748b"
                 fontSize={12}
                 domain={['dataMin - 500', 'dataMax + 500']}
               />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 30px -20px rgba(15, 23, 42, 0.35)'
                 }}
-                formatter={(value: number) => [value.toLocaleString(), 'Average Ranking']}
+                formatter={(value: number) => [value.toLocaleString(), t('chart.averageRanking')]}
               />
               <Bar 
                 dataKey="averageRanking" 
@@ -169,24 +173,24 @@ export default function TrendChart({ universityName, data, title }: TrendChartPr
 
       <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
         <div className="text-center">
-          <p className="text-gray-500">Best Year</p>
-          <p className="font-semibold">
+          <p className="text-slate-500">{t('chart.bestYear')}</p>
+          <p className="font-semibold text-slate-800">
             {chartData.reduce((best, current) => 
               current.averageRanking < best.averageRanking ? current : best
             ).year}
           </p>
         </div>
         <div className="text-center">
-          <p className="text-gray-500">Trend</p>
-          <p className="font-semibold">
+          <p className="text-slate-500">{t('chart.trend')}</p>
+          <p className="font-semibold text-slate-800">
             {chartData.length > 1 && chartData[chartData.length - 1].averageRanking < chartData[0].averageRanking 
-              ? '↗️ Improving' : chartData.length > 1 && chartData[chartData.length - 1].averageRanking > chartData[0].averageRanking
-              ? '↘️ Declining' : '→ Stable'}
+              ? t('chart.improving') : chartData.length > 1 && chartData[chartData.length - 1].averageRanking > chartData[0].averageRanking
+              ? t('chart.declining') : t('chart.stable')}
           </p>
         </div>
         <div className="text-center">
-          <p className="text-gray-500">Years</p>
-          <p className="font-semibold">{chartData.length}</p>
+          <p className="text-slate-500">{t('chart.years')}</p>
+          <p className="font-semibold text-slate-800">{chartData.length}</p>
         </div>
       </div>
     </motion.div>

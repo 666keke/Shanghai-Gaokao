@@ -28,22 +28,22 @@ export default function HelpSection({
     switch (type) {
       case 'tips':
         return {
-          container: 'bg-yellow-50 border border-yellow-200',
-          title: 'text-yellow-900',
-          content: 'text-yellow-700',
-          button: 'text-yellow-700 hover:text-yellow-900'
+          container: 'glass-card border border-amber-100/60',
+          title: 'text-amber-900',
+          content: 'text-amber-700',
+          button: 'text-amber-700 hover:text-amber-900'
         }
       case 'guide':
         return {
-          container: 'bg-yellow-50 border border-yellow-200',
-          title: 'text-yellow-900',
-          content: 'text-yellow-700',
-          button: 'text-yellow-700 hover:text-yellow-900'
+          container: 'glass-card border border-amber-100/60',
+          title: 'text-amber-900',
+          content: 'text-amber-700',
+          button: 'text-amber-700 hover:text-amber-900'
         }
       case 'howToUse':
       default:
         return {
-          container: 'bg-blue-50 border border-blue-200',
+          container: 'glass-card border border-blue-100/60',
           title: 'text-blue-900',
           content: 'text-blue-700',
           button: 'text-blue-700 hover:text-blue-900'
@@ -75,11 +75,11 @@ export default function HelpSection({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`${styles.container} rounded-xl overflow-hidden ${className}`}
+      className={`${styles.container} rounded-3xl overflow-hidden ${className}`}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`w-full flex items-center justify-between p-6 ${styles.button} transition-colors hover:bg-black/5`}
+        className={`w-full flex items-center justify-between p-6 ${styles.button} transition-colors hover:bg-white/50`}
       >
         <div className="flex items-center space-x-3">
           {getIcon()}

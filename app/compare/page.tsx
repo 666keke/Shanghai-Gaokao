@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import UnifiedCompare from '../../components/UnifiedCompare'
 import HelpSection from '../../components/HelpSection'
-import { GitCompare, Users, BarChart3 } from 'lucide-react'
+import { GitCompare, Sparkles } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { getDataPath } from '../../lib/utils'
 
@@ -86,192 +86,201 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{t('compare.title')}</h1>
-              <p className="text-gray-600 mt-2">{t('compare.subtitle')}</p>
+    <div className="min-h-screen pb-16">
+      <section className="pt-16 pb-10 px-4">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
+          <div>
+            <div className="pill mb-4">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              <span>{t('compare.title')}</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <GitCompare className="h-8 w-8 text-blue-600" />
-              <Users className="h-8 w-8 text-green-600" />
-              <BarChart3 className="h-8 w-8 text-purple-600" />
+            <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900">{t('compare.title')}</h1>
+            <p className="mt-3 text-slate-600">{t('compare.subtitle')}</p>
+          </div>
+          <div className="surface-card rounded-3xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500">{t('compare.quickSummary')}</p>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {compareMode === 'universities' ? selectedUniversities.length : selectedMajorGroups.length}
+                </h3>
+              </div>
+              <GitCompare className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <p className="text-xs text-slate-500">{compareMode === 'universities' ? t('compare.universitiesSelected') : t('compare.majorGroupsSelected')}</p>
+                <p className="font-semibold text-slate-900">{compareMode === 'universities' ? selectedUniversities.length : selectedMajorGroups.length}</p>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <p className="text-xs text-slate-500">{t('dashboard.stats.records')}</p>
+                <p className="font-semibold text-slate-900">{data.length.toLocaleString()}</p>
+              </div>
             </div>
           </div>
         </div>
-      </header>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Comparison Mode Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl p-6 shadow-lg mb-8"
-        >
-          <h2 className="text-xl font-semibold mb-4">{t('compare.comparisonMode')}</h2>
-          
-          <div className="flex space-x-4 mb-6">
-            <button
-              onClick={() => setCompareMode('universities')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                compareMode === 'universities' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {t('compare.compareUniversities')}
-            </button>
-            <button
-              onClick={() => setCompareMode('majorGroups')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                compareMode === 'majorGroups' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {t('compare.compareMajorGroups')}
-            </button>
-          </div>
-
-
-        </motion.div>
-
-        {/* Instructions */}
-        <HelpSection 
-          title={t('help.howToUse')}
-          type="howToUse"
-          className="mb-8"
-        >
-          <ul className="space-y-1 text-sm">
-            <li>{t('help.compare.instruction1', { type: compareMode === 'universities' ? t('help.compare.universities') : t('help.compare.majorGroups') })}</li>
-            <li>{t('help.compare.instruction2')}</li>
-            <li>{t('help.compare.instruction3')}</li>
-            <li>{t('help.compare.instruction4')}</li>
-          </ul>
-        </HelpSection>
-
-        {/* Comparison Component */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <UnifiedCompare
-            items={compareMode === 'universities' ? selectedUniversities : selectedMajorGroups}
-            data={data}
-            mode={compareMode}
-            onAddItem={compareMode === 'universities' ? addUniversity : addMajorGroup}
-            onRemoveItem={compareMode === 'universities' ? removeUniversity : removeMajorGroup}
-          />
-        </motion.div>
-
-        {/* Quick Stats */}
-        {((compareMode === 'universities' && selectedUniversities.length > 0) || 
-          (compareMode === 'majorGroups' && selectedMajorGroups.length > 0)) && (
+      <section className="px-4 pb-10">
+        <div className="max-w-6xl mx-auto space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-8 bg-white rounded-xl p-6 shadow-lg"
+            className="glass-card rounded-3xl p-6"
           >
-            <h2 className="text-xl font-semibold mb-4">{t('compare.quickSummary')}</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {compareMode === 'universities' ? selectedUniversities.length : selectedMajorGroups.length}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {compareMode === 'universities' ? t('compare.universitiesSelected') : t('compare.majorGroupsSelected')}
-                </div>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">{t('compare.comparisonMode')}</h2>
+                <p className="text-sm text-slate-500">{t('compare.subtitle')}</p>
               </div>
-              
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600 mb-2">
-                  {compareMode === 'universities' 
-                    ? selectedUniversities.reduce((total, name) => {
-                        return total + data.filter(item => item.院校名 === name).length
-                      }, 0)
-                    : selectedMajorGroups.reduce((total, name) => {
-                        return total + data.filter(item => item.组名 === name).length
-                      }, 0)
-                  }
-                </div>
-                <div className="text-sm text-gray-600">{t('compare.totalPrograms')}</div>
-              </div>
-              
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600 mb-2">
-                  {Math.round(
-                    (compareMode === 'universities' 
-                      ? selectedUniversities.reduce((total, name) => {
-                          const rankings = data
-                            .filter(item => item.院校名 === name && item.最低排名)
-                            .map(item => item.最低排名!)
-                          return total + (rankings.length > 0 ? rankings.reduce((sum, rank) => sum + rank, 0) / rankings.length : 0)
-                        }, 0) / selectedUniversities.length
-                      : selectedMajorGroups.reduce((total, name) => {
-                          const rankings = data
-                            .filter(item => item.组名 === name && item.最低排名)
-                            .map(item => item.最低排名!)
-                          return total + (rankings.length > 0 ? rankings.reduce((sum, rank) => sum + rank, 0) / rankings.length : 0)
-                        }, 0) / selectedMajorGroups.length
-                    )
-                  ).toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-600">{t('compare.avgRankingAll')}</div>
-              </div>
-              
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600 mb-2">
-                  {Array.from(new Set(
-                    (compareMode === 'universities' 
-                      ? selectedUniversities.flatMap(name => 
-                          data.filter(item => item.院校名 === name).map(item => item.年份)
-                        )
-                      : selectedMajorGroups.flatMap(name => 
-                          data.filter(item => item.组名 === name).map(item => item.年份)
-                        )
-                    )
-                  )).length}
-                </div>
-                <div className="text-sm text-gray-600">{t('compare.yearsCovered')}</div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setCompareMode('universities')}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    compareMode === 'universities'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                      : 'border border-slate-200 bg-white/80 text-slate-600 hover:border-blue-200 hover:text-blue-600'
+                  }`}
+                >
+                  {t('compare.compareUniversities')}
+                </button>
+                <button
+                  onClick={() => setCompareMode('majorGroups')}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    compareMode === 'majorGroups'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                      : 'border border-slate-200 bg-white/80 text-slate-600 hover:border-blue-200 hover:text-blue-600'
+                  }`}
+                >
+                  {t('compare.compareMajorGroups')}
+                </button>
               </div>
             </div>
           </motion.div>
-        )}
 
-        {/* Tips */}
-        <HelpSection 
-          title={t('help.understandingComparisons')}
-          type="tips"
-          className="mt-8"
-          defaultExpanded={false}
-        >
-          <div className="text-sm space-y-1">
-            <p>{t('help.compare.tip1')}</p>
-            <p>{t('help.compare.tip2')}</p>
-            <p>{t('help.compare.tip3')}</p>
-            <p>{t('help.compare.tip4', { type: compareMode === 'universities' ? t('help.compare.universities') : t('help.compare.majorGroups') })}</p>
-          </div>
-        </HelpSection>
-      </div>
+          <HelpSection
+            title={t('help.howToUse')}
+            type="howToUse"
+            className="mb-4"
+          >
+            <ul className="space-y-1 text-sm">
+              <li>{t('help.compare.instruction1', { type: compareMode === 'universities' ? t('help.compare.universities') : t('help.compare.majorGroups') })}</li>
+              <li>{t('help.compare.instruction2')}</li>
+              <li>{t('help.compare.instruction3')}</li>
+              <li>{t('help.compare.instruction4')}</li>
+            </ul>
+          </HelpSection>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <GitCompare className="h-6 w-6" />
-            <span className="text-lg font-semibold">{t('nav.title')}</span>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <UnifiedCompare
+              items={compareMode === 'universities' ? selectedUniversities : selectedMajorGroups}
+              data={data}
+              mode={compareMode}
+              onAddItem={compareMode === 'universities' ? addUniversity : addMajorGroup}
+              onRemoveItem={compareMode === 'universities' ? removeUniversity : removeMajorGroup}
+            />
+          </motion.div>
+
+          {((compareMode === 'universities' && selectedUniversities.length > 0) ||
+            (compareMode === 'majorGroups' && selectedMajorGroups.length > 0)) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="glass-card rounded-3xl p-6"
+            >
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('compare.quickSummary')}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                <div className="rounded-2xl bg-slate-50 p-4 text-center">
+                  <div className="text-2xl font-semibold text-slate-900 mb-1">
+                    {compareMode === 'universities' ? selectedUniversities.length : selectedMajorGroups.length}
+                  </div>
+                  <div className="text-slate-600">
+                    {compareMode === 'universities' ? t('compare.universitiesSelected') : t('compare.majorGroupsSelected')}
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-emerald-50 p-4 text-center">
+                  <div className="text-2xl font-semibold text-emerald-600 mb-1">
+                    {compareMode === 'universities'
+                      ? selectedUniversities.reduce((total, name) => {
+                          return total + data.filter(item => item.院校名 === name).length
+                        }, 0)
+                      : selectedMajorGroups.reduce((total, name) => {
+                          return total + data.filter(item => item.组名 === name).length
+                        }, 0)
+                    }
+                  </div>
+                  <div className="text-slate-600">{t('compare.totalPrograms')}</div>
+                </div>
+                <div className="rounded-2xl bg-blue-50 p-4 text-center">
+                  <div className="text-2xl font-semibold text-blue-600 mb-1">
+                    {Math.round(
+                      (compareMode === 'universities'
+                        ? selectedUniversities.reduce((total, name) => {
+                            const rankings = data
+                              .filter(item => item.院校名 === name && item.最低排名)
+                              .map(item => item.最低排名!)
+                            return total + (rankings.length > 0 ? rankings.reduce((sum, rank) => sum + rank, 0) / rankings.length : 0)
+                          }, 0) / selectedUniversities.length
+                        : selectedMajorGroups.reduce((total, name) => {
+                            const rankings = data
+                              .filter(item => item.组名 === name && item.最低排名)
+                              .map(item => item.最低排名!)
+                            return total + (rankings.length > 0 ? rankings.reduce((sum, rank) => sum + rank, 0) / rankings.length : 0)
+                          }, 0) / selectedMajorGroups.length
+                      )
+                    ).toLocaleString()}
+                  </div>
+                  <div className="text-slate-600">{t('compare.avgRankingAll')}</div>
+                </div>
+                <div className="rounded-2xl bg-purple-50 p-4 text-center">
+                  <div className="text-2xl font-semibold text-purple-600 mb-1">
+                    {Array.from(new Set(
+                      (compareMode === 'universities'
+                        ? selectedUniversities.flatMap(name =>
+                            data.filter(item => item.院校名 === name).map(item => item.年份)
+                          )
+                        : selectedMajorGroups.flatMap(name =>
+                            data.filter(item => item.组名 === name).map(item => item.年份)
+                          )
+                      )
+                    )).length}
+                  </div>
+                  <div className="text-slate-600">{t('compare.yearsCovered')}</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          <HelpSection
+            title={t('help.understandingComparisons')}
+            type="tips"
+            className="mt-4"
+            defaultExpanded={false}
+          >
+            <div className="text-sm space-y-1">
+              <p>{t('help.compare.tip1')}</p>
+              <p>{t('help.compare.tip2')}</p>
+              <p>{t('help.compare.tip3')}</p>
+              <p>{t('help.compare.tip4', { type: compareMode === 'universities' ? t('help.compare.universities') : t('help.compare.majorGroups') })}</p>
+            </div>
+          </HelpSection>
+        </div>
+      </section>
+
+      <footer className="mt-10 border-t border-white/50 bg-white/60 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-4 py-10 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-3 text-slate-700">
+            <GitCompare className="h-5 w-5" />
+            <span className="text-base font-semibold">{t('nav.title')}</span>
           </div>
-          <p className="text-gray-400">
-            {t('compare.subtitle')}
-          </p>
-          <div className="mt-6 text-sm text-gray-500">
-            {compareMode === 'universities' ? t('compare.universitiesSelected') : t('compare.majorGroupsSelected')}: {compareMode === 'universities' ? selectedUniversities.length : selectedMajorGroups.length} | {data.length.toLocaleString()} {t('dashboard.stats.records').toLowerCase()}
+          <p className="text-sm text-slate-500">{t('compare.subtitle')}</p>
+          <div className="mt-4 text-xs text-slate-400">
+            {compareMode === 'universities' ? t('compare.universitiesSelected') : t('compare.majorGroupsSelected')}: {compareMode === 'universities' ? selectedUniversities.length : selectedMajorGroups.length} • {data.length.toLocaleString()} {t('dashboard.stats.records').toLowerCase()}
           </div>
         </div>
       </footer>

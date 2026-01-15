@@ -25,12 +25,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-slate-50 text-slate-900`}>
         <LanguageProvider>
           <DynamicLayout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-              <Navigation />
-              {children}
+            <div className="min-h-screen app-shell">
+              <div className="relative min-h-screen">
+                <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
+                <div className="relative min-h-screen">
+                  <Navigation />
+                  {children}
+                </div>
+              </div>
             </div>
           </DynamicLayout>
         </LanguageProvider>

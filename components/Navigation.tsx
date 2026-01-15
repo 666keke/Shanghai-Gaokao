@@ -20,6 +20,13 @@ export default function Navigation() {
     { href: '/lookup', label: t('nav.lookup'), icon: Target },
   ]
 
+  const isActiveRoute = (href: string) => {
+    if (href === '/') {
+      return pathname === '/'
+    }
+    return pathname.startsWith(href)
+  }
+
   const openMobileMenu = () => {
     setIsMobileMenuOpen(true)
     // Use requestAnimationFrame to ensure the menu renders off-screen first
@@ -54,51 +61,59 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-              <GraduationCap className="h-8 w-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">{t('nav.title')}</h1>
+      <nav className="sticky top-4 z-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="surface-card rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-3" onClick={closeMobileMenu}>
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600/10 text-blue-600">
+                <GraduationCap className="h-6 w-6" />
+              </span>
+              <div>
+                <h1 className="text-lg sm:text-xl font-semibold text-slate-900">
+                  {t('nav.title')}
+                </h1>
+              </div>
             </Link>
-            
+
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              {navItems.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`flex items-center space-x-2 transition-colors ${
-                    pathname === href
-                      ? 'text-blue-600 font-medium'
-                      : 'text-gray-600 hover:text-blue-600'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{label}</span>
-                </Link>
-              ))}
+            <div className="hidden md:flex items-center space-x-3">
+              <div className="flex items-center rounded-full bg-slate-100/80 p-1">
+                {navItems.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`flex items-center space-x-2 rounded-full px-4 py-2 text-sm transition-colors ${
+                      isActiveRoute(href)
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-slate-600 hover:text-blue-600'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
+                  </Link>
+                ))}
+              </div>
               <LanguageSelector />
             </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center space-x-2">
               <LanguageSelector />
-              <button 
+              <button
                 onClick={isMobileMenuOpen ? closeMobileMenu : openMobileMenu}
-                className="text-gray-600 hover:text-blue-600 p-2 transition-all duration-200 hover:bg-gray-100 rounded-lg"
+                className="focus-ring rounded-xl bg-slate-100/80 p-2 text-slate-600 transition-all duration-200 hover:bg-slate-200/80"
                 aria-label="Toggle mobile menu"
               >
-                <div className="relative w-6 h-6">
-                  <Menu 
+                <div className="relative h-6 w-6">
+                  <Menu
                     className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${
                       isMobileMenuOpen ? 'rotate-180 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
-                    }`} 
+                    }`}
                   />
-                  <X 
+                  <X
                     className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${
                       isMobileMenuOpen ? 'rotate-0 scale-100 opacity-100' : 'rotate-180 scale-0 opacity-0'
-                    }`} 
+                    }`}
                   />
                 </div>
               </button>
@@ -110,77 +125,66 @@ export default function Navigation() {
       {/* Mobile Popup Menu */}
       {isMobileMenuOpen && (
         <>
-          {/* Backdrop */}
-          <div 
-            className={`fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300 ${
+          <div
+            className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${
               isAnimating ? 'opacity-100' : 'opacity-0'
             }`}
             onClick={closeMobileMenu}
           />
-          
-          {/* Popup Menu */}
-          <div 
-            className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl z-50 md:hidden transition-transform duration-300 ease-out ${
-              isAnimating ? 'translate-x-0' : 'translate-x-full'
+
+          <div
+            className={`fixed bottom-6 left-4 right-4 rounded-3xl bg-white shadow-2xl z-50 md:hidden transition-transform duration-300 ease-out ${
+              isAnimating ? 'translate-y-0' : 'translate-y-6'
             }`}
           >
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div 
-                className={`flex items-center justify-between p-6 border-b border-gray-200 transition-all duration-500 delay-100 ${
-                  isAnimating ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            <div className="flex flex-col">
+              <div
+                className={`flex items-center justify-between px-6 pt-6 transition-all duration-500 delay-100 ${
+                  isAnimating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               >
                 <div className="flex items-center space-x-2">
-                  <GraduationCap className="h-6 w-6 text-blue-600" />
-                  <h2 className="text-lg font-semibold text-gray-900">{t('nav.title')}</h2>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600">
+                    <GraduationCap className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h2 className="text-base font-semibold text-slate-900">{t('nav.title')}</h2>
+                  </div>
                 </div>
                 <button
                   onClick={closeMobileMenu}
-                  className="text-gray-500 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="rounded-xl bg-slate-100/70 p-2 text-slate-500 transition-colors hover:bg-slate-200/80"
                   aria-label="Close menu"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
-              {/* Navigation Items */}
-              <div className="flex-1 py-6">
-                <nav className="space-y-1">
+              <div className="px-6 pb-6 pt-4">
+                <nav className="space-y-2">
                   {navItems.map(({ href, label, icon: Icon }, index) => (
                     <Link
                       key={href}
                       href={href}
                       onClick={closeMobileMenu}
-                      className={`flex items-center space-x-3 px-6 py-4 text-base transition-all duration-500 ${
-                        isAnimating 
-                          ? 'opacity-100 translate-x-0' 
-                          : 'opacity-0 translate-x-8'
+                      className={`flex items-center justify-between rounded-2xl px-4 py-4 text-base transition-all duration-500 ${
+                        isAnimating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                       } ${
-                        pathname === href
-                          ? 'text-blue-600 bg-blue-50 border-r-2 border-blue-600 font-medium'
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                        isActiveRoute(href)
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                       }`}
                       style={{
                         transitionDelay: isAnimating ? `${200 + index * 100}ms` : '0ms'
                       }}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span>{label}</span>
+                      <div className="flex items-center space-x-3">
+                        <Icon className="h-5 w-5" />
+                        <span>{label}</span>
+                      </div>
                     </Link>
                   ))}
                 </nav>
-              </div>
-
-              {/* Footer */}
-              <div 
-                className={`p-6 border-t border-gray-200 transition-all duration-500 delay-500 ${
-                  isAnimating ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-              >
-                <div className="text-sm text-gray-500 text-center">
-                  {t('nav.title')} © 2024
-                </div>
               </div>
             </div>
           </div>

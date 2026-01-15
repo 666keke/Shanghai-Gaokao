@@ -280,12 +280,12 @@ export default function SmartSearch({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleKeyDown}
-            className="w-full pl-4 pr-12 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg backdrop-blur-sm bg-white/90 transition-all duration-200"
+            className="focus-ring w-full rounded-2xl border border-slate-200 bg-white/90 py-4 pl-4 pr-12 text-lg shadow-lg shadow-slate-900/10 transition-all duration-200"
           />
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-gray-600 z-10"
+              className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 hover:text-slate-600 z-10"
               aria-label={t('common.clearSearch')}
             >
               <X className="h-5 w-5" />
@@ -295,7 +295,7 @@ export default function SmartSearch({
 
         <button
           onClick={() => handleSearch()}
-          className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl shadow-lg transition-all duration-200 flex items-center gap-2"
+          className="rounded-2xl bg-blue-600 px-8 py-4 text-white font-medium shadow-lg shadow-blue-600/30 transition-all duration-200 flex items-center gap-2 hover:bg-blue-500"
           aria-label={t('common.search')}
         >
           <Search className="h-5 w-5" />
@@ -311,7 +311,7 @@ export default function SmartSearch({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50 max-h-80 overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 glass-card rounded-2xl overflow-hidden z-50 max-h-80 overflow-y-auto"
           >
             {suggestions.length > 0 ? (
               suggestions.map((suggestion, index) => (
@@ -320,8 +320,8 @@ export default function SmartSearch({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.03 }}
-                className={`px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
-                  index === selectedIndex ? 'bg-blue-50' : 'hover:bg-gray-50'
+                className={`px-4 py-3 cursor-pointer transition-colors border-b border-slate-100 last:border-b-0 ${
+                  index === selectedIndex ? 'bg-blue-50' : 'hover:bg-slate-50'
                 }`}
                 onClick={() => handleSelectSuggestion(suggestion)}
               >
@@ -333,17 +333,17 @@ export default function SmartSearch({
                         <GraduationCap className="h-5 w-5 text-blue-600" />
                       )}
                       {suggestion.type === 'recent' && (
-                        <Clock className="h-5 w-5 text-gray-400" />
+                        <Clock className="h-5 w-5 text-slate-400" />
                       )}
                     </div>
                     <div className="truncate">
-                      <span className="font-medium text-gray-900 truncate">
+                      <span className="font-medium text-slate-900 truncate">
                         {suggestion.matchedText ? (
                           <span
                             dangerouslySetInnerHTML={{
                               __html: suggestion.value.replace(
                                 new RegExp(`(${suggestion.matchedText})`, 'gi'),
-                                '<mark class="bg-yellow-200 text-yellow-900">$1</mark>'
+                                '<mark class="bg-amber-200 text-amber-900">$1</mark>'
                               )
                             }}
                           />
@@ -352,7 +352,7 @@ export default function SmartSearch({
                         )}
                       </span>
                       {suggestion.rank && suggestion.rank <= 1000 && (
-                        <Award className="h-4 w-4 text-yellow-500 inline-block ml-1 align-middle" />
+                        <Award className="h-4 w-4 text-amber-500 inline-block ml-1 align-middle" />
                       )}
                     </div>
                   </div>
@@ -360,7 +360,7 @@ export default function SmartSearch({
                   {/* Middle: Rank */}
                   <div className="hidden md:block px-4 text-left flex-shrink-0" style={{ minWidth: '150px' }}>
                     {suggestion.type === 'university' && (
-                      <span className="text-gray-600 truncate">
+                      <span className="text-slate-600 truncate">
                         {t('smartSearch.avgRanking', { rank: suggestion.rank ? suggestion.rank.toLocaleString() : 'N/A' })}
                       </span>
                     )}
@@ -369,7 +369,7 @@ export default function SmartSearch({
                   {/* Right: Programs */}
                   <div className="text-right flex-shrink-0" style={{ minWidth: '100px' }}>
                     {suggestion.programs && (
-                      <span className="text-gray-500">
+                      <span className="text-slate-500">
                         {t('smartSearch.programsCount', { count: suggestion.programs })}
                       </span>
                     )}
@@ -378,7 +378,7 @@ export default function SmartSearch({
               </motion.div>
               ))
             ) : (
-              <div className="p-4 text-center text-sm text-gray-500">
+              <div className="p-4 text-center text-sm text-slate-500">
                 <p>{t('smartSearch.noResults', { query: debouncedSearchTerm })}</p>
                 <p className="mt-2 text-xs">{t('smartSearch.tip')}</p>
               </div>

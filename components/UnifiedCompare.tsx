@@ -106,7 +106,7 @@ function UniversityDetailModal({ data, onUpdate }: UniversityDetailModalProps) {
       {/* Major Group Selection */}
       <div>
         <h4 className="text-lg font-semibold mb-3">{t('detail.selectMajorGroups', { selected: data.selectedMajorGroups.length, total: allMajorGroups.length })}</h4>
-        <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
+        <div className="max-h-40 overflow-y-auto border border-slate-200 rounded-2xl p-3 bg-white/70">
           <div className="space-y-2">
             {allMajorGroups.map(groupName => (
               <label key={groupName} className="flex items-center space-x-2 cursor-pointer">
@@ -114,7 +114,7 @@ function UniversityDetailModal({ data, onUpdate }: UniversityDetailModalProps) {
                   type="checkbox"
                   checked={data.selectedMajorGroups.includes(groupName)}
                   onChange={() => toggleMajorGroup(groupName)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm">{groupName}</span>
               </label>
@@ -129,7 +129,7 @@ function UniversityDetailModal({ data, onUpdate }: UniversityDetailModalProps) {
           <h4 className="text-lg font-semibold mb-3">{t('detail.majorGroupStatistics')}</h4>
           <div className="space-y-4">
             {majorGroupStats.map(stats => (
-              <div key={stats.name} className="bg-gray-50 rounded-lg p-4">
+              <div key={stats.name} className="bg-white/70 border border-slate-100 rounded-2xl p-4">
                 <h5 className="font-medium text-gray-900 mb-2">{stats.name}</h5>
                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                    <div>
@@ -177,7 +177,7 @@ function UniversityDetailModal({ data, onUpdate }: UniversityDetailModalProps) {
       )}
       
       {/* Summary */}
-      <div className="bg-blue-50 rounded-lg p-4">
+      <div className="bg-blue-50 rounded-2xl p-4">
         <h4 className="text-lg font-semibold text-blue-900 mb-2">{t('detail.selectionSummary')}</h4>
         <div className="text-sm text-blue-800">
           <p>{t('detail.selectedYears')}: {data.selectedYears.join(', ')}</p>
@@ -334,12 +334,12 @@ export default function UnifiedCompare({
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-lg">
+    <div className="glass-card rounded-3xl p-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl font-bold text-gray-900">{labels.title}</h3>
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center space-x-2 rounded-2xl bg-blue-600 px-4 py-2 text-white shadow-lg shadow-blue-600/30 transition-colors hover:bg-blue-500"
         >
           <Plus className="h-4 w-4" />
           <span>{labels.addButton}</span>
@@ -351,7 +351,7 @@ export default function UnifiedCompare({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="mb-6 p-4 bg-gray-50 rounded-lg"
+          className="mb-6 rounded-2xl bg-slate-50/80 p-4"
         >
           <div className="flex space-x-2 mb-3">
             <input
@@ -359,7 +359,7 @@ export default function UnifiedCompare({
               placeholder={labels.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="focus-ring flex-1 rounded-2xl border border-slate-200 bg-white/80 px-3 py-2 text-sm"
             />
             <button
               onClick={() => setShowAddForm(false)}
@@ -375,7 +375,7 @@ export default function UnifiedCompare({
                 <button
                   key={name}
                   onClick={() => addItem(name)}
-                  className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md text-sm"
+                  className="block w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-slate-100"
                 >
                   {name}
                 </button>
@@ -386,7 +386,7 @@ export default function UnifiedCompare({
       )}
 
       {items.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-slate-500">
           <p className="text-lg mb-2">{labels.emptyMessage}</p>
           <p className="text-sm">{labels.emptySubMessage}</p>
         </div>
@@ -400,7 +400,7 @@ export default function UnifiedCompare({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`bg-gray-50 rounded-lg p-6 relative ${isUniversityMode ? 'hover:bg-gray-100 cursor-pointer' : ''} transition-colors`}
+                className={`rounded-2xl border border-slate-100 bg-white/80 p-6 relative ${isUniversityMode ? 'hover:bg-slate-50 cursor-pointer' : ''} transition-colors`}
                 onClick={() => isUniversityMode && openDetailModal(itemName)}
               >
                 <div className="absolute top-4 right-4 flex space-x-2">
@@ -410,7 +410,7 @@ export default function UnifiedCompare({
                         e.stopPropagation()
                         openDetailModal(itemName)
                       }}
-                      className="text-gray-400 hover:text-blue-500 transition-colors"
+                      className="text-slate-400 hover:text-blue-500 transition-colors"
                       title="View Details"
                     >
                       <Eye className="h-5 w-5" />
@@ -425,17 +425,17 @@ export default function UnifiedCompare({
                       }
                       onRemoveItem(itemName)
                     }}
-                    className="text-gray-400 hover:text-red-500 transition-colors"
+                    className="text-slate-400 hover:text-rose-500 transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 <div className="pr-16">
-                  <h4 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h4 className="text-xl font-semibold text-slate-900 mb-2">
                     {itemName}
                     {isUniversityMode && (
-                      <span className="ml-2 text-sm text-gray-500">
+                      <span className="ml-2 text-sm text-slate-500">
                         {t('detail.clickForDetails')}
                       </span>
                     )}
@@ -446,7 +446,7 @@ export default function UnifiedCompare({
                     )}
                   </h4>
                   {!isUniversityMode && 'universityName' in stats && (
-                    <p className="text-gray-600 mb-4">{stats.universityName}</p>
+                    <p className="text-slate-600 mb-4">{stats.universityName}</p>
                   )}
                   {isUniversityMode && universityFilters.find(f => f.name === itemName) && (
                     <p className="text-xs text-blue-600 mb-2">
@@ -463,31 +463,31 @@ export default function UnifiedCompare({
 
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-500 block">{labels.dataLabel}</span>
+                    <span className="text-slate-500 block">{labels.dataLabel}</span>
                     <span className="font-medium text-lg">{stats.totalPrograms}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500 block">{t('unified.avgRanking')}</span>
+                    <span className="text-slate-500 block">{t('unified.avgRanking')}</span>
                     <span className="font-medium text-lg">
                       {stats.averageRanking ? stats.averageRanking.toLocaleString() : 'N/A'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500 block">{t('unified.bestRanking')}</span>
+                    <span className="text-slate-500 block">{t('unified.bestRanking')}</span>
                     <span className="font-medium text-lg">
                       {stats.bestRanking ? stats.bestRanking.toLocaleString() : 'N/A'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500 block">{labels.recentLabel}</span>
+                    <span className="text-slate-500 block">{labels.recentLabel}</span>
                     <span className="font-medium text-lg">{stats.recentPrograms}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500 block">{t('unified.years')}</span>
+                    <span className="text-slate-500 block">{t('unified.years')}</span>
                     <span className="font-medium text-lg">{stats.yearRange}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500 block">{t('unified.trend')}</span>
+                    <span className="text-slate-500 block">{t('unified.trend')}</span>
                     <div className="flex items-center space-x-1">
                       {getTrendIcon(stats.trend)}
                       <span className="font-medium text-lg capitalize">
@@ -511,26 +511,26 @@ export default function UnifiedCompare({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={closeDetailModal}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+              className="glass-card rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-slate-200">
                 <div>
-                                     <h3 className="text-2xl font-bold text-gray-900">
+                   <h3 className="text-2xl font-bold text-slate-900">
                      {detailModal.name}
                    </h3>
-                   <p className="text-gray-600">{t('detail.universityDetails')}</p>
+                   <p className="text-slate-600">{t('detail.universityDetails')}</p>
                 </div>
                 <button
                   onClick={closeDetailModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="rounded-xl bg-slate-100/80 p-2 text-slate-500 hover:text-slate-700 transition-colors"
                 >
                   <X className="h-6 w-6" />
                 </button>

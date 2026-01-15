@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import TrendChart from '../../components/TrendChart'
 import MajorGroupsTable from '../../components/MajorGroupsTable'
 import HelpSection from '../../components/HelpSection'
-import { Search, TrendingUp, BarChart3, Filter, Users, GraduationCap } from 'lucide-react'
+import { Search, TrendingUp, GraduationCap, Sparkles } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { getDataPath } from '../../lib/utils'
 
@@ -102,293 +102,280 @@ export default function TrendsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{t('trends.title')}</h1>
-              <p className="text-gray-600 mt-2">{t('trends.subtitle')}</p>
+    <div className="min-h-screen pb-16">
+      <section className="pt-16 pb-10 px-4">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
+          <div>
+            <div className="pill mb-4">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              <span>{t('trends.title')}</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <TrendingUp className="h-8 w-8 text-blue-600" />
-              <BarChart3 className="h-8 w-8 text-green-600" />
+            <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900">{t('trends.title')}</h1>
+            <p className="mt-3 text-slate-600">{t('trends.subtitle')}</p>
+          </div>
+          <div className="surface-card rounded-3xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500">{t('trends.marketSummary')}</p>
+                <h3 className="text-lg font-semibold text-slate-900">{universities.length}</h3>
+              </div>
+              <TrendingUp className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <p className="text-xs text-slate-500">{t('trends.totalUniversities')}</p>
+                <p className="font-semibold text-slate-900">{universities.length}</p>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <p className="text-xs text-slate-500">{t('dashboard.stats.records')}</p>
+                <p className="font-semibold text-slate-900">{data.length.toLocaleString()}</p>
+              </div>
             </div>
           </div>
         </div>
-      </header>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* View Mode Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl p-6 shadow-lg mb-8"
-        >
-          <h2 className="text-xl font-semibold mb-4">{t('trends.analysisMode')}</h2>
-          
-          <div className="flex space-x-4 mb-6">
-            <button
-              onClick={() => setViewMode('university')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                viewMode === 'university' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {t('trends.byUniversity')}
-            </button>
-            <button
-              onClick={() => setViewMode('majorGroup')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                viewMode === 'majorGroup' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {t('trends.byMajorGroup')}
-            </button>
-          </div>
-
-          {viewMode === 'university' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="px-4 pb-10">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card rounded-3xl p-6"
+          >
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('trends.searchUniversities')}
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder={t('trends.searchUniversities.placeholder')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+                <h2 className="text-xl font-semibold text-slate-900">{t('trends.analysisMode')}</h2>
+                <p className="text-sm text-slate-500">{t('trends.subtitle')}</p>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('trends.selectedUniversity')}
-                </label>
-                <select
-                  value={selectedUniversity}
-                  onChange={(e) => setSelectedUniversity(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setViewMode('university')}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    viewMode === 'university'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                      : 'border border-slate-200 bg-white/80 text-slate-600 hover:border-blue-200 hover:text-blue-600'
+                  }`}
                 >
-                  {universities.slice(0, 50).map(name => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
+                  {t('trends.byUniversity')}
+                </button>
+                <button
+                  onClick={() => setViewMode('majorGroup')}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    viewMode === 'majorGroup'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                      : 'border border-slate-200 bg-white/80 text-slate-600 hover:border-blue-200 hover:text-blue-600'
+                  }`}
+                >
+                  {t('trends.byMajorGroup')}
+                </button>
               </div>
             </div>
-          ) : (
-            <div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('trends.searchMajorGroups')}
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder={t('trends.searchMajorGroups.placeholder')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('trends.selectedMajorGroups', { count: selectedMajorGroups.length })}
-                </label>
-                {selectedMajorGroups.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {selectedMajorGroups.map(groupName => (
-                      <span
-                        key={groupName}
-                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center space-x-2"
-                      >
-                        <span>{groupName}</span>
-                        <button
-                          onClick={() => removeMajorGroup(groupName)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm mb-3">{t('trends.noMajorGroups')}</p>
-                )}
-              </div>
-
-              <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-lg">
-                <div className="grid grid-cols-1 gap-1 p-2">
-                  {majorGroups.slice(0, 100).map(group => (
-                    <button
-                      key={group.组名}
-                      onClick={() => addMajorGroup(group.组名)}
-                      disabled={selectedMajorGroups.includes(group.组名) || selectedMajorGroups.length >= 6}
-                      className={`text-left px-3 py-2 rounded text-sm transition-colors ${
-                        selectedMajorGroups.includes(group.组名)
-                          ? 'bg-blue-100 text-blue-800'
-                          : selectedMajorGroups.length >= 6
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'hover:bg-gray-100'
-                      }`}
+            <div className="mt-6">
+              {viewMode === 'university' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <label className="flex flex-col gap-2 text-sm text-slate-600">
+                    {t('trends.searchUniversities')}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder={t('trends.searchUniversities.placeholder')}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="focus-ring w-full rounded-2xl border border-slate-200 bg-white/80 py-2.5 pl-10 pr-4 text-sm"
+                      />
+                    </div>
+                  </label>
+                  <label className="flex flex-col gap-2 text-sm text-slate-600">
+                    {t('trends.selectedUniversity')}
+                    <select
+                      value={selectedUniversity}
+                      onChange={(e) => setSelectedUniversity(e.target.value)}
+                      className="focus-ring w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-2.5 text-sm"
                     >
-                      <div className="font-medium">{group.组名}</div>
-                      <div className="text-xs text-gray-500">{group.院校名}</div>
-                    </button>
-                  ))}
+                      {universities.slice(0, 50).map(name => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
-              </div>
-            </div>
-          )}
-        </motion.div>
+              ) : (
+                <div className="space-y-4">
+                  <label className="flex flex-col gap-2 text-sm text-slate-600">
+                    {t('trends.searchMajorGroups')}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder={t('trends.searchMajorGroups.placeholder')}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="focus-ring w-full rounded-2xl border border-slate-200 bg-white/80 py-2.5 pl-10 pr-4 text-sm"
+                      />
+                    </div>
+                  </label>
 
-        {/* Main Trend Charts */}
-        {viewMode === 'university' && selectedUniversity && (
-          <>
+                  <div>
+                    <label className="block text-sm text-slate-600 mb-2">
+                      {t('trends.selectedMajorGroups', { count: selectedMajorGroups.length })}
+                    </label>
+                    {selectedMajorGroups.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedMajorGroups.map(groupName => (
+                          <span
+                            key={groupName}
+                            className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                          >
+                            {groupName}
+                            <button onClick={() => removeMajorGroup(groupName)} className="text-blue-600">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500">{t('trends.noMajorGroups')}</p>
+                    )}
+                  </div>
+
+                  <div className="max-h-44 overflow-y-auto rounded-2xl border border-slate-200 bg-white/70 p-2">
+                    <div className="grid grid-cols-1 gap-1">
+                      {majorGroups.slice(0, 100).map(group => (
+                        <button
+                          key={group.组名}
+                          onClick={() => addMajorGroup(group.组名)}
+                          disabled={selectedMajorGroups.includes(group.组名) || selectedMajorGroups.length >= 6}
+                          className={`text-left rounded-xl px-3 py-2 text-sm transition ${
+                            selectedMajorGroups.includes(group.组名)
+                              ? 'bg-blue-100 text-blue-800'
+                              : selectedMajorGroups.length >= 6
+                              ? 'cursor-not-allowed bg-slate-100 text-slate-400'
+                              : 'hover:bg-slate-100'
+                          }`}
+                        >
+                          <div className="font-medium">{group.组名}</div>
+                          <div className="text-xs text-slate-500">{group.院校名}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {viewMode === 'university' && selectedUniversity && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mb-8"
+              className="space-y-6"
             >
-              <TrendChart
-                universityName={selectedUniversity}
-                data={data}
-              />
+              <TrendChart universityName={selectedUniversity} data={data} />
+              <MajorGroupsTable universityName={selectedUniversity} data={data} />
             </motion.div>
-            
-            {/* Major Groups Table */}
-            <MajorGroupsTable
-              universityName={selectedUniversity}
-              data={data}
-            />
-          </>
-        )}
+          )}
 
-        {viewMode === 'majorGroup' && selectedMajorGroups.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-          >
-            {selectedMajorGroups.map((groupName, index) => (
-              <motion.div
-                key={groupName}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <TrendChart
-                  universityName={groupName}
-                  data={data.filter(item => item.组名 === groupName)}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Popular Universities Overview */}
-        {viewMode === 'university' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8"
-          >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('trends.popularUniversities')}</h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {topUniversities.map((universityName, index) => (
+          {viewMode === 'majorGroup' && selectedMajorGroups.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+            >
+              {selectedMajorGroups.map((groupName, index) => (
                 <motion.div
-                  key={universityName}
+                  key={groupName}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index }}
                 >
                   <TrendChart
-                    universityName={universityName}
-                    data={data}
+                    universityName={groupName}
+                    data={data.filter(item => item.组名 === groupName)}
                   />
                 </motion.div>
               ))}
+            </motion.div>
+          )}
+
+          {viewMode === 'university' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-6"
+            >
+              <h2 className="section-title">{t('trends.popularUniversities')}</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {topUniversities.map((universityName, index) => (
+                  <motion.div
+                    key={universityName}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                  >
+                    <TrendChart universityName={universityName} data={data} />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="glass-card rounded-3xl p-6"
+          >
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('trends.marketSummary')}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="rounded-2xl bg-emerald-50 p-4 text-center">
+                <div className="text-2xl font-semibold text-emerald-600">
+                  {Math.round(data.filter(d => d.年份 === 2024).length / data.filter(d => d.年份 === 2023).length * 100)}%
+                </div>
+                <div className="text-slate-600">{t('trends.programGrowth')}</div>
+              </div>
+              <div className="rounded-2xl bg-blue-50 p-4 text-center">
+                <div className="text-2xl font-semibold text-blue-600">
+                  {universities.length}
+                </div>
+                <div className="text-slate-600">{t('trends.totalUniversities')}</div>
+              </div>
+              <div className="rounded-2xl bg-purple-50 p-4 text-center">
+                <div className="text-2xl font-semibold text-purple-600">
+                  5 {t('trends.years')}
+                </div>
+                <div className="text-slate-600">{t('trends.historicalCoverage')}</div>
+              </div>
             </div>
           </motion.div>
-        )}
 
-        {/* Trends Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-12 bg-white rounded-xl p-6 shadow-lg"
-        >
-          <h2 className="text-xl font-semibold mb-4">{t('trends.marketSummary')}</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600 mb-2">
-                {Math.round(data.filter(d => d.年份 === 2024).length / data.filter(d => d.年份 === 2023).length * 100)}%
-              </div>
-              <div className="text-sm text-gray-600">{t('trends.programGrowth')}</div>
+          <HelpSection
+            title={t('help.understandingTrends')}
+            type="tips"
+            className="mt-4"
+            defaultExpanded={false}
+          >
+            <div className="text-sm space-y-1">
+              <p>{t('help.trends.instruction1')}</p>
+              <p>{t('help.trends.instruction2')}</p>
+              <p>{t('help.trends.instruction3')}</p>
+              <p>{t('help.trends.instruction4')}</p>
+              <p>{t('help.trends.instruction5')}</p>
             </div>
-            
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 mb-2">
-                {universities.length}
-              </div>
-              <div className="text-sm text-gray-600">{t('trends.totalUniversities')}</div>
-            </div>
-            
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600 mb-2">
-                5 {t('trends.years')}
-              </div>
-              <div className="text-sm text-gray-600">{t('trends.historicalCoverage')}</div>
-            </div>
-          </div>
-        </motion.div>
+          </HelpSection>
+        </div>
+      </section>
 
-        {/* Help Section */}
-        <HelpSection 
-          title={t('help.understandingTrends')}
-          type="tips"
-          className="mt-8"
-          defaultExpanded={false}
-        >
-          <div className="text-sm space-y-1">
-            <p>{t('help.trends.instruction1')}</p>
-            <p>{t('help.trends.instruction2')}</p>
-            <p>{t('help.trends.instruction3')}</p>
-            <p>{t('help.trends.instruction4')}</p>
-            <p>{t('help.trends.instruction5')}</p>
+      <footer className="mt-10 border-t border-white/50 bg-white/60 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-4 py-10 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-3 text-slate-700">
+            <GraduationCap className="h-5 w-5" />
+            <span className="text-base font-semibold">{t('nav.title')}</span>
           </div>
-        </HelpSection>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <GraduationCap className="h-6 w-6" />
-            <span className="text-lg font-semibold">{t('nav.title')}</span>
-          </div>
-          <p className="text-gray-400">
-            {t('trends.subtitle')}
-          </p>
-          <div className="mt-6 text-sm text-gray-500">
-            {t('trends.totalUniversities')}: {universities.length} | {data.length.toLocaleString()} {t('dashboard.stats.records').toLowerCase()}
+          <p className="text-sm text-slate-500">{t('trends.subtitle')}</p>
+          <div className="mt-4 text-xs text-slate-400">
+            {t('trends.totalUniversities')}: {universities.length} • {data.length.toLocaleString()} {t('dashboard.stats.records').toLowerCase()}
           </div>
         </div>
       </footer>
