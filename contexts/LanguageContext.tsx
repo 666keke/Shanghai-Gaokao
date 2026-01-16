@@ -425,7 +425,7 @@ const translations = {
     
     // Library Page (formerly Trends + Compare)
     'library.title': 'University Library',
-    'library.subtitle': 'Explore admission trends and compare universities and major groups',
+    'library.subtitle': 'Explore admission trends',
     'library.byUniversity': 'By University',
     'library.byMajorGroup': 'By Major Group',
     'library.addUniversity': 'Add University',
