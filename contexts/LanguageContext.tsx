@@ -17,8 +17,7 @@ const translations = {
   zh: {
     // Navigation
     'nav.dashboard': '首页',
-    'nav.trends': '趋势',
-    'nav.compare': '对比',
+    'nav.library': '院校库',
     'nav.lookup': '查询',
     'nav.title': '上海高考志愿分析',
 
@@ -118,9 +117,34 @@ const translations = {
     'smartSearch.tip': '请使用官方四字简称进行搜索。例：北京航空航天大学 -> 北京航大',
     'smartSearch.noResults': '找不到与 "{query}" 相关的结果。',
     
-    // Trends Page
-    'trends.title': '院校和专业组聚焦',
-    'trends.subtitle': '分析大学录取趋势变化',
+    // Library Page (formerly Trends + Compare)
+    'library.title': '院校库',
+    'library.subtitle': '探索大学和专业组录取趋势，进行多维度对比分析',
+    'library.byUniversity': '按大学分析',
+    'library.byMajorGroup': '按专业组分析',
+    'library.addUniversity': '添加大学',
+    'library.addMajorGroup': '添加专业组',
+    'library.searchUniversities': '搜索大学...',
+    'library.searchMajorGroups': '搜索专业组...',
+    'library.noUniversitiesSelected': '请添加大学开始分析',
+    'library.noMajorGroupsSelected': '请添加专业组开始分析',
+    'library.maxUniversities': '还可添加 {count} 所大学',
+    'library.maxMajorGroups': '还可添加 {count} 个专业组',
+    'library.universityTrendComparison': '录取趋势对比',
+    'library.majorGroupTrendComparison': '专业组趋势对比',
+    'library.universitiesComparing': '所大学对比中',
+    'library.majorGroupsComparing': '个专业组对比中',
+    'library.majorGroupDetails': '专业组详情',
+    'library.yearlyComparison': '各年指标数据对比',
+    'library.majorGroup': '专业组',
+    'library.university': '所属大学',
+    'library.avgRanking': '平均排名',
+    'library.addMajorGroupHint': '点击上方"添加专业组"按钮选择专业组进行对比',
+    'library.selectUniversity': '请选择大学查看录取趋势',
+    
+    // Trends Page (kept for backwards compatibility)
+    'trends.title': '院校库',
+    'trends.subtitle': '探索大学和专业组录取趋势',
     'trends.analysisMode': '分析模式',
     'trends.byUniversity': '按大学分析',
     'trends.byMajorGroup': '按专业组分析',
@@ -131,6 +155,7 @@ const translations = {
     'trends.searchMajorGroups.placeholder': '搜索专业组...',
     'trends.selectedMajorGroups': '选择的专业组 ({count}/6)',
     'trends.noMajorGroups': '未选择专业组',
+    'trends.selectUniversity': '请选择大学查看趋势',
     'trends.popularUniversities': '其他大学趋势',
     'trends.marketSummary': '市场趋势总结',
     'trends.programGrowth': '专业增长 (2024 vs 2023)',
@@ -275,8 +300,7 @@ const translations = {
   en: {
     // Navigation
     'nav.dashboard': 'Home',
-    'nav.trends': 'Trends',
-    'nav.compare': 'Compare',
+    'nav.library': 'Library',
     'nav.lookup': 'Full List',
     'nav.title': 'Shanghai Gaokao Analytics',
 
@@ -376,9 +400,34 @@ const translations = {
     'smartSearch.tip': 'Tip: You should search with the official 4-word abbreviation.',
     'smartSearch.noResults': 'No results found for "{query}".',
     
-    // Trends Page
-    'trends.title': 'Spotlight on Schools and Major Groups',
-    'trends.subtitle': 'Analyze university admission patterns over time',
+    // Library Page (formerly Trends + Compare)
+    'library.title': 'University Library',
+    'library.subtitle': 'Explore admission trends and compare universities and major groups',
+    'library.byUniversity': 'By University',
+    'library.byMajorGroup': 'By Major Group',
+    'library.addUniversity': 'Add University',
+    'library.addMajorGroup': 'Add Major Group',
+    'library.searchUniversities': 'Search universities...',
+    'library.searchMajorGroups': 'Search major groups...',
+    'library.noUniversitiesSelected': 'Add universities to start analyzing',
+    'library.noMajorGroupsSelected': 'Add major groups to start analyzing',
+    'library.maxUniversities': '{count} more universities can be added',
+    'library.maxMajorGroups': '{count} more major groups can be added',
+    'library.universityTrendComparison': 'Admission Trend Comparison',
+    'library.majorGroupTrendComparison': 'Major Group Trend Comparison',
+    'library.universitiesComparing': 'universities comparing',
+    'library.majorGroupsComparing': 'major groups comparing',
+    'library.majorGroupDetails': 'Major Group Details',
+    'library.yearlyComparison': 'Yearly Data Comparison',
+    'library.majorGroup': 'Major Group',
+    'library.university': 'University',
+    'library.avgRanking': 'Avg Ranking',
+    'library.addMajorGroupHint': 'Click "Add Major Group" button above to select major groups for comparison',
+    'library.selectUniversity': 'Select a university to view admission trends',
+    
+    // Trends Page (kept for backwards compatibility)
+    'trends.title': 'University Library',
+    'trends.subtitle': 'Explore university admission trends',
     'trends.analysisMode': 'Analysis Mode',
     'trends.byUniversity': 'By University',
     'trends.byMajorGroup': 'By Major Group',
@@ -389,6 +438,7 @@ const translations = {
     'trends.searchMajorGroups.placeholder': 'Search for major groups...',
     'trends.selectedMajorGroups': 'Selected Major Groups ({count}/6)',
     'trends.noMajorGroups': 'No major groups selected',
+    'trends.selectUniversity': 'Select a university to view trends',
     'trends.popularUniversities': 'Other Universities Trends',
     'trends.marketSummary': 'Market Trends Summary',
     'trends.programGrowth': 'Program Growth (2024 vs 2023)',

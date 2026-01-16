@@ -52,7 +52,7 @@ export default function MajorGroupsTable({ universityName, data }: MajorGroupsTa
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="glass-card rounded-3xl p-6 mt-8"
+      className="glass-card rounded-3xl p-6"
     >
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { GraduationCap, Home, TrendingUp, GitCompare, Target, Menu, X } from 'lucide-react'
+import { GraduationCap, Home, Building2, Target, Menu, X } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import LanguageSelector from './LanguageSelector'
 
@@ -16,8 +16,7 @@ export default function Navigation() {
   const navItems = [
     { href: '/', label: t('nav.dashboard'), icon: Home },
     { href: '/lookup', label: t('nav.lookup'), icon: Target },
-    { href: '/trends', label: t('nav.trends'), icon: TrendingUp },
-    { href: '/compare', label: t('nav.compare'), icon: GitCompare },
+    { href: '/trends', label: t('nav.library'), icon: Building2 },
   ]
 
   const isActiveRoute = (href: string) => {

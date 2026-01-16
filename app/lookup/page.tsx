@@ -279,7 +279,7 @@ function LookupContent() {
                       setUserRanking(e.target.value)
                       setDisplayLimit(30)
                     }}
-                    className="focus-ring w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min="1"
                   />
                 </div>
@@ -293,7 +293,7 @@ function LookupContent() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="focus-ring h-[46px] rounded-xl border border-slate-200 bg-white px-4 text-sm"
+                  className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white px-4 text-sm"
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -313,7 +313,7 @@ function LookupContent() {
                   onChange={(e) =>
                     setSafetyFilter(e.target.value as typeof safetyFilter)
                   }
-                  className="focus-ring h-[46px] rounded-xl border border-slate-200 bg-white px-4 text-sm"
+                  className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white px-4 text-sm"
                 >
                   <option value="all">{t('trends.majorGroupsTable.allYears')}</option>
                   <option value="safe">{t('calc.safe')}</option>
@@ -330,7 +330,7 @@ function LookupContent() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                  className="focus-ring h-[46px] rounded-xl border border-slate-200 bg-white px-4 text-sm"
+                  className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white px-4 text-sm"
                 >
                   <option value="ranking">{t('lookup.minRanking')}</option>
                   <option value="margin">{t('lookup.yourMargin')}</option>
