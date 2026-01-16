@@ -17,10 +17,10 @@ const translations = {
   zh: {
     // Navigation
     'nav.dashboard': '首页',
-    'nav.trends': '趋势分析',
+    'nav.trends': '趋势',
     'nav.compare': '对比',
-    'nav.lookup': '详细查询',
-    'nav.title': '高考志愿分析',
+    'nav.lookup': '查询',
+    'nav.title': '上海高考志愿分析',
 
     // Admission Chance Calculator
     'calc.title': '录取概率分析',
@@ -278,17 +278,17 @@ const translations = {
     'nav.trends': 'Trends',
     'nav.compare': 'Compare',
     'nav.lookup': 'Full List',
-    'nav.title': 'Gaokao Analytics',
+    'nav.title': 'Shanghai Gaokao Analytics',
 
     // Admission Chance Calculator
-    'calc.title': 'Admission Chance Calculator',
-    'calc.subtitle': 'Enter ranking and confirm to generate results',
+    'calc.title': 'Enter Your Ranking',
+    'calc.subtitle': 'Get your admission chances with ease',
     'calc.yourRanking': 'Your Gaokao Ranking',
     'calc.placeholder': 'e.g., 5000',
     'calc.hint': 'Lower ranking = better (1 is the best)',
     'calc.referenceYear': 'Reference Year',
     'calc.viewAll': 'View Full List',
-    'calc.confirm': 'Confirm & generate results',
+    'calc.confirm': 'Confirm',
     'calc.safe': 'Safe',
     'calc.safe.desc': 'Margin > 1000, very high admission chance',
     'calc.moderate': 'Moderate',
