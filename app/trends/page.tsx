@@ -20,6 +20,8 @@ import {
   Table2,
 } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useDisclaimer } from '../../contexts/DisclaimerContext'
+import DisclaimerBanner from '../../components/DisclaimerBanner'
 import { getDataPath } from '../../lib/utils'
 
 interface UniversityData {
@@ -45,6 +47,7 @@ interface MajorGroup {
 
 export default function LibraryPage() {
   const { t } = useLanguage()
+  const { hasAgreed, isLoading } = useDisclaimer()
   const [data, setData] = useState<UniversityData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>([])
@@ -220,11 +223,14 @@ export default function LibraryPage() {
               </span>
             </div>
           </div>
+          
+          {/* Disclaimer Banner */}
+          <DisclaimerBanner />
         </div>
       </section>
 
       {/* Mode Toggle & Controls */}
-      <section className="px-4 pb-6">
+      <section className={`px-4 pb-6 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

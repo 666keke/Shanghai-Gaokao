@@ -14,6 +14,8 @@ import {
   BarChart3,
   GraduationCap,
   ArrowRight,
+  HelpCircle,
+  Info,
 } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 
@@ -40,13 +42,19 @@ interface AdmissionResult {
   最低排名: number
   年份: number
   margin: number
-  safetyLevel: 'safe' | 'moderate' | 'risky'
+  safetyLevel: 'possiblySafe' | 'safe' | 'moderate' | 'risky'
 }
 
 export interface GroupedResults {
+  possiblySafe: AdmissionResult[]
   safe: AdmissionResult[]
   moderate: AdmissionResult[]
   risky: AdmissionResult[]
+}
+
+// Helper function to check if the score is 580 or above (special case)
+function is580OrAbove(score: string): boolean {
+  return score.includes('580') && (score.includes('及以上') || score.includes('分及以上') || score === '580')
 }
 
 export interface AdmissionStats {
@@ -54,6 +62,7 @@ export interface AdmissionStats {
   totalPrograms: number
   accessiblePercent: number
   uniqueUniversities: number
+  possiblySafeCount: number
   safeCount: number
   moderateCount: number
   riskyCount: number
@@ -96,31 +105,60 @@ export default function AdmissionChanceCalculator({
     const rankingNum = parseInt(ranking)
     if (isNaN(rankingNum) || rankingNum <= 0) return null
 
-    const yearData = data.filter(
-      (item) => item.年份 === selectedYear && item.最低排名
-    )
+    const yearData = data.filter((item) => item.年份 === selectedYear)
 
-    const matches: AdmissionResult[] = yearData
-      .filter((item) => rankingNum <= item.最低排名!)
-      .map((item) => {
-        const margin = item.最低排名! - rankingNum
-        let safetyLevel: 'safe' | 'moderate' | 'risky'
-        if (margin > 1000) safetyLevel = 'safe'
-        else if (margin > 500) safetyLevel = 'moderate'
-        else safetyLevel = 'risky'
+    const matches: AdmissionResult[] = []
 
-        return {
+    yearData.forEach((item) => {
+      // Must have ranking data to be considered
+      if (!item.最低排名) return
+      
+      // User's ranking must be good enough (lower number = better ranking)
+      if (rankingNum > item.最低排名) return
+
+      const margin = item.最低排名 - rankingNum
+
+      // Special case: 580 or above scores - mark as possiblySafe
+      // The ranking exists (it's the ranking at exactly 580 points)
+      // but we can't calculate precise safety level since actual score is unknown
+      if (is580OrAbove(item.投档线)) {
+        matches.push({
           组名: item.组名,
           院校名: item.院校名,
           组号: item.组号,
           投档线: item.投档线,
-          最低排名: item.最低排名!,
+          最低排名: item.最低排名,
           年份: item.年份,
           margin,
-          safetyLevel,
-        }
+          safetyLevel: 'possiblySafe',
+        })
+        return
+      }
+
+      // Normal case: calculate safety level based on margin
+      let safetyLevel: 'possiblySafe' | 'safe' | 'moderate' | 'risky'
+      if (margin > 1000) safetyLevel = 'safe'
+      else if (margin > 500) safetyLevel = 'moderate'
+      else safetyLevel = 'risky'
+
+      matches.push({
+        组名: item.组名,
+        院校名: item.院校名,
+        组号: item.组号,
+        投档线: item.投档线,
+        最低排名: item.最低排名,
+        年份: item.年份,
+        margin,
+        safetyLevel,
       })
-      .sort((a, b) => a.最低排名 - b.最低排名)
+    })
+
+    // Sort: possiblySafe first (by ranking), then by ranking
+    matches.sort((a, b) => {
+      if (a.safetyLevel === 'possiblySafe' && b.safetyLevel !== 'possiblySafe') return -1
+      if (a.safetyLevel !== 'possiblySafe' && b.safetyLevel === 'possiblySafe') return 1
+      return (a.最低排名 || 0) - (b.最低排名 || 0)
+    })
 
     return matches
   }, [ranking, selectedYear, data])
@@ -129,6 +167,7 @@ export default function AdmissionChanceCalculator({
   const groupedResults = useMemo(() => {
     if (!results) return null
     return {
+      possiblySafe: results.filter((r) => r.safetyLevel === 'possiblySafe'),
       safe: results.filter((r) => r.safetyLevel === 'safe'),
       moderate: results.filter((r) => r.safetyLevel === 'moderate'),
       risky: results.filter((r) => r.safetyLevel === 'risky'),
@@ -141,9 +180,9 @@ export default function AdmissionChanceCalculator({
     if (isNaN(rankingNum) || !results) return null
 
     const totalPrograms = data.filter(
-      (item) => item.年份 === selectedYear && item.最低排名
+      (item) => item.年份 === selectedYear && (item.最低排名 || is580OrAbove(item.投档线))
     ).length
-    const accessiblePercent = Math.round((results.length / totalPrograms) * 100)
+    const accessiblePercent = totalPrograms > 0 ? Math.round((results.length / totalPrograms) * 100) : 0
 
     const uniqueUniversities = new Set(results.map((r) => r.院校名)).size
 
@@ -152,6 +191,7 @@ export default function AdmissionChanceCalculator({
       totalPrograms,
       accessiblePercent,
       uniqueUniversities,
+      possiblySafeCount: groupedResults?.possiblySafe.length || 0,
       safeCount: groupedResults?.safe.length || 0,
       moderateCount: groupedResults?.moderate.length || 0,
       riskyCount: groupedResults?.risky.length || 0,
@@ -178,44 +218,6 @@ export default function AdmissionChanceCalculator({
 
   const rankingNumber = parseInt(ranking)
   const canConfirm = !isNaN(rankingNumber) && rankingNumber > 0
-
-  const getSafetyConfig = (level: 'safe' | 'moderate' | 'risky') => {
-    switch (level) {
-      case 'safe':
-        return {
-          icon: Shield,
-          color: 'emerald',
-          bgClass: 'bg-emerald-50',
-          borderClass: 'border-emerald-200',
-          textClass: 'text-emerald-700',
-          iconClass: 'text-emerald-600',
-          label: t('calc.safe'),
-          description: t('calc.safe.desc'),
-        }
-      case 'moderate':
-        return {
-          icon: AlertTriangle,
-          color: 'amber',
-          bgClass: 'bg-amber-50',
-          borderClass: 'border-amber-200',
-          textClass: 'text-amber-700',
-          iconClass: 'text-amber-600',
-          label: t('calc.moderate'),
-          description: t('calc.moderate.desc'),
-        }
-      case 'risky':
-        return {
-          icon: AlertCircle,
-          color: 'rose',
-          bgClass: 'bg-rose-50',
-          borderClass: 'border-rose-200',
-          textClass: 'text-rose-700',
-          iconClass: 'text-rose-600',
-          label: t('calc.risky'),
-          description: t('calc.risky.desc'),
-        }
-    }
-  }
 
   return (
     <div className="space-y-8">
@@ -336,8 +338,22 @@ export function AdmissionChanceResults({
   groupedResults: GroupedResults
 }) {
   const { t } = useLanguage()
-  const getSafetyConfig = (level: 'safe' | 'moderate' | 'risky') => {
+  const [showPossiblySafeInfo, setShowPossiblySafeInfo] = useState(false)
+  
+  const getSafetyConfig = (level: 'possiblySafe' | 'safe' | 'moderate' | 'risky') => {
     switch (level) {
+      case 'possiblySafe':
+        return {
+          icon: HelpCircle,
+          color: 'sky',
+          bgClass: 'bg-sky-50',
+          borderClass: 'border-sky-200',
+          textClass: 'text-sky-700',
+          iconClass: 'text-sky-600',
+          label: t('calc.possiblySafe'),
+          description: t('calc.possiblySafe.desc'),
+          hasInfo: true,
+        }
       case 'safe':
         return {
           icon: Shield,
@@ -348,6 +364,7 @@ export function AdmissionChanceResults({
           iconClass: 'text-emerald-600',
           label: t('calc.safe'),
           description: t('calc.safe.desc'),
+          hasInfo: false,
         }
       case 'moderate':
         return {
@@ -359,6 +376,7 @@ export function AdmissionChanceResults({
           iconClass: 'text-amber-600',
           label: t('calc.moderate'),
           description: t('calc.moderate.desc'),
+          hasInfo: false,
         }
       case 'risky':
         return {
@@ -370,6 +388,7 @@ export function AdmissionChanceResults({
           iconClass: 'text-rose-600',
           label: t('calc.risky'),
           description: t('calc.risky.desc'),
+          hasInfo: false,
         }
     }
   }
@@ -412,7 +431,7 @@ export function AdmissionChanceResults({
               <Shield className="h-5 w-5" />
             </div>
             <div className="text-3xl font-bold text-emerald-600">
-              {stats.safeCount}
+              {stats.safeCount + stats.possiblySafeCount}
             </div>
             <div className="text-xs text-slate-500 mt-1">
               {t('calc.stats.safe')}
@@ -455,11 +474,14 @@ export function AdmissionChanceResults({
         </div>
 
         {/* Safety Level Breakdown */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {(['safe', 'moderate', 'risky'] as const).map((level, idx) => {
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {(['possiblySafe', 'safe', 'moderate', 'risky'] as const).map((level, idx) => {
             const config = getSafetyConfig(level)
             const Icon = config.icon
             const items = groupedResults[level]
+
+            // Skip if no items for this level
+            if (items.length === 0) return null
 
             return (
               <motion.div
@@ -475,11 +497,35 @@ export function AdmissionChanceResults({
                     <span className={`font-semibold ${config.textClass}`}>
                       {config.label}
                     </span>
+                    {config.hasInfo && (
+                      <button
+                        onClick={() => setShowPossiblySafeInfo(!showPossiblySafeInfo)}
+                        className="text-sky-500 hover:text-sky-600 transition-colors"
+                        title={t('calc.possiblySafe.info')}
+                      >
+                        <Info className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                   <span className={`text-2xl font-bold ${config.textClass}`}>
                     {items.length}
                   </span>
                 </div>
+                
+                {/* Info tooltip for possiblySafe */}
+                {config.hasInfo && showPossiblySafeInfo && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-4 p-3 rounded-xl bg-sky-100/50 border border-sky-200"
+                  >
+                    <p className="text-xs text-sky-800">
+                      {t('calc.possiblySafe.info')}
+                    </p>
+                  </motion.div>
+                )}
+                
                 <p className="text-xs text-slate-600 mb-4">
                   {config.description}
                 </p>

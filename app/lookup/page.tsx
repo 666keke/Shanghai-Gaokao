@@ -17,8 +17,12 @@ import {
   GraduationCap,
   BarChart3,
   Home,
+  HelpCircle,
+  Info,
 } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useDisclaimer } from '../../contexts/DisclaimerContext'
+import DisclaimerBanner from '../../components/DisclaimerBanner'
 import { getDataPath } from '../../lib/utils'
 
 interface UniversityData {
@@ -44,31 +48,37 @@ interface AvailableOption {
   最低排名: number
   年份: number
   margin: number
-  safetyLevel: 'safe' | 'moderate' | 'risky'
+  safetyLevel: 'possiblySafe' | 'safe' | 'moderate' | 'risky' | 'notAdmitted'
+}
+
+// Helper function to check if the score is 580 or above (special case)
+function is580OrAbove(score: string): boolean {
+  return score.includes('580') && (score.includes('及以上') || score.includes('分及以上') || score === '580')
 }
 
 function LookupContent() {
   const { t } = useLanguage()
+  const { hasAgreed, isLoading } = useDisclaimer()
   const searchParams = useSearchParams()
 
   const [data, setData] = useState<UniversityData[]>([])
   const [loading, setLoading] = useState(true)
   const [userRanking, setUserRanking] = useState<string>('')
   const [selectedYear, setSelectedYear] = useState<number>(2024)
-  const [safetyFilter, setSafetyFilter] = useState<'all' | 'safe' | 'moderate' | 'risky'>('all')
-  const [sortBy, setSortBy] = useState<'ranking' | 'margin' | 'university'>('ranking')
+  const [safetyFilter, setSafetyFilter] = useState<'all' | 'possiblySafe' | 'safe' | 'moderate' | 'risky' | 'notAdmitted'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [displayLimit, setDisplayLimit] = useState(30)
+  const [showPossiblySafeInfo, setShowPossiblySafeInfo] = useState(false)
 
   // Initialize from URL params
   useEffect(() => {
     const rankingParam = searchParams.get('ranking')
     const yearParam = searchParams.get('year')
-    const filterParam = searchParams.get('filter') as 'safe' | 'moderate' | 'risky' | null
+    const filterParam = searchParams.get('filter') as 'possiblySafe' | 'safe' | 'moderate' | 'risky' | 'notAdmitted' | null
 
     if (rankingParam) setUserRanking(rankingParam)
     if (yearParam) setSelectedYear(parseInt(yearParam))
-    if (filterParam && ['safe', 'moderate', 'risky'].includes(filterParam)) {
+    if (filterParam && ['possiblySafe', 'safe', 'moderate', 'risky', 'notAdmitted'].includes(filterParam)) {
       setSafetyFilter(filterParam)
     }
   }, [searchParams])
@@ -91,33 +101,69 @@ function LookupContent() {
     [data]
   )
 
-  // Calculate results
+  // Calculate results (including not-admitted for filtering)
   const searchResults = useMemo(() => {
     const ranking = parseInt(userRanking)
     if (isNaN(ranking) || ranking <= 0) return []
 
-    const options: AvailableOption[] = data
-      .filter(
-        (item) =>
-          item.年份 === selectedYear && item.最低排名 && ranking <= item.最低排名
-      )
-      .map((item) => {
-        const margin = item.最低排名! - ranking
-        let safetyLevel: 'safe' | 'moderate' | 'risky'
+    const options: AvailableOption[] = []
+
+    data
+      .filter((item) => item.年份 === selectedYear)
+      .forEach((item) => {
+        // Must have ranking data to be considered
+        if (!item.最低排名) return
+
+        const margin = item.最低排名 - ranking
+
+        // User's ranking is not good enough - mark as notAdmitted
+        if (ranking > item.最低排名) {
+          options.push({
+            组名: item.组名,
+            院校名: item.院校名,
+            组号: item.组号,
+            投档线: item.投档线,
+            最低排名: item.最低排名,
+            年份: item.年份,
+            margin, // Will be negative
+            safetyLevel: 'notAdmitted',
+          })
+          return
+        }
+
+        // Special case: 580 or above scores - mark as possiblySafe
+        // The ranking exists (it's the ranking at exactly 580 points)
+        // but we can't calculate precise safety level since actual score is unknown
+        if (is580OrAbove(item.投档线)) {
+          options.push({
+            组名: item.组名,
+            院校名: item.院校名,
+            组号: item.组号,
+            投档线: item.投档线,
+            最低排名: item.最低排名,
+            年份: item.年份,
+            margin,
+            safetyLevel: 'possiblySafe',
+          })
+          return
+        }
+
+        // Normal case: calculate safety level based on margin
+        let safetyLevel: 'possiblySafe' | 'safe' | 'moderate' | 'risky' | 'notAdmitted'
         if (margin > 1000) safetyLevel = 'safe'
         else if (margin > 500) safetyLevel = 'moderate'
         else safetyLevel = 'risky'
 
-        return {
+        options.push({
           组名: item.组名,
           院校名: item.院校名,
           组号: item.组号,
           投档线: item.投档线,
-          最低排名: item.最低排名!,
+          最低排名: item.最低排名,
           年份: item.年份,
           margin,
           safetyLevel,
-        }
+        })
       })
 
     return options
@@ -127,8 +173,10 @@ function LookupContent() {
   const filteredResults = useMemo(() => {
     let results = [...searchResults]
 
-    // Safety filter
-    if (safetyFilter !== 'all') {
+    // By default, exclude notAdmitted unless specifically filtered
+    if (safetyFilter === 'all') {
+      results = results.filter((r) => r.safetyLevel !== 'notAdmitted')
+    } else {
       results = results.filter((r) => r.safetyLevel === safetyFilter)
     }
 
@@ -142,35 +190,60 @@ function LookupContent() {
       )
     }
 
-    // Sort
-    switch (sortBy) {
-      case 'ranking':
-        results.sort((a, b) => a.最低排名 - b.最低排名)
-        break
-      case 'margin':
-        results.sort((a, b) => b.margin - a.margin)
-        break
-      case 'university':
-        results.sort((a, b) => a.院校名.localeCompare(b.院校名))
-        break
-    }
+    // Sort by ranking (possiblySafe first, then by minimum ranking)
+    results.sort((a, b) => {
+      // notAdmitted items: sort by how close they are (least negative margin first)
+      if (a.safetyLevel === 'notAdmitted' && b.safetyLevel === 'notAdmitted') {
+        return b.margin - a.margin // Less negative first
+      }
+      
+      // possiblySafe items first (among admitted)
+      if (a.safetyLevel === 'possiblySafe' && b.safetyLevel !== 'possiblySafe' && b.safetyLevel !== 'notAdmitted') return -1
+      if (a.safetyLevel !== 'possiblySafe' && a.safetyLevel !== 'notAdmitted' && b.safetyLevel === 'possiblySafe') return 1
+
+      // Sort by ranking (lower ranking = more competitive)
+      return a.最低排名 - b.最低排名
+    })
 
     return results
-  }, [searchResults, safetyFilter, searchTerm, sortBy])
+  }, [searchResults, safetyFilter, searchTerm])
 
-  // Stats
+  // Stats (excluding notAdmitted from total counts)
   const stats = useMemo(() => {
+    const admittedResults = searchResults.filter((r) => r.safetyLevel !== 'notAdmitted')
     return {
-      total: searchResults.length,
+      total: admittedResults.length,
+      possiblySafe: searchResults.filter((r) => r.safetyLevel === 'possiblySafe').length,
       safe: searchResults.filter((r) => r.safetyLevel === 'safe').length,
       moderate: searchResults.filter((r) => r.safetyLevel === 'moderate').length,
       risky: searchResults.filter((r) => r.safetyLevel === 'risky').length,
-      universities: new Set(searchResults.map((r) => r.院校名)).size,
+      notAdmitted: searchResults.filter((r) => r.safetyLevel === 'notAdmitted').length,
+      universities: new Set(admittedResults.map((r) => r.院校名)).size,
     }
   }, [searchResults])
 
-  const getSafetyConfig = (level: 'safe' | 'moderate' | 'risky') => {
+  const getSafetyConfig = (level: 'possiblySafe' | 'safe' | 'moderate' | 'risky' | 'notAdmitted') => {
     switch (level) {
+      case 'notAdmitted':
+        return {
+          icon: AlertCircle,
+          bgClass: 'bg-slate-50',
+          borderClass: 'border-slate-300',
+          textClass: 'text-slate-600',
+          badgeClass: 'bg-slate-200 text-slate-700',
+          label: t('calc.notAdmitted'),
+          hasInfo: false,
+        }
+      case 'possiblySafe':
+        return {
+          icon: HelpCircle,
+          bgClass: 'bg-sky-50',
+          borderClass: 'border-sky-200',
+          textClass: 'text-sky-700',
+          badgeClass: 'bg-sky-100 text-sky-700',
+          label: t('calc.possiblySafe'),
+          hasInfo: true,
+        }
       case 'safe':
         return {
           icon: Shield,
@@ -179,6 +252,7 @@ function LookupContent() {
           textClass: 'text-emerald-700',
           badgeClass: 'bg-emerald-100 text-emerald-700',
           label: t('calc.safe'),
+          hasInfo: false,
         }
       case 'moderate':
         return {
@@ -188,6 +262,7 @@ function LookupContent() {
           textClass: 'text-amber-700',
           badgeClass: 'bg-amber-100 text-amber-700',
           label: t('calc.moderate'),
+          hasInfo: false,
         }
       case 'risky':
         return {
@@ -197,6 +272,7 @@ function LookupContent() {
           textClass: 'text-rose-700',
           badgeClass: 'bg-rose-100 text-rose-700',
           label: t('calc.risky'),
+          hasInfo: false,
         }
     }
   }
@@ -236,34 +312,42 @@ function LookupContent() {
             </div>
 
             {userRanking && stats.total > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm">
+              <div className="flex items-center gap-2 flex-wrap">
+                {stats.possiblySafe > 0 && (
+                  <div className="flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1.5 text-sm">
+                    <HelpCircle className="h-4 w-4 text-sky-600" />
+                    <span className="font-medium text-sky-700">{stats.possiblySafe}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-sm">
                   <Shield className="h-4 w-4 text-emerald-600" />
                   <span className="font-medium text-emerald-700">{stats.safe}</span>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-sm">
+                <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-sm">
                   <AlertTriangle className="h-4 w-4 text-amber-600" />
                   <span className="font-medium text-amber-700">{stats.moderate}</span>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-rose-100 px-4 py-2 text-sm">
+                <div className="flex items-center gap-2 rounded-full bg-rose-100 px-3 py-1.5 text-sm">
                   <AlertCircle className="h-4 w-4 text-rose-600" />
                   <span className="font-medium text-rose-700">{stats.risky}</span>
                 </div>
               </div>
             )}
           </div>
+          {/* Disclaimer Banner */}
+          <DisclaimerBanner />
         </div>
       </section>
 
       {/* Search Controls */}
-      <section className="px-4 pb-6">
+      <section className={`px-4 pb-6 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="glass-card rounded-2xl p-5"
           >
-            <div className="grid gap-4 md:grid-cols-[1fr_auto_auto_auto]">
+            <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
               {/* Ranking Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -315,26 +399,12 @@ function LookupContent() {
                   }
                   className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white px-4 text-sm"
                 >
-                  <option value="all">{t('trends.majorGroupsTable.allYears')}</option>
+                  <option value="all">{t('lookup.allLevels')}</option>
+                  <option value="possiblySafe">{t('calc.possiblySafe')}</option>
                   <option value="safe">{t('calc.safe')}</option>
                   <option value="moderate">{t('calc.moderate')}</option>
                   <option value="risky">{t('calc.risky')}</option>
-                </select>
-              </div>
-
-              {/* Sort */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('dashboard.sortBy')}
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                  className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white px-4 text-sm"
-                >
-                  <option value="ranking">{t('lookup.minRanking')}</option>
-                  <option value="margin">{t('lookup.yourMargin')}</option>
-                  <option value="university">{t('common.university')}</option>
+                  <option value="notAdmitted">{t('calc.notAdmitted')}</option>
                 </select>
               </div>
             </div>
@@ -409,7 +479,7 @@ function LookupContent() {
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-semibold text-slate-900 truncate">
                               {option.院校名}
                             </h3>
@@ -418,11 +488,27 @@ function LookupContent() {
                             >
                               <Icon className="h-3 w-3" />
                               {config.label}
+                              {config.hasInfo && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowPossiblySafeInfo(!showPossiblySafeInfo)
+                                  }}
+                                  className="ml-0.5 hover:opacity-70"
+                                >
+                                  <Info className="h-3 w-3" />
+                                </button>
+                              )}
                             </span>
                           </div>
                           <p className="text-sm text-slate-600 truncate">
                             {option.组名} · {option.组号}
                           </p>
+                          {config.hasInfo && showPossiblySafeInfo && (
+                            <p className="text-xs text-sky-600 mt-1 bg-sky-50 rounded-lg px-2 py-1">
+                              {t('calc.possiblySafe.info')}
+                            </p>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-6 text-sm">
@@ -436,10 +522,10 @@ function LookupContent() {
                           </div>
                           <div className="text-center">
                             <p className="text-xs text-slate-500">
-                              {t('lookup.yourMargin')}
+                              {option.safetyLevel === 'notAdmitted' ? t('lookup.gap') : t('lookup.yourMargin')}
                             </p>
                             <p className={`font-semibold ${config.textClass}`}>
-                              +{option.margin.toLocaleString()}
+                              {option.margin >= 0 ? '+' : ''}{option.margin.toLocaleString()}
                             </p>
                           </div>
                           <div className="text-center">

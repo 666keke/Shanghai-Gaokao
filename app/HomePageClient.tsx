@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart3, GraduationCap, TrendingUp } from 'lucide-react'
+import { BarChart3, GraduationCap, TrendingUp, Building2, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useDisclaimer } from '../contexts/DisclaimerContext'
 import AdmissionChanceCalculator, {
   AdmissionChanceResults,
   AdmissionStats,
   GroupedResults,
 } from '../components/AdmissionChanceCalculator'
+import DisclaimerBanner from '../components/DisclaimerBanner'
 import { getSvgPath } from '../lib/utils'
 
 interface UniversityData {
@@ -32,6 +35,7 @@ interface HomePageClientProps {
 
 export default function HomePageClient({ data }: HomePageClientProps) {
   const { t } = useLanguage()
+  const { hasAgreed, isLoading } = useDisclaimer()
   const [selectedYear, setSelectedYear] = useState<number>(2024)
   const [rankingValue, setRankingValue] = useState('')
   const [confirmedRanking, setConfirmedRanking] = useState<string | null>(null)
@@ -109,16 +113,14 @@ export default function HomePageClient({ data }: HomePageClientProps) {
   return (
     <div className="min-h-screen pb-16">
       {/* Hero Section */}
-      <motion.section
-        layout
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className={`relative overflow-hidden px-4 pt-12 sm:pt-20 pb-8 sm:pb-10 ${
+      <section
+        className={`relative overflow-hidden px-4 pt-12 sm:pt-20 pb-8 sm:pb-10 transition-all duration-500 ease-out ${
           isHeroExpanded
             ? 'min-h-[calc(100svh-96px)] lg:min-h-[calc(100vh-96px)] flex items-center'
             : ''
         }`}
       >
-        <motion.div layout className="max-w-6xl mx-auto relative">
+        <div className="max-w-6xl mx-auto relative">
           <div className="absolute -left-16 top-0 h-40 w-40 rounded-full bg-blue-500/15 blur-3xl" />
           <div className="absolute right-0 top-12 h-52 w-52 rounded-full bg-indigo-500/15 blur-3xl" />
 
@@ -194,21 +196,53 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <AdmissionChanceCalculator
-                data={data}
-                selectedYear={selectedYear}
-                years={years}
-                onYearChange={setSelectedYear}
-                onRankingChange={setRankingValue}
-                showEmptyState={false}
-                showResults={false}
-                onResultsChange={setResultPayload}
-                onConfirm={setConfirmedRanking}
-              />
+              <DisclaimerBanner />
+              <div className={`space-y-4 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
+                <AdmissionChanceCalculator
+                  data={data}
+                  selectedYear={selectedYear}
+                  years={years}
+                  onYearChange={setSelectedYear}
+                  onRankingChange={setRankingValue}
+                  showEmptyState={false}
+                  showResults={false}
+                  onResultsChange={setResultPayload}
+                  onConfirm={setConfirmedRanking}
+                />
+              
+                {/* Library Button */}
+                <Link href="/trends" className="block">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 sm:p-8 shadow-[0_25px_60px_-35px_rgba(30,41,59,0.5)] hover:shadow-[0_30px_70px_-35px_rgba(30,41,59,0.6)] transition-shadow duration-300"
+                  >
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    <div className="relative flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                          <Building2 className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl sm:text-2xl font-semibold text-white">
+                            {t('nav.library')}
+                          </h3>
+                          <p className="text-sm text-blue-100">
+                            {t('library.subtitle')}
+                          </p>
+                        </div>
+                      </div>
+                      <ArrowRight className="h-6 w-6 text-white/80 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
+                    </div>
+                  </motion.div>
+                </Link>
+              </div>
             </motion.div>
           </div>
-        </motion.div>
-      </motion.section>
+        </div>
+      </section>
 
       {confirmedRanking && resultPayload && (
         <section className="px-4 pb-10">
