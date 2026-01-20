@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { ShaderGradientCanvas, ShaderGradient } from '@shadergradient/react'
 import { BarChart3, GraduationCap, TrendingUp, Building2, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -216,11 +217,55 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 sm:p-8 shadow-[0_25px_60px_-35px_rgba(30,41,59,0.5)] hover:shadow-[0_30px_70px_-35px_rgba(30,41,59,0.6)] transition-shadow duration-300"
+                    className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 to-indigo-700 p-6 sm:p-8 shadow-[0_25px_60px_-35px_rgba(30,41,59,0.5)] hover:shadow-[0_30px_70px_-35px_rgba(30,41,59,0.6)] transition-shadow duration-300"
                   >
+                    <div className="pointer-events-none absolute -inset-6">
+                      <ShaderGradientCanvas
+                        className="absolute inset-0"
+                        style={{ position: 'absolute', inset: 0 }}
+                        pixelDensity={1.6}
+                        fov={40}
+                      >
+                        <ShaderGradient
+                          control="props"
+                          animate="on"
+                          brightness={1.2}
+                          cAzimuthAngle={180}
+                          cDistance={3.6}
+                          cPolarAngle={90}
+                          cameraZoom={1}
+                          color1="#1e40af"
+                          color2="#3b82f6"
+                          color3="#818cf8"
+                          envPreset="city"
+                          grain="on"
+                          lightType="3d"
+                          positionX={-1.4}
+                          positionY={0}
+                          positionZ={0}
+                          range="disabled"
+                          rangeEnd={40}
+                          rangeStart={0}
+                          reflection={0.1}
+                          rotationX={0}
+                          rotationY={10}
+                          rotationZ={50}
+                          shader="defaults"
+                          type="plane"
+                          uAmplitude={1}
+                          uDensity={1.3}
+                          uFrequency={5.5}
+                          uSpeed={0.4}
+                          uStrength={4}
+                          uTime={0}
+                          wireframe={false}
+                        />
+                      </ShaderGradientCanvas>
+                    </div>
+                    <div className="absolute inset-0 bg-slate-900/25" />
                     {/* Shimmer effect */}
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                    <div className="relative flex items-center justify-between">
+                    <div className="relative z-10 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
                           <Building2 className="h-6 w-6 text-white" />
