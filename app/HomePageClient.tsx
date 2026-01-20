@@ -223,13 +223,13 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       <ShaderGradientCanvas
                         className="absolute inset-0"
                         style={{ position: 'absolute', inset: 0 }}
-                        pixelDensity={1.6}
+                        pixelDensity={2.0}
                         fov={40}
                       >
                         <ShaderGradient
                           control="props"
                           animate="on"
-                          brightness={1.2}
+                          brightness={1.4}
                           cAzimuthAngle={180}
                           cDistance={3.6}
                           cPolarAngle={90}
