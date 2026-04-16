@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useDisclaimer } from '../../contexts/DisclaimerContext'
+import { useCompareBasket } from '../../contexts/CompareBasketContext'
 import DisclaimerBanner from '../../components/DisclaimerBanner'
 import { getDataPath } from '../../lib/utils'
 
@@ -45,9 +46,12 @@ interface MajorGroup {
   组号: string
 }
 
+const SERIES_COLORS = ['#256f8f', '#8f4b3f', '#3f7f63', '#9a6a25', '#6d5b8f', '#98704a']
+
 export default function LibraryPage() {
   const { t } = useLanguage()
   const { hasAgreed, isLoading } = useDisclaimer()
+  const basket = useCompareBasket()
   const [data, setData] = useState<UniversityData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>([])
@@ -55,7 +59,16 @@ export default function LibraryPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'university' | 'majorGroup'>('university')
   const [showAddPanel, setShowAddPanel] = useState(false)
-  const [activeDetailUniversity, setActiveDetailUniversity] = useState<string>('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#major-groups') {
+      setViewMode('majorGroup')
+      return
+    }
+    if (basket.universities.length === 0 && basket.majorGroups.length > 0) {
+      setViewMode('majorGroup')
+    }
+  }, [basket.majorGroups.length, basket.universities.length])
 
   useEffect(() => {
     fetch(getDataPath())
@@ -63,20 +76,34 @@ export default function LibraryPage() {
       .then((jsonData: UniversityData[]) => {
         setData(jsonData)
         setLoading(false)
-        // Pre-select some popular universities
-        const popular = ['清华大学', '北京大学', '复旦大学']
-        const available = Array.from(new Set(jsonData.map((item) => item.院校名)))
-        const preSelected = popular.filter((name) => available.includes(name)).slice(0, 2)
-        if (preSelected.length > 0) {
-          setSelectedUniversities(preSelected)
-          setActiveDetailUniversity(preSelected[0])
-        }
       })
       .catch((err) => {
         console.error('Error loading data:', err)
         setLoading(false)
       })
   }, [])
+
+  useEffect(() => {
+    if (loading || data.length === 0 || basket.universities.length > 0 || selectedUniversities.length > 0) {
+      return
+    }
+
+    const popular = ['清华大学', '北京大学', '复旦大学']
+    const available = Array.from(new Set(data.map((item) => item.院校名)))
+    const preSelected = popular.filter((name) => available.includes(name)).slice(0, 2)
+    if (preSelected.length > 0) {
+      setSelectedUniversities(preSelected)
+    }
+  }, [basket.universities.length, data, loading, selectedUniversities.length])
+
+  useEffect(() => {
+    if (basket.universities.length === 0) return
+    setSelectedUniversities(basket.universities)
+  }, [basket.universities])
+
+  useEffect(() => {
+    setSelectedMajorGroups(basket.majorGroups)
+  }, [basket.majorGroups])
 
   const universities = useMemo(
     () =>
@@ -119,29 +146,27 @@ export default function LibraryPage() {
     if (!selectedUniversities.includes(name) && selectedUniversities.length < 6) {
       const newList = [...selectedUniversities, name]
       setSelectedUniversities(newList)
-      if (!activeDetailUniversity) {
-        setActiveDetailUniversity(name)
-      }
+      basket.addUniversity(name)
     }
   }
 
   const removeUniversity = (name: string) => {
     const newList = selectedUniversities.filter((uni) => uni !== name)
     setSelectedUniversities(newList)
-    if (activeDetailUniversity === name) {
-      setActiveDetailUniversity(newList[0] || '')
-    }
+    basket.removeUniversity(name)
   }
 
   // Major group mode functions
   const addMajorGroup = (groupName: string) => {
     if (!selectedMajorGroups.includes(groupName) && selectedMajorGroups.length < 6) {
       setSelectedMajorGroups([...selectedMajorGroups, groupName])
+      basket.addMajorGroup(groupName)
     }
   }
 
   const removeMajorGroup = (groupName: string) => {
     setSelectedMajorGroups(selectedMajorGroups.filter((group) => group !== groupName))
+    basket.removeMajorGroup(groupName)
   }
 
   // Get all years for comparison table
@@ -182,7 +207,7 @@ export default function LibraryPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-2 border-[var(--brand)] border-t-transparent"></div>
           <p className="text-slate-600">{t('common.loading')}</p>
         </div>
       </div>
@@ -192,10 +217,10 @@ export default function LibraryPage() {
   return (
     <div className="min-h-screen pb-16">
       {/* Header */}
-      <section className="pt-8 pb-6 px-4">
-        <div className="max-w-6xl mx-auto">
+      <section className="pb-6 pt-8">
+        <div className="page-wrap">
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-            <Link href="/" className="hover:text-blue-600 flex items-center gap-1">
+            <Link href="/" className="flex items-center gap-1 hover:text-[color:var(--brand)]">
               <Home className="h-4 w-4" />
               {t('nav.dashboard')}
             </Link>
@@ -206,7 +231,7 @@ export default function LibraryPage() {
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <Building2 className="h-8 w-8 text-blue-600" />
+                <Building2 className="h-8 w-8 text-[color:var(--brand)]" />
                 {t('library.title')}
               </h1>
               <p className="text-slate-600 mt-1">{t('library.subtitle')}</p>
@@ -214,11 +239,11 @@ export default function LibraryPage() {
 
             <div className="flex items-center gap-3">
               <span className="pill">
-                <GraduationCap className="h-3.5 w-3.5 text-blue-600" />
+                <GraduationCap className="h-3.5 w-3.5 text-[color:var(--brand)]" />
                 {stats.universities} {t('dashboard.stats.universities')}
               </span>
               <span className="pill">
-                <BarChart3 className="h-3.5 w-3.5 text-indigo-600" />
+                <BarChart3 className="h-3.5 w-3.5 text-[color:var(--sage)]" />
                 {stats.totalRecords.toLocaleString()} {t('dashboard.stats.records')}
               </span>
             </div>
@@ -230,22 +255,22 @@ export default function LibraryPage() {
       </section>
 
       {/* Mode Toggle & Controls */}
-      <section className={`px-4 pb-6 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
-        <div className="max-w-6xl mx-auto">
+      <section className={`pb-6 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="page-wrap">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card rounded-2xl p-5"
+            className="workbench-card rounded-lg p-5"
           >
             {/* Mode Toggle */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4">
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewMode('university')}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
                     viewMode === 'university'
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-600'
+                      ? 'bg-[var(--brand-dark)] text-white'
+                      : 'border border-stone-300 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
                   }`}
                 >
                   <Building2 className="h-4 w-4" />
@@ -253,10 +278,10 @@ export default function LibraryPage() {
                 </button>
                 <button
                   onClick={() => setViewMode('majorGroup')}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
                     viewMode === 'majorGroup'
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-600'
+                      ? 'bg-[var(--brand-dark)] text-white'
+                      : 'border border-stone-300 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
                   }`}
                 >
                   <Layers className="h-4 w-4" />
@@ -267,7 +292,7 @@ export default function LibraryPage() {
               {/* Add Button */}
               <button
                 onClick={() => setShowAddPanel(!showAddPanel)}
-                className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500 transition"
+                className="focus-ring flex items-center gap-2 rounded-lg bg-[var(--brand-dark)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--brand)]"
               >
                 <Plus className="h-4 w-4" />
                 {viewMode === 'university' ? t('library.addUniversity') : t('library.addMajorGroup')}
@@ -285,16 +310,16 @@ export default function LibraryPage() {
                         key={uni}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium"
+                        className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium"
                         style={{
-                          backgroundColor: `${['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6]}15`,
-                          color: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6],
+                          backgroundColor: `${SERIES_COLORS[index % SERIES_COLORS.length]}15`,
+                          color: SERIES_COLORS[index % SERIES_COLORS.length],
                         }}
                       >
                         <span
                           className="w-2 h-2 rounded-full"
                           style={{
-                            backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6],
+                            backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length],
                           }}
                         />
                         {uni}
@@ -316,16 +341,16 @@ export default function LibraryPage() {
                         key={group}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium"
+                        className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium"
                         style={{
-                          backgroundColor: `${['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6]}15`,
-                          color: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6],
+                          backgroundColor: `${SERIES_COLORS[index % SERIES_COLORS.length]}15`,
+                          color: SERIES_COLORS[index % SERIES_COLORS.length],
                         }}
                       >
                         <span
                           className="w-2 h-2 rounded-full"
                           style={{
-                            backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6],
+                            backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length],
                           }}
                         />
                         {group}
@@ -365,11 +390,11 @@ export default function LibraryPage() {
                         }
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="focus-ring h-[42px] w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm"
+                        className="focus-ring h-[42px] w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-sm"
                       />
                     </div>
 
-                    <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-200 bg-white">
+                    <div className="max-h-48 overflow-y-auto rounded-lg border border-stone-300 bg-white">
                       {viewMode === 'university' ? (
                         <div className="p-2 grid gap-1">
                           {universities
@@ -386,7 +411,7 @@ export default function LibraryPage() {
                                 className={`text-left rounded-lg px-3 py-2 text-sm transition ${
                                   selectedUniversities.length >= 6
                                     ? 'cursor-not-allowed bg-slate-50 text-slate-400'
-                                    : 'hover:bg-blue-50 hover:text-blue-600'
+                                    : 'hover:bg-[var(--brand-soft)] hover:text-[color:var(--brand-dark)]'
                                 }`}
                               >
                                 {name}
@@ -409,7 +434,7 @@ export default function LibraryPage() {
                                 className={`text-left rounded-lg px-3 py-2 text-sm transition ${
                                   selectedMajorGroups.length >= 6
                                     ? 'cursor-not-allowed bg-slate-50 text-slate-400'
-                                    : 'hover:bg-blue-50'
+                                    : 'hover:bg-[var(--brand-soft)]'
                                 }`}
                               >
                                 <div className="font-medium">{group.组名}</div>
@@ -434,8 +459,8 @@ export default function LibraryPage() {
       </section>
 
       {/* Main Content */}
-      <section className="px-4 pb-10">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <section className="pb-10">
+        <div className="page-wrap space-y-6">
           {viewMode === 'university' && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -450,50 +475,12 @@ export default function LibraryPage() {
                 title={t('library.universityTrendComparison')}
               />
 
-              {/* University Detail Selector */}
+              {/* Major Groups Table for selected universities */}
               {selectedUniversities.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="glass-card rounded-2xl p-5"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                    <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                      <Table2 className="h-5 w-5 text-blue-600" />
-                      {t('library.majorGroupDetails')}
-                    </h3>
-                    <div className="flex gap-2 flex-wrap">
-                      {selectedUniversities.map((uni, index) => (
-                        <button
-                          key={uni}
-                          onClick={() => setActiveDetailUniversity(uni)}
-                          className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                            activeDetailUniversity === uni
-                              ? 'text-white shadow-lg'
-                              : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-200'
-                          }`}
-                          style={
-                            activeDetailUniversity === uni
-                              ? {
-                                  backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6],
-                                  boxShadow: `0 4px 14px ${['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6]}40`,
-                                }
-                              : {}
-                          }
-                        >
-                          {uni}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Major Groups Table for selected university */}
-              {activeDetailUniversity && (
                 <MajorGroupsTable
-                  universityName={activeDetailUniversity}
+                  universityNames={selectedUniversities}
                   data={data}
+                  seriesColors={SERIES_COLORS}
                 />
               )}
             </motion.div>
@@ -518,10 +505,10 @@ export default function LibraryPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="glass-card rounded-3xl p-6"
+                  className="workbench-card rounded-lg p-6"
                 >
                   <div className="flex items-center gap-2 mb-6">
-                    <Table2 className="h-5 w-5 text-blue-600" />
+                    <Table2 className="h-5 w-5 text-[color:var(--brand)]" />
                     <h3 className="text-lg font-semibold text-slate-900">
                       {t('library.yearlyComparison')}
                     </h3>
@@ -533,9 +520,6 @@ export default function LibraryPage() {
                         <tr className="border-b border-slate-200">
                           <th className="text-left py-3 px-4 font-medium text-slate-600 sticky left-0 bg-white/95 backdrop-blur z-10">
                             {t('library.majorGroup')}
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium text-slate-600">
-                            {t('library.university')}
                           </th>
                           <th className="text-center py-3 px-4 font-medium text-slate-600">
                             {t('library.avgRanking')}
@@ -561,7 +545,7 @@ export default function LibraryPage() {
                                 <span
                                   className="w-2 h-2 rounded-full flex-shrink-0"
                                   style={{
-                                    backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'][index % 6],
+                                    backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length],
                                   }}
                                 />
                                 <span className="font-medium text-slate-900 truncate max-w-[200px]" title={item.groupName}>
@@ -569,11 +553,8 @@ export default function LibraryPage() {
                                 </span>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-slate-600">
-                              {item.universityName}
-                            </td>
                             <td className="py-3 px-4 text-center">
-                              <span className="font-semibold text-blue-600">
+                              <span className="font-semibold text-[color:var(--brand)]">
                                 {item.avgRanking?.toLocaleString() || '-'}
                               </span>
                             </td>
@@ -613,7 +594,7 @@ export default function LibraryPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="glass-card rounded-2xl p-8 text-center"
+                  className="workbench-card rounded-lg p-8 text-center"
                 >
                   <TrendingUp className="h-12 w-12 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">
@@ -630,8 +611,8 @@ export default function LibraryPage() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-10 border-t border-white/50 bg-white/60 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+      <footer className="mt-10 border-t border-stone-200 bg-stone-50/80">
+        <div className="page-wrap py-8 text-center">
           <div className="flex items-center justify-center space-x-2 mb-2 text-slate-700">
             <GraduationCap className="h-5 w-5" />
             <span className="text-base font-semibold">{t('nav.title')}</span>

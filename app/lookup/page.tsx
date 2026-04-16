@@ -19,9 +19,12 @@ import {
   Home,
   HelpCircle,
   Info,
+  Plus,
+  Check,
 } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useDisclaimer } from '../../contexts/DisclaimerContext'
+import { useCompareBasket } from '../../contexts/CompareBasketContext'
 import DisclaimerBanner from '../../components/DisclaimerBanner'
 import { getDataPath } from '../../lib/utils'
 
@@ -59,7 +62,9 @@ function is580OrAbove(score: string): boolean {
 function LookupContent() {
   const { t } = useLanguage()
   const { hasAgreed, isLoading } = useDisclaimer()
+  const basket = useCompareBasket()
   const searchParams = useSearchParams()
+  const isChinese = t('nav.title') === '上海高考志愿分析'
 
   const [data, setData] = useState<UniversityData[]>([])
   const [loading, setLoading] = useState(true)
@@ -281,7 +286,7 @@ function LookupContent() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-2 border-[var(--brand)] border-t-transparent"></div>
           <p className="text-slate-600">{t('common.loading')}</p>
         </div>
       </div>
@@ -291,10 +296,10 @@ function LookupContent() {
   return (
     <div className="min-h-screen pb-16">
       {/* Header */}
-      <section className="pt-8 pb-6 px-4">
-        <div className="max-w-6xl mx-auto">
+      <section className="pb-6 pt-8">
+        <div className="page-wrap">
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-            <Link href="/" className="hover:text-blue-600 flex items-center gap-1">
+            <Link href="/" className="flex items-center gap-1 hover:text-[color:var(--brand)]">
               <Home className="h-4 w-4" />
               {t('nav.dashboard')}
             </Link>
@@ -305,7 +310,7 @@ function LookupContent() {
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <Target className="h-8 w-8 text-blue-600" />
+                <Target className="h-8 w-8 text-[color:var(--brand)]" />
                 {t('lookup.title')}
               </h1>
               <p className="text-slate-600 mt-1">{t('lookup.subtitle')}</p>
@@ -314,20 +319,20 @@ function LookupContent() {
             {userRanking && stats.total > 0 && (
               <div className="flex items-center gap-2 flex-wrap">
                 {stats.possiblySafe > 0 && (
-                  <div className="flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1.5 text-sm">
+                  <div className="flex items-center gap-2 rounded-md bg-sky-100 px-3 py-1.5 text-sm">
                     <HelpCircle className="h-4 w-4 text-sky-600" />
                     <span className="font-medium text-sky-700">{stats.possiblySafe}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-sm">
+                <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-1.5 text-sm">
                   <Shield className="h-4 w-4 text-emerald-600" />
                   <span className="font-medium text-emerald-700">{stats.safe}</span>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-sm">
+                <div className="flex items-center gap-2 rounded-md bg-amber-100 px-3 py-1.5 text-sm">
                   <AlertTriangle className="h-4 w-4 text-amber-600" />
                   <span className="font-medium text-amber-700">{stats.moderate}</span>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-rose-100 px-3 py-1.5 text-sm">
+                <div className="flex items-center gap-2 rounded-md bg-rose-100 px-3 py-1.5 text-sm">
                   <AlertCircle className="h-4 w-4 text-rose-600" />
                   <span className="font-medium text-rose-700">{stats.risky}</span>
                 </div>
@@ -340,12 +345,12 @@ function LookupContent() {
       </section>
 
       {/* Search Controls */}
-      <section className={`px-4 pb-6 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
-        <div className="max-w-6xl mx-auto">
+      <section className={`pb-6 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="page-wrap">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card rounded-2xl p-5"
+            className="workbench-card rounded-lg p-5"
           >
             <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
               {/* Ranking Input */}
@@ -363,7 +368,7 @@ function LookupContent() {
                       setUserRanking(e.target.value)
                       setDisplayLimit(30)
                     }}
-                    className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min="1"
                   />
                 </div>
@@ -377,7 +382,7 @@ function LookupContent() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white px-4 text-sm"
+                  className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -397,7 +402,7 @@ function LookupContent() {
                   onChange={(e) =>
                     setSafetyFilter(e.target.value as typeof safetyFilter)
                   }
-                  className="focus-ring h-[46px] w-full rounded-xl border border-slate-200 bg-white px-4 text-sm"
+                  className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
                 >
                   <option value="all">{t('lookup.allLevels')}</option>
                   <option value="possiblySafe">{t('calc.possiblySafe')}</option>
@@ -419,7 +424,7 @@ function LookupContent() {
                     placeholder={t('dashboard.search.placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="focus-ring w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm"
+                    className="focus-ring w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-10 pr-4 text-sm"
                   />
                 </div>
               </div>
@@ -429,8 +434,8 @@ function LookupContent() {
       </section>
 
       {/* Results */}
-      <section className="px-4 pb-10">
-        <div className="max-w-6xl mx-auto">
+      <section className="pb-10">
+        <div className="page-wrap">
           {/* Results Header */}
           {userRanking && (
             <div className="flex items-center justify-between mb-4">
@@ -447,7 +452,7 @@ function LookupContent() {
                     setSafetyFilter('all')
                     setSearchTerm('')
                   }}
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-[color:var(--brand)] hover:underline"
                 >
                   {t('common.clearSearch')}
                 </button>
@@ -475,7 +480,7 @@ function LookupContent() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: Math.min(index * 0.02, 0.3) }}
-                      className={`rounded-2xl border ${config.borderClass} ${config.bgClass} p-4 transition-all hover:shadow-md`}
+                      className={`rounded-lg border ${config.borderClass} ${config.bgClass} p-4 transition-all hover:bg-white/80`}
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex-1 min-w-0">
@@ -484,7 +489,7 @@ function LookupContent() {
                               {option.院校名}
                             </h3>
                             <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${config.badgeClass}`}
+                              className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${config.badgeClass}`}
                             >
                               <Icon className="h-3 w-3" />
                               {config.label}
@@ -511,7 +516,27 @@ function LookupContent() {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-6 text-sm">
+                        <div className="flex flex-wrap items-center gap-3 text-sm sm:justify-end">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => basket.addUniversity(option.院校名)}
+                              disabled={basket.hasUniversity(option.院校名)}
+                              className="focus-ring inline-flex h-9 items-center gap-1 rounded-md border border-stone-200 bg-white/75 px-2.5 text-xs font-semibold text-[color:var(--brand)] transition hover:border-[var(--brand)] disabled:text-[color:var(--sage)]"
+                            >
+                              {basket.hasUniversity(option.院校名) ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                              {isChinese ? '院校' : 'School'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => basket.addMajorGroup(option.组名)}
+                              disabled={basket.hasMajorGroup(option.组名)}
+                              className="focus-ring inline-flex h-9 items-center gap-1 rounded-md border border-stone-200 bg-white/75 px-2.5 text-xs font-semibold text-[color:var(--brand)] transition hover:border-[var(--brand)] disabled:text-[color:var(--sage)]"
+                            >
+                              {basket.hasMajorGroup(option.组名) ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                              {isChinese ? '专业组' : 'Group'}
+                            </button>
+                          </div>
                           <div className="text-center">
                             <p className="text-xs text-slate-500">
                               {t('lookup.minRanking')}
@@ -547,7 +572,7 @@ function LookupContent() {
                   <div className="text-center pt-4">
                     <button
                       onClick={() => setDisplayLimit((prev) => prev + 30)}
-                      className="focus-ring inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+                      className="focus-ring inline-flex items-center gap-2 rounded-lg bg-[var(--brand-dark)] px-6 py-3 text-sm font-semibold text-white hover:bg-[var(--brand)]"
                     >
                       {t('dashboard.loadMore', {
                         remaining: filteredResults.length - displayLimit,
@@ -561,7 +586,7 @@ function LookupContent() {
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="glass-card rounded-2xl p-8 text-center"
+                className="workbench-card rounded-lg p-8 text-center"
               >
                 <Target className="h-12 w-12 text-slate-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">
@@ -579,9 +604,9 @@ function LookupContent() {
                 key="prompt"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="glass-card rounded-2xl p-8 text-center"
+                className="workbench-card rounded-lg p-8 text-center"
               >
-                <Target className="h-12 w-12 text-blue-600/40 mx-auto mb-4" />
+                <Target className="h-12 w-12 text-[color:var(--brand)] mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">
                   {t('calc.empty.title')}
                 </h3>
@@ -595,8 +620,8 @@ function LookupContent() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-10 border-t border-white/50 bg-white/60 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+      <footer className="mt-10 border-t border-stone-200 bg-stone-50/80">
+        <div className="page-wrap py-8 text-center">
           <div className="flex items-center justify-center space-x-2 mb-2 text-slate-700">
             <GraduationCap className="h-5 w-5" />
             <span className="text-base font-semibold">{t('nav.title')}</span>
@@ -613,7 +638,7 @@ export default function LookupPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-2 border-blue-600 border-t-transparent"></div>
+          <div className="h-16 w-16 animate-spin rounded-full border-2 border-[var(--brand)] border-t-transparent"></div>
         </div>
       }
     >

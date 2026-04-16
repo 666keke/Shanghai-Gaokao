@@ -22,7 +22,7 @@ export default function DisclaimerBanner() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="my-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5"
+      className="my-5 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:p-5"
     >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">
@@ -37,7 +37,7 @@ export default function DisclaimerBanner() {
           </p>
           <button
             onClick={setAgreed}
-            className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-500 transition-colors"
+            className="focus-ring inline-flex items-center gap-2 rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-600"
           >
             <CheckCircle2 className="h-4 w-4" />
             {t('disclaimer.agree')}

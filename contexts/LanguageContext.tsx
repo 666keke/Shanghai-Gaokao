@@ -149,6 +149,11 @@ const translations = {
     'library.majorGroup': '专业组',
     'library.university': '所属大学',
     'library.avgRanking': '平均排名',
+    'library.visibility': '显示范围',
+    'library.visible': '显示',
+    'library.hidden': '隐藏',
+    'library.allUniversitiesHidden': '已隐藏所有大学。打开上方开关继续查看。',
+    'library.groupCount': '{count} 个专业组',
     'library.addMajorGroupHint': '点击上方"添加专业组"按钮选择专业组进行对比',
     'library.selectUniversity': '请选择大学查看录取趋势',
     
@@ -445,6 +450,11 @@ const translations = {
     'library.majorGroup': 'Major Group',
     'library.university': 'University',
     'library.avgRanking': 'Avg Ranking',
+    'library.visibility': 'Visible range',
+    'library.visible': 'Shown',
+    'library.hidden': 'Hidden',
+    'library.allUniversitiesHidden': 'All universities are hidden. Turn one on above to continue.',
+    'library.groupCount': '{count} major groups',
     'library.addMajorGroupHint': 'Click "Add Major Group" button above to select major groups for comparison',
     'library.selectUniversity': 'Select a university to view admission trends',
     

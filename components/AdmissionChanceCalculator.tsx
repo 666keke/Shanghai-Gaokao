@@ -73,6 +73,8 @@ interface AdmissionChanceCalculatorProps {
   selectedYear: number
   years: number[]
   onYearChange: (year: number) => void
+  rankPresets?: number[]
+  embedded?: boolean
   onRankingChange?: (value: string) => void
   showEmptyState?: boolean
   showResults?: boolean
@@ -90,6 +92,8 @@ export default function AdmissionChanceCalculator({
   selectedYear,
   years,
   onYearChange,
+  rankPresets,
+  embedded = false,
   onRankingChange,
   showEmptyState = true,
   showResults = true,
@@ -218,6 +222,7 @@ export default function AdmissionChanceCalculator({
 
   const rankingNumber = parseInt(ranking)
   const canConfirm = !isNaN(rankingNumber) && rankingNumber > 0
+  const isChinese = t('calc.title') === '录取概率分析'
 
   return (
     <div className="space-y-8">
@@ -225,13 +230,11 @@ export default function AdmissionChanceCalculator({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-white p-6 sm:p-8 shadow-[0_35px_80px_-60px_rgba(30,41,59,0.6)]"
+        className={embedded ? 'rounded-lg border border-stone-200 bg-white/75 p-4 sm:p-5' : 'workbench-card rounded-lg p-5 sm:p-6'}
       >
-        <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-blue-500/12 blur-3xl" />
-        <div className="pointer-events-none absolute -left-16 -bottom-20 h-44 w-44 rounded-full bg-indigo-500/12 blur-3xl" />
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600/10">
-            <Target className="h-6 w-6 text-blue-600" />
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--brand-soft)]">
+            <Target className="h-5 w-5 text-[color:var(--brand-dark)]" />
           </div>
           <div>
             <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
@@ -241,9 +244,9 @@ export default function AdmissionChanceCalculator({
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-[1fr_auto_auto] md:items-end">
+        <div className="grid gap-4">
           {/* Ranking Input */}
-          <div className="relative">
+          <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               {t('calc.yourRanking')}
             </label>
@@ -253,46 +256,73 @@ export default function AdmissionChanceCalculator({
                 value={ranking}
                 onChange={(e) => handleRankingChange(e.target.value)}
                 placeholder={t('calc.placeholder')}
-                className="focus-ring h-[58px] w-full rounded-2xl border border-slate-200 bg-white px-5 text-lg font-medium placeholder:text-slate-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="focus-ring h-[54px] w-full rounded-lg border border-stone-300 bg-white px-4 text-lg font-medium placeholder:text-slate-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 min="1"
               />
               {isCalculating && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--brand)] border-t-transparent" />
                 </div>
               )}
             </div>
           </div>
 
-          {/* Year Selector */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              {t('calc.referenceYear')}
-            </label>
-            <select
-              value={selectedYear}
-              onChange={(e) => onYearChange(parseInt(e.target.value))}
-              className="focus-ring h-[58px] w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium"
-            >
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px_128px] sm:items-end">
+            <div>
+              <p className="text-xs text-slate-500">{t('calc.hint')}</p>
+              {rankPresets && rankPresets.length > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium text-slate-500">
+                    {isChinese ? '快速试算' : 'Try'}
+                  </span>
+                  {rankPresets.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => handleRankingChange(String(preset))}
+                      className={`focus-ring rounded-md border px-2.5 py-1 text-xs font-semibold transition ${
+                        ranking === String(preset)
+                          ? 'border-[var(--brand)] bg-[var(--brand-soft)] text-[color:var(--brand-dark)]'
+                          : 'border-stone-200 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
+                      }`}
+                    >
+                      {preset.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* Confirm Button */}
-          <div className="flex items-end">
-            <button
-              type="button"
-              disabled={!canConfirm}
-              onClick={() => canConfirm && onConfirm?.(ranking)}
-              className="focus-ring inline-flex h-[58px] w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500 transition-colors disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-            >
-              {t('calc.confirm')}
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {/* Year Selector */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {t('calc.referenceYear')}
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => onYearChange(parseInt(e.target.value))}
+                className="focus-ring h-[54px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium"
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Confirm Button */}
+            <div className="flex items-end">
+              <button
+                type="button"
+                disabled={!canConfirm}
+                onClick={() => canConfirm && onConfirm?.(ranking)}
+                className="focus-ring inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-dark)] px-6 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand)] disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                {t('calc.confirm')}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -311,9 +341,9 @@ export default function AdmissionChanceCalculator({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="glass-card rounded-3xl p-8 text-center"
+          className="workbench-card rounded-lg p-8 text-center"
         >
-          <Sparkles className="h-12 w-12 text-blue-600/40 mx-auto mb-4" />
+          <Sparkles className="h-12 w-12 text-[color:var(--brand)] mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-900 mb-2">
             {t('calc.empty.title')}
           </h3>
@@ -408,9 +438,9 @@ export function AdmissionChanceResults({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
-            className="glass-card rounded-2xl p-4 text-center"
+            className="workbench-card rounded-lg p-4 text-center"
           >
-            <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
+            <div className="flex items-center justify-center gap-2 text-[color:var(--brand)] mb-2">
               <BarChart3 className="h-5 w-5" />
             </div>
             <div className="text-3xl font-bold text-slate-900">
@@ -425,7 +455,7 @@ export function AdmissionChanceResults({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.15 }}
-            className="glass-card rounded-2xl p-4 text-center"
+            className="workbench-card rounded-lg p-4 text-center"
           >
             <div className="flex items-center justify-center gap-2 text-emerald-600 mb-2">
               <Shield className="h-5 w-5" />
@@ -442,9 +472,9 @@ export function AdmissionChanceResults({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="glass-card rounded-2xl p-4 text-center"
+            className="workbench-card rounded-lg p-4 text-center"
           >
-            <div className="flex items-center justify-center gap-2 text-purple-600 mb-2">
+            <div className="flex items-center justify-center gap-2 text-[color:var(--sage)] mb-2">
               <GraduationCap className="h-5 w-5" />
             </div>
             <div className="text-3xl font-bold text-slate-900">
@@ -459,9 +489,9 @@ export function AdmissionChanceResults({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.25 }}
-            className="glass-card rounded-2xl p-4 text-center"
+            className="workbench-card rounded-lg p-4 text-center"
           >
-            <div className="flex items-center justify-center gap-2 text-indigo-600 mb-2">
+            <div className="flex items-center justify-center gap-2 text-[color:var(--brand)] mb-2">
               <TrendingUp className="h-5 w-5" />
             </div>
             <div className="text-3xl font-bold text-slate-900">
@@ -474,7 +504,7 @@ export function AdmissionChanceResults({
         </div>
 
         {/* Safety Level Breakdown */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2">
           {(['possiblySafe', 'safe', 'moderate', 'risky'] as const).map((level, idx) => {
             const config = getSafetyConfig(level)
             const Icon = config.icon
@@ -489,12 +519,12 @@ export function AdmissionChanceResults({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + idx * 0.1 }}
-                className={`rounded-2xl border ${config.borderClass} ${config.bgClass} p-5`}
+                className={`rounded-lg border ${config.borderClass} ${config.bgClass} p-5`}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex min-w-0 items-center gap-2">
                     <Icon className={`h-5 w-5 ${config.iconClass}`} />
-                    <span className={`font-semibold ${config.textClass}`}>
+                    <span className={`whitespace-nowrap font-semibold ${config.textClass}`}>
                       {config.label}
                     </span>
                     {config.hasInfo && (
@@ -507,7 +537,7 @@ export function AdmissionChanceResults({
                       </button>
                     )}
                   </div>
-                  <span className={`text-2xl font-bold ${config.textClass}`}>
+                  <span className={`shrink-0 text-2xl font-bold ${config.textClass}`}>
                     {items.length}
                   </span>
                 </div>
@@ -518,7 +548,7 @@ export function AdmissionChanceResults({
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="mb-4 p-3 rounded-xl bg-sky-100/50 border border-sky-200"
+                    className="mb-4 rounded-lg border border-sky-200 bg-sky-100/50 p-3"
                   >
                     <p className="text-xs text-sky-800">
                       {t('calc.possiblySafe.info')}
@@ -534,14 +564,14 @@ export function AdmissionChanceResults({
                   {items.slice(0, 3).map((item, i) => (
                     <div
                       key={`${item.组名}-${i}`}
-                      className="flex items-center justify-between rounded-xl bg-white/60 px-3 py-2 text-sm"
+                      className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-lg bg-white/70 px-3 py-2 text-sm"
                     >
-                      <div className="truncate flex-1">
-                        <span className="font-medium text-slate-900">
+                      <div className="min-w-0">
+                        <span className="break-words font-medium leading-5 text-slate-900">
                           {item.组名}
                         </span>
                       </div>
-                      <span className="text-slate-500 text-xs ml-2">
+                      <span className="whitespace-nowrap pt-0.5 text-xs text-slate-500">
                         {item.最低排名.toLocaleString()}
                       </span>
                     </div>
@@ -549,7 +579,7 @@ export function AdmissionChanceResults({
                   {items.length > 3 && (
                     <Link
                       href={`/lookup?ranking=${ranking}&year=${selectedYear}&filter=${level}`}
-                      className="flex items-center justify-center gap-1 rounded-xl bg-white/60 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white/80 transition-colors"
+                      className="flex items-center justify-center gap-1 rounded-lg bg-white/70 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white"
                     >
                       {t('calc.viewMore', { count: items.length - 3 })}
                       <ChevronRight className="h-4 w-4" />

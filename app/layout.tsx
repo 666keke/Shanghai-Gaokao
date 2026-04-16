@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import Navigation from '../components/Navigation'
 import { LanguageProvider } from '../contexts/LanguageContext'
 import { DisclaimerProvider } from '../contexts/DisclaimerContext'
+import { CompareBasketProvider } from '../contexts/CompareBasketContext'
 import DynamicLayout from '../components/DynamicLayout'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   description: 'Modern analytics platform for Chinese university admission data, trends, and predictions',
@@ -26,20 +24,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} bg-slate-50 text-slate-900`}>
+      <body>
         <LanguageProvider>
           <DisclaimerProvider>
-            <DynamicLayout>
-              <div className="min-h-screen app-shell">
-                <div className="relative min-h-screen">
-                  <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
+            <CompareBasketProvider>
+              <DynamicLayout>
+                <div className="min-h-screen app-shell">
                   <div className="relative min-h-screen">
-                    <Navigation />
-                    {children}
+                    <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
+                    <div className="relative min-h-screen">
+                      <Navigation />
+                      {children}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </DynamicLayout>
+              </DynamicLayout>
+            </CompareBasketProvider>
           </DisclaimerProvider>
         </LanguageProvider>
       </body>

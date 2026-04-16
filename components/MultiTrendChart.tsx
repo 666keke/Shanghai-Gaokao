@@ -33,14 +33,14 @@ interface MultiTrendChartProps {
 
 // Color palette for multiple series
 const COLORS = [
-  '#3b82f6', // blue
-  '#ef4444', // red
-  '#10b981', // green
-  '#f59e0b', // amber
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#84cc16', // lime
+  '#256f8f',
+  '#8f4b3f',
+  '#3f7f63',
+  '#9a6a25',
+  '#6d5b8f',
+  '#98704a',
+  '#527b82',
+  '#657a35',
 ]
 
 export default function MultiTrendChart({
@@ -145,7 +145,7 @@ export default function MultiTrendChart({
 
   if (items.length === 0) {
     return (
-      <div className="glass-card rounded-3xl p-6">
+      <div className="workbench-card rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">{t('chart.admissionTrends')}</h3>
         <div className="text-center text-slate-500 py-12">
           <TrendingUp className="h-12 w-12 text-slate-300 mx-auto mb-4" />
@@ -157,7 +157,7 @@ export default function MultiTrendChart({
 
   if (chartData.every((row) => items.every((item) => row[item] === undefined))) {
     return (
-      <div className="glass-card rounded-3xl p-6">
+      <div className="workbench-card rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">{t('chart.admissionTrends')}</h3>
         <div className="text-center text-slate-500 py-8">
           {t('chart.noData', { name: title || items.join(', ') })}
@@ -171,7 +171,7 @@ export default function MultiTrendChart({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="glass-card rounded-3xl p-6"
+      className="workbench-card rounded-lg p-6"
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
         <h3 className="text-lg font-semibold text-slate-900">
@@ -187,7 +187,7 @@ export default function MultiTrendChart({
         {itemStats.map((stat) => (
           <div
             key={stat.name}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm"
+            className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
             style={{ backgroundColor: `${stat.color}15` }}
           >
             <div
@@ -219,9 +219,9 @@ export default function MultiTrendChart({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'white',
+                backgroundColor: 'oklch(0.995 0.006 86)',
                 border: '1px solid #e2e8f0',
-                borderRadius: '12px',
+                borderRadius: '8px',
                 boxShadow: '0 10px 30px -20px rgba(15, 23, 42, 0.35)',
               }}
               formatter={(value: number, name: string) => [
@@ -252,7 +252,7 @@ export default function MultiTrendChart({
         {itemStats.slice(0, 4).map((stat) => (
           <div
             key={stat.name}
-            className="text-center p-3 rounded-xl"
+            className="rounded-lg p-3 text-center"
             style={{ backgroundColor: `${stat.color}10` }}
           >
             <p className="text-xs text-slate-500 truncate" title={stat.name}>
