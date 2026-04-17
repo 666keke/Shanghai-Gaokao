@@ -19,6 +19,8 @@ interface MajorGroupsTableProps {
   universityNames: string[]
   data: UniversityData[]
   seriesColors?: string[]
+  excludedMajorGroups?: string[]
+  onToggleGroupExclusion?: (groupName: string) => void
 }
 
 interface GroupRow {
@@ -33,6 +35,8 @@ export default function MajorGroupsTable({
   universityNames,
   data,
   seriesColors = ['#256f8f', '#8f4b3f', '#3f7f63', '#9a6a25', '#6d5b8f', '#98704a'],
+  excludedMajorGroups = [],
+  onToggleGroupExclusion,
 }: MajorGroupsTableProps) {
   const { t } = useLanguage()
   const basket = useCompareBasket()
@@ -108,6 +112,7 @@ export default function MajorGroupsTable({
   }, [universityData, universityNames])
 
   const visibleSet = useMemo(() => new Set(visibleUniversities), [visibleUniversities])
+  const excludedSet = useMemo(() => new Set(excludedMajorGroups), [excludedMajorGroups])
 
   const universitySections = useMemo(
     () =>
@@ -196,7 +201,7 @@ export default function MajorGroupsTable({
     const key = getMajorGroupActionKey(groupName)
     const sizeClass =
       size === 'mobile'
-        ? 'mt-2 inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs font-medium'
+        ? 'inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs font-medium'
         : 'focus-ring inline-flex h-8 flex-shrink-0 items-center gap-1 rounded-md border px-2.5 text-xs font-medium'
     const transition = { duration: 0.18, ease: 'easeOut' }
     const motionProps = {
@@ -221,6 +226,36 @@ export default function MajorGroupsTable({
           {getMajorGroupActionLabel(groupName)}
         </motion.button>
       </AnimatePresence>
+    )
+  }
+
+  const GroupExcludeAction = ({
+    groupName,
+    size = 'desktop',
+  }: {
+    groupName: string
+    size?: 'mobile' | 'desktop'
+  }) => {
+    const isExcluded = excludedSet.has(groupName)
+    const sizeClass =
+      size === 'mobile'
+        ? 'inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs font-medium'
+        : 'focus-ring inline-flex h-8 flex-shrink-0 items-center gap-1 rounded-md border px-2.5 text-xs font-medium'
+
+    return (
+      <motion.button
+        type="button"
+        onClick={() => onToggleGroupExclusion?.(groupName)}
+        className={`${sizeClass} transition-colors ${
+          isExcluded
+            ? 'border-stone-300 bg-stone-100 text-slate-600 hover:bg-white'
+            : 'border-stone-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-stone-50'
+        }`}
+        whileTap={{ scale: 0.98 }}
+      >
+        {isExcluded ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+        {isExcluded ? t('library.restoreGroup') : t('library.excludeGroup')}
+      </motion.button>
     )
   }
 
@@ -301,10 +336,15 @@ export default function MajorGroupsTable({
               </div>
 
               <div className="space-y-3 md:hidden">
-                {section.rows.map((item) => (
+                {section.rows.map((item) => {
+                  const isExcluded = excludedSet.has(item.groupName)
+
+                  return (
                   <article
                     key={`${item.universityName}-${item.groupName}-mobile`}
-                    className="rounded-lg border border-stone-200 bg-white p-3"
+                    className={`rounded-lg border border-stone-200 bg-white p-3 transition-opacity duration-200 ${
+                      isExcluded ? 'opacity-45' : 'opacity-100'
+                    }`}
                   >
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -332,7 +372,10 @@ export default function MajorGroupsTable({
                         <div className="text-sm font-semibold text-[color:var(--brand)]">
                           {item.avgRanking ? item.avgRanking.toLocaleString() : '-'}
                         </div>
-                        <MajorGroupAction groupName={item.groupName} size="mobile" />
+                        <div className="mt-2 flex flex-wrap justify-end gap-1.5">
+                          <GroupExcludeAction groupName={item.groupName} size="mobile" />
+                          <MajorGroupAction groupName={item.groupName} size="mobile" />
+                        </div>
                       </div>
                     </div>
 
@@ -363,7 +406,8 @@ export default function MajorGroupsTable({
                       })}
                     </div>
                   </article>
-                ))}
+                  )
+                })}
               </div>
 
               <div className="hidden overflow-x-auto md:block">
@@ -387,11 +431,14 @@ export default function MajorGroupsTable({
                     </tr>
                   </thead>
                   <tbody>
-                    {section.rows.map((item, index) => (
+                    {section.rows.map((item, index) => {
+                      const isExcluded = excludedSet.has(item.groupName)
+
+                      return (
                       <motion.tr
                         key={`${item.universityName}-${item.groupName}`}
                         initial={{ opacity: 0, x: -16 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        animate={{ opacity: isExcluded ? 0.42 : 1, x: 0 }}
                         transition={{ delay: Math.min(index * 0.02, 0.18) }}
                         className="border-b border-slate-100 transition-colors hover:bg-slate-50"
                       >
@@ -417,7 +464,10 @@ export default function MajorGroupsTable({
                                 </div>
                               </div>
                             </div>
-                            <MajorGroupAction groupName={item.groupName} />
+                            <div className="flex flex-shrink-0 items-center gap-2">
+                              <GroupExcludeAction groupName={item.groupName} />
+                              <MajorGroupAction groupName={item.groupName} />
+                            </div>
                           </div>
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -442,7 +492,8 @@ export default function MajorGroupsTable({
                           </td>
                         ))}
                       </motion.tr>
-                    ))}
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>

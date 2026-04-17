@@ -351,9 +351,16 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                         </div>
                         <button
                           type="button"
-                          onClick={() => basket.addUniversity(logo.name)}
-                          disabled={basket.hasUniversity(logo.name)}
-                          className="focus-ring inline-flex h-8 items-center gap-1 rounded-md border border-stone-200 px-2 text-xs font-semibold text-[color:var(--brand)] transition hover:border-[var(--brand)] disabled:text-[color:var(--sage)]"
+                          onClick={() =>
+                            basket.hasUniversity(logo.name)
+                              ? basket.removeUniversity(logo.name)
+                              : basket.addUniversity(logo.name)
+                          }
+                          className={`focus-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-xs font-semibold transition ${
+                            basket.hasUniversity(logo.name)
+                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100'
+                              : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
+                          }`}
                         >
                           {basket.hasUniversity(logo.name) ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                           {basket.hasUniversity(logo.name) ? (isChinese ? '已加' : 'Added') : (isChinese ? '对比' : 'Add')}

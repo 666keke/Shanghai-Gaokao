@@ -61,6 +61,8 @@ export default function LibraryPage() {
   const [showAddPanel, setShowAddPanel] = useState(false)
   const [hasSeededDefaultUniversities, setHasSeededDefaultUniversities] = useState(false)
   const [hasUserEditedUniversities, setHasUserEditedUniversities] = useState(false)
+  const [excludedMajorGroups, setExcludedMajorGroups] = useState<string[]>([])
+  const [chartUpdateMessage, setChartUpdateMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.hash === '#major-groups') {
@@ -123,6 +125,12 @@ export default function LibraryPage() {
   useEffect(() => {
     setSelectedMajorGroups(basket.majorGroups)
   }, [basket.majorGroups])
+
+  useEffect(() => {
+    if (!chartUpdateMessage) return
+    const timer = window.setTimeout(() => setChartUpdateMessage(null), 2200)
+    return () => window.clearTimeout(timer)
+  }, [chartUpdateMessage])
 
   const universities = useMemo(
     () =>
@@ -190,10 +198,26 @@ export default function LibraryPage() {
     basket.removeMajorGroup(groupName)
   }
 
+  const toggleGroupExclusion = (groupName: string) => {
+    setExcludedMajorGroups((current) => {
+      const isExcluded = current.includes(groupName)
+      setChartUpdateMessage(
+        isExcluded ? t('library.groupRestoredToast') : t('library.groupExcludedToast')
+      )
+      return isExcluded ? current.filter((group) => group !== groupName) : [...current, groupName]
+    })
+  }
+
   // Get all years for comparison table
   const allYears = useMemo(() => {
     return Array.from(new Set(data.map((item) => item.年份))).sort((a, b) => b - a)
   }, [data])
+
+  const universityChartData = useMemo(() => {
+    if (excludedMajorGroups.length === 0) return data
+    const excludedSet = new Set(excludedMajorGroups)
+    return data.filter((item) => !excludedSet.has(item.组名))
+  }, [data, excludedMajorGroups])
 
   // Major group comparison data
   const majorGroupComparisonData = useMemo(() => {
@@ -237,6 +261,22 @@ export default function LibraryPage() {
 
   return (
     <div className="min-h-screen pb-16">
+      <AnimatePresence>
+        {chartUpdateMessage && (
+          <motion.div
+            key={chartUpdateMessage}
+            initial={{ opacity: 0, y: -12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="fixed left-1/2 top-20 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-lg"
+            role="status"
+          >
+            {chartUpdateMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <section className="pb-6 pt-8">
         <div className="page-wrap">
@@ -491,7 +531,7 @@ export default function LibraryPage() {
               {/* Multi-University Comparison Chart */}
               <MultiTrendChart
                 items={selectedUniversities}
-                data={data}
+                data={universityChartData}
                 mode="university"
                 title={t('library.universityTrendComparison')}
               />
@@ -502,6 +542,8 @@ export default function LibraryPage() {
                   universityNames={selectedUniversities}
                   data={data}
                   seriesColors={SERIES_COLORS}
+                  excludedMajorGroups={excludedMajorGroups}
+                  onToggleGroupExclusion={toggleGroupExclusion}
                 />
               )}
             </motion.div>
