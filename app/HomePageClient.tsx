@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useMemo } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, BookOpenCheck, Building2, Check, GraduationCap, Plus, SearchCheck, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -41,14 +41,15 @@ export default function HomePageClient({ data }: HomePageClientProps) {
   const [selectedYear, setSelectedYear] = useState<number>(2024)
   const [rankingValue, setRankingValue] = useState('')
   const [confirmedRanking, setConfirmedRanking] = useState<string | null>(null)
+  const [isQueryCompact, setIsQueryCompact] = useState(false)
   const [resultPayload, setResultPayload] = useState<{
     ranking: string
     selectedYear: number
     stats: AdmissionStats
     groupedResults: GroupedResults
   } | null>(null)
-  const resultsRef = useRef<HTMLDivElement | null>(null)
   const isChinese = t('dashboard.title') === '大学录取智能分析'
+  const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
     if (!rankingValue) {
@@ -59,23 +60,12 @@ export default function HomePageClient({ data }: HomePageClientProps) {
   }, [rankingValue, confirmedRanking])
 
   useEffect(() => {
-    if (!confirmedRanking || !resultPayload || !resultsRef.current) return
-    if (typeof window === 'undefined') return
-    const isMobile = window.matchMedia('(max-width: 640px)').matches
-    if (!isMobile) return
-    const target = resultsRef.current
-    const nav = document.querySelector('nav')
-    const offset = nav instanceof HTMLElement ? nav.getBoundingClientRect().height + 24 : 96
-    const timer = window.setTimeout(() => {
-      const top = target.getBoundingClientRect().top + window.scrollY - offset
-      window.scrollTo({ top, behavior: 'smooth' })
-    }, 50)
-    return () => window.clearTimeout(timer)
-  }, [confirmedRanking, resultPayload])
-
-  useEffect(() => {
     document.title = t('nav.title')
   }, [t])
+
+  const transition = shouldReduceMotion
+    ? { duration: 0 }
+    : { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const }
 
   const years = useMemo(
     () => Array.from(new Set(data.map((item) => item.年份))).sort((a, b) => b - a),
@@ -117,6 +107,18 @@ export default function HomePageClient({ data }: HomePageClientProps) {
     }
   }
 
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year)
+    if (confirmedRanking) {
+      setConfirmedRanking(null)
+    }
+  }
+
+  const handleConfirmRanking = (ranking: string) => {
+    setConfirmedRanking(ranking)
+    setIsQueryCompact(true)
+  }
+
   return (
     <div className="min-h-screen pb-14">
       <main className="page-wrap pt-8 sm:pt-10">
@@ -125,44 +127,59 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="hero-workbench rounded-lg p-5 sm:p-6 lg:p-7"
+              transition={transition}
+              className={`hero-workbench rounded-lg ${
+                isQueryCompact ? 'p-3 sm:p-4' : 'p-5 sm:p-6 lg:p-7'
+              }`}
             >
-              <div className="mb-5">
-                <div className="max-w-3xl">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-white/55 px-2.5 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
-                    <SearchCheck className="h-3.5 w-3.5" />
-                    {isChinese ? '第一步' : 'Step one'}
-                  </div>
-                  <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[color:var(--ink)] sm:text-5xl lg:text-[3.35rem]">
-                    {isChinese ? '输入你的位次' : 'Enter your rank'}
-                  </h1>
-                  <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
-                    {isChinese
-                      ? '查看匹配院校与专业组。'
-                      : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
-                  </p>
-                </div>
-              </div>
-
-              <DisclaimerBanner />
+              <AnimatePresence initial={false}>
+                {!isQueryCompact && (
+                  <motion.div
+                    key="rank-workbench-intro"
+                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+                    transition={transition}
+                    className="mb-5"
+                  >
+                    <div className="max-w-3xl">
+                      <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-white/55 px-2.5 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
+                        <SearchCheck className="h-3.5 w-3.5" />
+                        {isChinese ? '第一步' : 'Step one'}
+                      </div>
+                      <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[color:var(--ink)] sm:text-5xl lg:text-[3.35rem]">
+                        {isChinese ? '输入你的位次' : 'Enter your rank'}
+                      </h1>
+                      <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
+                        {isChinese
+                          ? '查看匹配院校与专业组。'
+                          : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
+                      </p>
+                    </div>
+                    <DisclaimerBanner />
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className={!isLoading && !hasAgreed ? 'pointer-events-none opacity-50' : ''}>
                 <AdmissionChanceCalculator
                   data={data}
                   selectedYear={selectedYear}
                   years={years}
-                  onYearChange={setSelectedYear}
+                  onYearChange={handleYearChange}
                   embedded
+                  compact={isQueryCompact}
+                  onExpand={() => setIsQueryCompact(false)}
                   onRankingChange={setRankingValue}
                   showEmptyState={false}
                   showResults={false}
                   onResultsChange={setResultPayload}
-                  onConfirm={setConfirmedRanking}
+                  onConfirm={handleConfirmRanking}
                 />
               </div>
             </motion.div>
 
             {confirmedRanking && resultPayload && (
-              <section ref={resultsRef} className="pb-8">
+              <section className="pb-8">
                 <AdmissionChanceResults
                   ranking={resultPayload.ranking}
                   selectedYear={resultPayload.selectedYear}
