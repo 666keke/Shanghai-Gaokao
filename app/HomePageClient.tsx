@@ -138,7 +138,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   </h1>
                   <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
                     {isChinese
-                      ? '得到安全、稳妥、冲刺的志愿选择。'
+                      ? '查看匹配院校与专业组。'
                       : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
                   </p>
                 </div>

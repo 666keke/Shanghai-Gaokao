@@ -1,78 +1,165 @@
-# 2020-2024 Shanghai Gaokao General Batch Admission Data (v2025.1)
-
-This table data is intended to help candidates understand the admission scores of previous years to assist in filling out their applications.
-
-**Note: This table is only a convenient tool and does not guarantee the absolute accuracy of the data. Please refer to the official data and manuals released by the Shanghai Municipal Education Examination Authority!**
+# Shanghai Gaokao Admission Workbench
 
 [简体中文](./README.md)
 
----
+A web-based admission analysis workbench for Shanghai Gaokao candidates and families. It uses 2020-2024 Shanghai general undergraduate batch admission data to help users start from their citywide rank, inspect reachable major-group ranges, compare risk levels, and review multi-year trends.
 
-## Instructions (Recommended to open on a computer)
+Live site: [https://666keke.github.io/Shanghai-Gaokao/](https://666keke.github.io/Shanghai-Gaokao/)
 
-1.  **Enter your ranking**:
-    In the cell to the left of `Your Ranking`, enter your (estimated or actual) ranking before proceeding. (Defaults to 0 if not filled)
+> This project organizes historical data for exploration and decision support. It does not replace the current-year admission catalog, university admission brochure, or official information from the Shanghai Municipal Education Examination Authority.
 
-2.  **Select a worksheet**:
-    After entering your ranking, select a worksheet at the bottom of the window to use.
-    *   **Master Sheet**: Consolidates data from 2020-2024.
-    *   **"Year"-named worksheets**: Admission data for that year.
-    *   **"Year+D"-named worksheets**: Score distribution table for that year.
+## Purpose
 
-3.  **Usage Examples**:
-    *   Analyze the changes in admission rankings of institutions across years.
-    *   Analyze which institution-major groups you might be admitted to based on this year's ranking.
+Choosing applications is not only about finding one cutoff score. Candidates need to understand where their rank sits, which options look safer, which choices need a closer check, and how a university or major group has changed over several years. This project brings rank input, range discovery, lookup, trend analysis, and a comparison basket into one workflow.
 
----
+## Features
 
-## Column Descriptions (Please use the filter function flexibly)
+- **Rank-first workbench**: Enter a citywide Gaokao rank on the home page and choose a reference year to see the likely range.
+- **Rank distribution rail**: Shows the user's position against the selected year's admission cutoff-rank distribution.
+- **Risk grouping**: Groups major options into levels such as possibly safe, safe, stable, and reach.
+- **Rank lookup**: Use `/lookup/` to filter admission records by rank, year, university, or major group.
+- **University library**: Use `/trends/` to inspect universities and major groups across years.
+- **Comparison basket**: Add universities or specific major groups while browsing, and tap again to remove them.
+- **Major-group triage**: Hide groups you do not want to consider; charts update to reflect the visible set.
+- **Mobile-friendly comparison tables**: Compact card layouts reduce the need for heavy horizontal scrolling.
+- **Chinese and English UI**: Built-in language switching for both main user flows.
 
-| Header         | Description                                                        |
-| -------------- | ------------------------------------------------------------------ |
-| **Code**       | Major group code                                                   |
-| **Group Name** | Institution Name + Group Name                                      |
-| **Institution**| Institution Name                                                   |
-| **Group No.**  | Major group number under the institution                           |
-| **Cutoff**     | Minimum admission score for the year                               |
-| **Chinese+Math** | The following columns show the test score data of the last admitted student |
-| **High Chinese/Math** |                                                                    |
-| **Foreign Lang.**|                                                                    |
-| **Highest Optional** |                                                                    |
-| **2nd Highest Optional** |                                                                    |
-| **Lowest Optional** |                                                                    |
-| **Bonus Pts**  |                                                                    |
-| **Year**       | Data year                                                          |
-| **# at Same Score**| Number of students with the same admission score                     |
-| **Lowest Rank**| Lowest rank corresponding to the admission score                  |
-| **Highest Rank**| Highest rank corresponding to the admission score                 |
-| **Admitted**   | Whether you can be admitted based on the rank for the year (1 for yes) |
-| **Rank Lead**  | The number of ranks ahead of the lowest rank, reflecting the probability of admission to some extent |
+## Routes
 
-#### Notes
+| Route | Purpose |
+| --- | --- |
+| `/` | Home workbench for rank input, range preview, common universities, and comparison entry points |
+| `/lookup/` | Rank lookup with filters and add/remove actions for comparison |
+| `/trends/` | University library, major-group trends, multi-year tables, and comparison views |
 
-*   The information on institutions, corresponding codes, group numbers, and major groups may change each year. Please use this in conjunction with the admission brochure for the current year.
-*   There is competition among students with the same score. Reaching the cutoff score does not guarantee admission! The data for `Lowest Rank`, `Highest Rank`, and `Admitted` are based solely on the score distribution table corresponding to the cutoff score and do not mean that reaching the lowest rank or having "1" in the `Admitted` column guarantees admission!
-*   If `(#N/A)` appears, it means no candidates were admitted to that major group in that year.
+## Recommended Workflow
 
----
+1. Enter your citywide Gaokao rank on the home page.
+2. Select a reference year and inspect the overall range and risk groups.
+3. Open rank lookup to filter out obviously unsuitable records.
+4. Add universities or specific major groups to the comparison basket.
+5. Review multi-year trends in the university library.
+6. Cross-check the final shortlist against the current-year official catalog, subject requirements, admission plan, and university brochure.
 
-## Repository Structure
+## Data Scope
 
+The app uses local JSON data:
+
+- `public/data.json`: runtime data used by the web app.
+- `data.json`: a root-level data copy kept in the repository.
+
+Core fields:
+
+| Field | Meaning |
+| --- | --- |
+| `年份` | Data year |
+| `院校名` | University name |
+| `组名` | University major-group name, for example `复旦大学(01)` |
+| `组号` | Major-group number |
+| `投档线` | Cutoff score or special marker for that year |
+| `最低排名` | Lowest rank corresponding to the cutoff |
+| `语文数学合计`, `外语`, `选考最高`, etc. | Score details for the final admitted candidate when available; otherwise `null` |
+
+Important caveats:
+
+- Records marked `580及以上` cannot be converted into exact scores and should only be used as boundary references.
+- A cutoff rank is not an admission guarantee. Same-score competition, subject requirements, plan changes, physical exam rules, and major notes can all affect the final outcome.
+- University names, major-group numbers, and admission scopes may change each year. Always verify with current official documents before submitting applications.
+- The home-page distribution visualization is based on historical admission cutoff ranks, not the full examinee population.
+
+## Tech Stack
+
+- Next.js 14 App Router
+- React 18
+- TypeScript
+- Tailwind CSS
+- Recharts
+- Framer Motion
+- Fuse.js
+- Lucide React
+- Local static JSON data
+
+## Local Development
+
+Install dependencies:
+
+```bash
+npm install
 ```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Build and Static Deployment
+
+The project is configured for static export in `next.config.js`:
+
+```js
+output: 'export'
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+The build output is written to `out/`. In production, the app uses `/Shanghai-Gaokao` as both `basePath` and asset prefix, which fits GitHub Pages deployment:
+
+```text
+https://<username>.github.io/Shanghai-Gaokao/
+```
+
+You can preview the static output with any static server, for example:
+
+```bash
+python3 -m http.server 3001 --directory out
+```
+
+## Project Structure
+
+```text
 .
-├── 志愿工具-2020-2024年投档数据v2025.1.xlsx
-├── data.json # raw data
+├── app/
+│   ├── HomePageClient.tsx
+│   ├── lookup/page.tsx
+│   ├── trends/page.tsx
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── AdmissionChanceCalculator.tsx
+│   ├── MajorGroupCompare.tsx
+│   ├── MajorGroupsTable.tsx
+│   ├── MultiTrendChart.tsx
+│   ├── Navigation.tsx
+│   ├── UniversityCompare.tsx
+│   └── ui/
+├── contexts/
+│   ├── CompareBasketContext.tsx
+│   ├── DisclaimerContext.tsx
+│   └── LanguageContext.tsx
+├── lib/
+│   └── utils.ts
+├── public/
+│   ├── data.json
+│   └── univ_svg/
 ├── README.md
 └── README.en.md
 ```
 
----
+## Common Commands
 
-## Miscellaneous
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the local development server |
+| `npm run build` | Generate the static production build |
+| `npm run lint` | Run the Next.js ESLint check |
 
-*   **Data Source**: Shanghai Municipal Education Examination Authority
+## Disclaimer
 
-### Changelog
-
-*   **v2025.1**: Updated with 2024 data.
-*   **v1.2**: Updated with Q-group admission data. 
+This project helps users understand historical admission data and risk ranges. It does not provide admission guarantees or official application advice. Before submitting applications, verify everything against the Shanghai Municipal Education Examination Authority, target university brochures, current-year admission catalogs, and official university notices.
