@@ -283,7 +283,10 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   </ol>
                 </section>
 
-                <Link href="/trends" className="workbench-card hover-lift block rounded-lg p-5">
+                <Link
+                  href="/trends"
+                  className="workbench-card group block rounded-lg p-5 transition hover:border-[color:var(--brand)] hover:bg-white focus-ring"
+                >
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-5 w-5 text-[color:var(--brand)]" />
@@ -291,9 +294,14 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                         {t('nav.library')}
                       </h2>
                     </div>
-                    <span className="rounded-md bg-stone-100 px-2 py-1 text-xs font-semibold text-[color:var(--ink-soft)]">
-                      {stats.latestYear}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-stone-100 px-2 py-1 text-xs font-semibold text-[color:var(--ink-soft)]">
+                        {stats.latestYear}
+                      </span>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-200 bg-white text-[color:var(--brand)] transition group-hover:border-[color:var(--brand)] group-hover:bg-[var(--brand-soft)]">
+                        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                      </span>
+                    </div>
                   </div>
                   <p className="text-sm leading-6 text-[color:var(--ink-soft)]">
                     {t('library.subtitle')}
@@ -302,25 +310,29 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     <Metric value={stats.latestRecords.toLocaleString()} label={t('dashboard.stats.records')} />
                     <Metric value={stats.totalUniversities} label={t('dashboard.stats.universities')} />
                   </div>
+                  <div className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[color:var(--brand)]">
+                    {isChinese ? '进入院校库' : 'Open library'}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
                 </Link>
 
-                <section className="workbench-card rounded-lg p-4">
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--ink)]">
-                        <GraduationCap className="h-4 w-4 text-[color:var(--brand)]" />
+                <section className="workbench-card rounded-lg p-5">
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-5 w-5 text-[color:var(--brand)]" />
+                      <h2 className="text-base font-semibold text-[color:var(--ink)]">
                         {isChinese ? '常看院校' : 'Featured Schools'}
-                      </div>
-                      <p className="mt-1 text-xs text-[color:var(--ink-soft)]">
-                        {isChinese ? '可直接加入对比篮' : 'Add directly to compare'}
-                      </p>
+                      </h2>
                     </div>
+                    <p className="mt-2 text-sm leading-6 text-[color:var(--ink-soft)]">
+                      {isChinese ? '可直接加入对比篮' : 'Add directly to compare'}
+                    </p>
                   </div>
                   <div className="grid gap-2">
                     {logoPool.map((logo) => (
                       <div
                         key={logo.file}
-                        className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-stone-200 bg-white/75 p-2.5"
+                        className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-stone-200 bg-white/75 p-3"
                       >
                         <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white">
                           <img

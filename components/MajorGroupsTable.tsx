@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Eye, EyeOff, Table2 } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Check, Eye, EyeOff, Plus, Table2 } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useCompareBasket } from '../contexts/CompareBasketContext'
 
 interface UniversityData {
   组名: string
@@ -34,6 +35,7 @@ export default function MajorGroupsTable({
   seriesColors = ['#256f8f', '#8f4b3f', '#3f7f63', '#9a6a25', '#6d5b8f', '#98704a'],
 }: MajorGroupsTableProps) {
   const { t } = useLanguage()
+  const basket = useCompareBasket()
   const [visibleUniversities, setVisibleUniversities] = useState<string[]>(universityNames)
 
   useEffect(() => {
@@ -131,6 +133,95 @@ export default function MajorGroupsTable({
       }
       return universityNames.filter((item) => item === name || current.includes(item))
     })
+  }
+
+  const handleMajorGroupAction = (groupName: string) => {
+    const isAdded = basket.hasMajorGroup(groupName)
+
+    if (isAdded) {
+      basket.removeMajorGroup(groupName)
+      return
+    }
+
+    if (basket.majorGroups.length >= 6) return
+
+    basket.addMajorGroup(groupName)
+  }
+
+  const getMajorGroupActionState = (groupName: string) => {
+    const isAdded = basket.hasMajorGroup(groupName)
+    const isFull = !isAdded && basket.majorGroups.length >= 6
+
+    return {
+      isAdded,
+      isFull,
+    }
+  }
+
+  const getMajorGroupActionLabel = (groupName: string) => {
+    const state = getMajorGroupActionState(groupName)
+    if (state.isAdded) return t('library.groupAdded')
+    if (state.isFull) return t('library.groupBasketFull')
+    return t('library.addGroupToCompare')
+  }
+
+  const getMajorGroupActionClass = (groupName: string) => {
+    const state = getMajorGroupActionState(groupName)
+    if (state.isAdded) return 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100'
+    if (state.isFull) return 'cursor-not-allowed border-stone-200 bg-stone-100 text-slate-400'
+    return 'border-stone-300 bg-white text-[color:var(--brand)] hover:border-[var(--brand)] hover:bg-[var(--brand-soft)]'
+  }
+
+  const MajorGroupActionIcon = ({ groupName }: { groupName: string }) => {
+    const state = getMajorGroupActionState(groupName)
+    if (state.isAdded) return <Check className="h-3.5 w-3.5" />
+    return <Plus className="h-3.5 w-3.5" />
+  }
+
+  const getMajorGroupActionKey = (groupName: string) => {
+    const state = getMajorGroupActionState(groupName)
+    if (state.isAdded) return 'added'
+    if (state.isFull) return 'full'
+    return 'add'
+  }
+
+  const MajorGroupAction = ({
+    groupName,
+    size = 'desktop',
+  }: {
+    groupName: string
+    size?: 'mobile' | 'desktop'
+  }) => {
+    const state = getMajorGroupActionState(groupName)
+    const key = getMajorGroupActionKey(groupName)
+    const sizeClass =
+      size === 'mobile'
+        ? 'mt-2 inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs font-medium'
+        : 'focus-ring inline-flex h-8 flex-shrink-0 items-center gap-1 rounded-md border px-2.5 text-xs font-medium'
+    const transition = { duration: 0.18, ease: 'easeOut' }
+    const motionProps = {
+      initial: { opacity: 0, y: -4, scale: 0.96 },
+      animate: { opacity: 1, y: 0, scale: 1 },
+      exit: { opacity: 0, y: 4, scale: 0.96 },
+      transition,
+    }
+
+    return (
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.button
+          key={`${groupName}-${key}`}
+          type="button"
+          onClick={() => handleMajorGroupAction(groupName)}
+          disabled={state.isFull}
+          className={`${sizeClass} transition-colors ${getMajorGroupActionClass(groupName)}`}
+          whileTap={state.isFull ? undefined : { scale: 0.98 }}
+          {...motionProps}
+        >
+          <MajorGroupActionIcon groupName={groupName} />
+          {getMajorGroupActionLabel(groupName)}
+        </motion.button>
+      </AnimatePresence>
+    )
   }
 
   if (universityNames.length === 0 || universityData.length === 0 || groupRows.length === 0) {
@@ -241,6 +332,7 @@ export default function MajorGroupsTable({
                         <div className="text-sm font-semibold text-[color:var(--brand)]">
                           {item.avgRanking ? item.avgRanking.toLocaleString() : '-'}
                         </div>
+                        <MajorGroupAction groupName={item.groupName} size="mobile" />
                       </div>
                     </div>
 
@@ -278,7 +370,7 @@ export default function MajorGroupsTable({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-200">
-                      <th className="sticky left-0 z-10 min-w-[220px] bg-white/95 py-3 px-4 text-left font-medium text-slate-600 backdrop-blur">
+                      <th className="sticky left-0 z-10 min-w-[280px] bg-white/95 py-3 px-4 text-left font-medium text-slate-600 backdrop-blur">
                         {t('library.majorGroup')}
                       </th>
                       <th className="min-w-[120px] py-3 px-4 text-center font-medium text-slate-600">
@@ -304,25 +396,28 @@ export default function MajorGroupsTable({
                         className="border-b border-slate-100 transition-colors hover:bg-slate-50"
                       >
                         <td className="sticky left-0 z-10 bg-white/95 py-3 px-4 backdrop-blur">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span
-                              className="h-2 w-2 flex-shrink-0 rounded-full"
-                              style={{
-                                backgroundColor:
-                                  seriesColors[section.index % seriesColors.length],
-                              }}
-                            />
-                            <div className="min-w-0">
-                              <div
-                                className="max-w-[220px] truncate font-medium text-slate-900"
-                                title={item.groupName}
-                              >
-                                {item.groupName}
-                              </div>
-                              <div className="text-xs text-slate-500">
-                                {t('trends.majorGroupsTable.groupNumber')} {item.groupNumber}
+                          <div className="flex min-w-0 items-center justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <span
+                                className="h-2 w-2 flex-shrink-0 rounded-full"
+                                style={{
+                                  backgroundColor:
+                                    seriesColors[section.index % seriesColors.length],
+                                }}
+                              />
+                              <div className="min-w-0">
+                                <div
+                                  className="max-w-[220px] truncate font-medium text-slate-900"
+                                  title={item.groupName}
+                                >
+                                  {item.groupName}
+                                </div>
+                                <div className="text-xs text-slate-500">
+                                  {t('trends.majorGroupsTable.groupNumber')} {item.groupNumber}
+                                </div>
                               </div>
                             </div>
+                            <MajorGroupAction groupName={item.groupName} />
                           </div>
                         </td>
                         <td className="py-3 px-4 text-center">

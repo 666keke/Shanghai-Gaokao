@@ -59,16 +59,14 @@ export default function LibraryPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'university' | 'majorGroup'>('university')
   const [showAddPanel, setShowAddPanel] = useState(false)
+  const [hasSeededDefaultUniversities, setHasSeededDefaultUniversities] = useState(false)
+  const [hasUserEditedUniversities, setHasUserEditedUniversities] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.hash === '#major-groups') {
       setViewMode('majorGroup')
-      return
     }
-    if (basket.universities.length === 0 && basket.majorGroups.length > 0) {
-      setViewMode('majorGroup')
-    }
-  }, [basket.majorGroups.length, basket.universities.length])
+  }, [])
 
   useEffect(() => {
     fetch(getDataPath())
@@ -84,7 +82,17 @@ export default function LibraryPage() {
   }, [])
 
   useEffect(() => {
-    if (loading || data.length === 0 || basket.universities.length > 0 || selectedUniversities.length > 0) {
+    if (
+      loading ||
+      data.length === 0 ||
+      !basket.hasHydrated ||
+      basket.hasSavedBasket ||
+      basket.universities.length > 0 ||
+      basket.majorGroups.length > 0 ||
+      selectedUniversities.length > 0 ||
+      hasSeededDefaultUniversities ||
+      hasUserEditedUniversities
+    ) {
       return
     }
 
@@ -93,8 +101,19 @@ export default function LibraryPage() {
     const preSelected = popular.filter((name) => available.includes(name)).slice(0, 2)
     if (preSelected.length > 0) {
       setSelectedUniversities(preSelected)
+      setHasSeededDefaultUniversities(true)
     }
-  }, [basket.universities.length, data, loading, selectedUniversities.length])
+  }, [
+    basket.hasHydrated,
+    basket.hasSavedBasket,
+    basket.universities.length,
+    basket.majorGroups.length,
+    data,
+    hasSeededDefaultUniversities,
+    hasUserEditedUniversities,
+    loading,
+    selectedUniversities.length,
+  ])
 
   useEffect(() => {
     if (basket.universities.length === 0) return
@@ -144,6 +163,7 @@ export default function LibraryPage() {
   // University mode functions
   const addUniversity = (name: string) => {
     if (!selectedUniversities.includes(name) && selectedUniversities.length < 6) {
+      setHasUserEditedUniversities(true)
       const newList = [...selectedUniversities, name]
       setSelectedUniversities(newList)
       basket.addUniversity(name)
@@ -151,6 +171,7 @@ export default function LibraryPage() {
   }
 
   const removeUniversity = (name: string) => {
+    setHasUserEditedUniversities(true)
     const newList = selectedUniversities.filter((uni) => uni !== name)
     setSelectedUniversities(newList)
     basket.removeUniversity(name)
