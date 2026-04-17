@@ -328,31 +328,39 @@ export default function AdmissionChanceCalculator({
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px_128px] sm:items-end">
-            <div>
-              <p className="text-xs text-slate-500">{t('calc.hint')}</p>
-              {rankPresets && rankPresets.length > 0 && (
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-medium text-slate-500">
-                    {isChinese ? '常见位次' : 'Try rank'}
-                  </span>
-                  {rankPresets.map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => handleRankingChange(String(preset))}
-                      className={`focus-ring rounded-md border px-2.5 py-1 text-xs font-semibold transition active:scale-[0.98] ${
-                        ranking === String(preset)
-                          ? 'border-[var(--brand)] bg-[var(--brand-soft)] text-[color:var(--brand-dark)]'
-                          : 'border-stone-200 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
-                      }`}
-                    >
-                      {preset.toLocaleString()}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div
+            className={
+              embedded
+                ? 'grid gap-4 sm:grid-cols-[120px_128px] sm:justify-end sm:items-end'
+                : 'grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px_128px] sm:items-end'
+            }
+          >
+            {(!embedded || (rankPresets && rankPresets.length > 0)) && (
+              <div>
+                <p className="text-xs text-slate-500">{t('calc.hint')}</p>
+                {rankPresets && rankPresets.length > 0 && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-slate-500">
+                      {isChinese ? '常见位次' : 'Try rank'}
+                    </span>
+                    {rankPresets.map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => handleRankingChange(String(preset))}
+                        className={`focus-ring rounded-md border px-2.5 py-1 text-xs font-semibold transition active:scale-[0.98] ${
+                          ranking === String(preset)
+                            ? 'border-[var(--brand)] bg-[var(--brand-soft)] text-[color:var(--brand-dark)]'
+                            : 'border-stone-200 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
+                        }`}
+                      >
+                        {preset.toLocaleString()}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Year Selector */}
             <div>
@@ -443,8 +451,8 @@ function RankDistribution({
   const transition = reduceMotion ? { duration: 0 } : { duration: 0.36, ease: [0.22, 1, 0.36, 1] }
 
   return (
-    <div className="mt-3 rounded-md border border-stone-200/80 bg-white/52 px-3 py-3">
-      <div className="mb-2 flex items-center justify-between gap-3">
+    <div className="mt-3 px-1">
+      <div className="mb-1.5 flex items-center justify-between gap-3">
         <span className="text-xs font-semibold text-[color:var(--ink)]">
           {t('calc.rankPosition.title')}
         </span>
@@ -457,8 +465,8 @@ function RankDistribution({
         </span>
       </div>
 
-      <div className="relative h-12">
-        <div className="absolute inset-x-0 top-4 flex h-7 items-end gap-0.5 overflow-hidden rounded-md bg-[color-mix(in_oklch,var(--brand-soft)_34%,white)] px-1.5 pb-1 sm:gap-1">
+      <div className="relative h-11">
+        <div className="absolute inset-x-0 top-3 flex h-8 items-end gap-0.5 overflow-hidden rounded-md bg-[color-mix(in_oklch,var(--brand-soft)_26%,white)] px-1.5 pb-1 sm:gap-1">
           {bins.map((height, index) => (
             <span
               key={index}
@@ -481,7 +489,7 @@ function RankDistribution({
             <div className="rounded-md bg-[var(--brand-dark)] px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
               {ranking.toLocaleString()}
             </div>
-            <div className="h-7 w-px bg-[var(--brand-dark)]" />
+            <div className="h-8 w-px bg-[var(--brand-dark)]" />
           </motion.div>
         )}
       </div>
