@@ -69,6 +69,10 @@ const translations = {
     'common.expand': '展开',
     'common.collapse': '收起',
     'common.clearSearch': '清除搜索',
+
+    // Compare Basket
+    'basket.universitiesFull': '对比篮已满，最多保存 {count} 所院校。先移除一个再添加。',
+    'basket.majorGroupsFull': '专业组分析已满，最多保存 {count} 个专业组。先移除一个再添加。',
     
     // Dashboard
     'dashboard.title': '大学录取智能分析',
@@ -378,6 +382,10 @@ const translations = {
     'common.expand': 'Expand',
     'common.collapse': 'Collapse',
     'common.clearSearch': 'Clear search',
+
+    // Compare Basket
+    'basket.universitiesFull': 'Compare basket is full. Save up to {count} universities. Remove one before adding another.',
+    'basket.majorGroupsFull': 'Major group analysis is full. Save up to {count} major groups. Remove one before adding another.',
     
     // Dashboard
     'dashboard.title': 'University Admission Intelligence',

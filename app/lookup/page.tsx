@@ -473,6 +473,8 @@ function LookupContent() {
                 {filteredResults.slice(0, displayLimit).map((option, index) => {
                   const config = getSafetyConfig(option.safetyLevel)
                   const Icon = config.icon
+                  const isUniversityAdded = basket.hasUniversity(option.院校名)
+                  const isMajorGroupAdded = basket.hasMajorGroup(option.组名)
 
                   return (
                     <motion.div
@@ -520,21 +522,37 @@ function LookupContent() {
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              onClick={() => basket.addUniversity(option.院校名)}
-                              disabled={basket.hasUniversity(option.院校名)}
-                              className="focus-ring inline-flex h-9 items-center gap-1 rounded-md border border-stone-200 bg-white/75 px-2.5 text-xs font-semibold text-[color:var(--brand)] transition hover:border-[var(--brand)] disabled:text-[color:var(--sage)]"
+                              aria-pressed={isUniversityAdded}
+                              onClick={() =>
+                                isUniversityAdded
+                                  ? basket.removeUniversity(option.院校名)
+                                  : basket.addUniversity(option.院校名)
+                              }
+                              className={`focus-ring inline-flex h-9 items-center gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-semibold transition ${
+                                isUniversityAdded
+                                  ? 'border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50'
+                                  : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
+                              }`}
                             >
-                              {basket.hasUniversity(option.院校名) ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                              {isChinese ? '院校' : 'School'}
+                              {isUniversityAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                              {isUniversityAdded ? (isChinese ? '已加院校' : 'Added') : (isChinese ? '院校' : 'School')}
                             </button>
                             <button
                               type="button"
-                              onClick={() => basket.addMajorGroup(option.组名)}
-                              disabled={basket.hasMajorGroup(option.组名)}
-                              className="focus-ring inline-flex h-9 items-center gap-1 rounded-md border border-stone-200 bg-white/75 px-2.5 text-xs font-semibold text-[color:var(--brand)] transition hover:border-[var(--brand)] disabled:text-[color:var(--sage)]"
+                              aria-pressed={isMajorGroupAdded}
+                              onClick={() =>
+                                isMajorGroupAdded
+                                  ? basket.removeMajorGroup(option.组名)
+                                  : basket.addMajorGroup(option.组名)
+                              }
+                              className={`focus-ring inline-flex h-9 items-center gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-semibold transition ${
+                                isMajorGroupAdded
+                                  ? 'border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50'
+                                  : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
+                              }`}
                             >
-                              {basket.hasMajorGroup(option.组名) ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                              {isChinese ? '专业组' : 'Group'}
+                              {isMajorGroupAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                              {isMajorGroupAdded ? (isChinese ? '已加专业组' : 'Added') : (isChinese ? '专业组' : 'Group')}
                             </button>
                           </div>
                           <div className="text-center">

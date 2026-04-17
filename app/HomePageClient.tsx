@@ -111,6 +111,14 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
   const rankPresets = useMemo(() => [1000, 3000, 5000, 10000, 20000], [])
 
+  const toggleFeaturedUniversity = (name: string) => {
+    if (basket.hasUniversity(name)) {
+      basket.removeUniversity(name)
+    } else {
+      basket.addUniversity(name)
+    }
+  }
+
   return (
     <div className="min-h-screen pb-14">
       <main className="page-wrap pt-8 sm:pt-10">
@@ -329,44 +337,45 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     </p>
                   </div>
                   <div className="grid gap-2">
-                    {logoPool.map((logo) => (
-                      <div
-                        key={logo.file}
-                        className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-stone-200 bg-white/75 p-3"
-                      >
-                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white">
-                          <img
-                            src={getSvgPath(logo.file)}
-                            alt={logo.englishName}
-                            className="h-9 w-9 object-contain"
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-[color:var(--ink)]">
-                            {isChinese ? logo.name : logo.englishName}
-                          </div>
-                          <div className="truncate text-xs text-[color:var(--ink-soft)]">
-                            {isChinese ? logo.englishName : logo.name}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            basket.hasUniversity(logo.name)
-                              ? basket.removeUniversity(logo.name)
-                              : basket.addUniversity(logo.name)
-                          }
-                          className={`focus-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-xs font-semibold transition ${
-                            basket.hasUniversity(logo.name)
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100'
-                              : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
-                          }`}
+                    {logoPool.map((logo) => {
+                      const isAdded = basket.hasUniversity(logo.name)
+
+                      return (
+                        <div
+                          key={logo.file}
+                          className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-stone-200 bg-white/75 p-3"
                         >
-                          {basket.hasUniversity(logo.name) ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                          {basket.hasUniversity(logo.name) ? (isChinese ? '已加' : 'Added') : (isChinese ? '对比' : 'Add')}
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white">
+                            <img
+                              src={getSvgPath(logo.file)}
+                              alt={logo.englishName}
+                              className="h-9 w-9 object-contain"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-semibold text-[color:var(--ink)]">
+                              {isChinese ? logo.name : logo.englishName}
+                            </div>
+                            <div className="truncate text-xs text-[color:var(--ink-soft)]">
+                              {isChinese ? logo.englishName : logo.name}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            aria-pressed={isAdded}
+                            onClick={() => toggleFeaturedUniversity(logo.name)}
+                            className={`focus-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-xs font-semibold transition ${
+                              isAdded
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100'
+                                : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
+                            }`}
+                          >
+                            {isAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                            {isAdded ? (isChinese ? '已加' : 'Added') : (isChinese ? '对比' : 'Add')}
+                          </button>
+                        </div>
+                      )
+                    })}
                   </div>
                 </section>
               </>

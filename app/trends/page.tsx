@@ -170,12 +170,19 @@ export default function LibraryPage() {
 
   // University mode functions
   const addUniversity = (name: string) => {
-    if (!selectedUniversities.includes(name) && selectedUniversities.length < 6) {
-      setHasUserEditedUniversities(true)
-      const newList = [...selectedUniversities, name]
-      setSelectedUniversities(newList)
-      basket.addUniversity(name)
+    if (selectedUniversities.includes(name)) return false
+    if (selectedUniversities.length >= 6) {
+      basket.showUniversityLimitNotice()
+      return false
     }
+
+    const didAdd = basket.addUniversity(name)
+    if (didAdd) {
+      setHasUserEditedUniversities(true)
+      setSelectedUniversities([...selectedUniversities, name])
+    }
+
+    return didAdd
   }
 
   const removeUniversity = (name: string) => {
@@ -187,10 +194,18 @@ export default function LibraryPage() {
 
   // Major group mode functions
   const addMajorGroup = (groupName: string) => {
-    if (!selectedMajorGroups.includes(groupName) && selectedMajorGroups.length < 6) {
-      setSelectedMajorGroups([...selectedMajorGroups, groupName])
-      basket.addMajorGroup(groupName)
+    if (selectedMajorGroups.includes(groupName)) return false
+    if (selectedMajorGroups.length >= 6) {
+      basket.showMajorGroupLimitNotice()
+      return false
     }
+
+    const didAdd = basket.addMajorGroup(groupName)
+    if (didAdd) {
+      setSelectedMajorGroups([...selectedMajorGroups, groupName])
+    }
+
+    return didAdd
   }
 
   const removeMajorGroup = (groupName: string) => {
@@ -465,10 +480,9 @@ export default function LibraryPage() {
                               <button
                                 key={name}
                                 onClick={() => {
-                                  addUniversity(name)
-                                  setSearchTerm('')
+                                  if (addUniversity(name)) setSearchTerm('')
                                 }}
-                                disabled={selectedUniversities.length >= 6}
+                                aria-disabled={selectedUniversities.length >= 6}
                                 className={`text-left rounded-lg px-3 py-2 text-sm transition ${
                                   selectedUniversities.length >= 6
                                     ? 'cursor-not-allowed bg-slate-50 text-slate-400'
@@ -488,10 +502,9 @@ export default function LibraryPage() {
                               <button
                                 key={group.组名}
                                 onClick={() => {
-                                  addMajorGroup(group.组名)
-                                  setSearchTerm('')
+                                  if (addMajorGroup(group.组名)) setSearchTerm('')
                                 }}
-                                disabled={selectedMajorGroups.length >= 6}
+                                aria-disabled={selectedMajorGroups.length >= 6}
                                 className={`text-left rounded-lg px-3 py-2 text-sm transition ${
                                   selectedMajorGroups.length >= 6
                                     ? 'cursor-not-allowed bg-slate-50 text-slate-400'

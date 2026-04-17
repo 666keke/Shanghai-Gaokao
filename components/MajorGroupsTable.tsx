@@ -148,7 +148,10 @@ export default function MajorGroupsTable({
       return
     }
 
-    if (basket.majorGroups.length >= 6) return
+    if (basket.majorGroups.length >= 6) {
+      basket.addMajorGroup(groupName)
+      return
+    }
 
     basket.addMajorGroup(groupName)
   }
@@ -217,7 +220,7 @@ export default function MajorGroupsTable({
           key={`${groupName}-${key}`}
           type="button"
           onClick={() => handleMajorGroupAction(groupName)}
-          disabled={state.isFull}
+          aria-disabled={state.isFull}
           className={`${sizeClass} transition-colors ${getMajorGroupActionClass(groupName)}`}
           whileTap={state.isFull ? undefined : { scale: 0.98 }}
           {...motionProps}
