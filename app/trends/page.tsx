@@ -278,17 +278,19 @@ export default function LibraryPage() {
     <div className="min-h-screen pb-16">
       <AnimatePresence>
         {chartUpdateMessage && (
-          <motion.div
-            key={chartUpdateMessage}
-            initial={{ opacity: 0, y: -12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="fixed left-1/2 top-20 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-lg"
-            role="status"
-          >
-            {chartUpdateMessage}
-          </motion.div>
+          <div className="pointer-events-none fixed inset-x-4 top-20 z-[60] flex justify-center">
+            <motion.div
+              key={chartUpdateMessage}
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="w-full max-w-sm rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-lg"
+              role="status"
+            >
+              {chartUpdateMessage}
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

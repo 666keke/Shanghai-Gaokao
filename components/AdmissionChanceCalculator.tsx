@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import {
   Target,
@@ -103,6 +103,28 @@ export default function AdmissionChanceCalculator({
   const { t } = useLanguage()
   const [ranking, setRanking] = useState('')
   const [isCalculating, setIsCalculating] = useState(false)
+  const [rankBinCount, setRankBinCount] = useState(20)
+  const shouldReduceMotion = useReducedMotion()
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const updateBinCount = () => {
+      if (window.innerWidth >= 1280) {
+        setRankBinCount(44)
+      } else if (window.innerWidth >= 1024) {
+        setRankBinCount(36)
+      } else if (window.innerWidth >= 640) {
+        setRankBinCount(28)
+      } else {
+        setRankBinCount(20)
+      }
+    }
+
+    updateBinCount()
+    window.addEventListener('resize', updateBinCount)
+    return () => window.removeEventListener('resize', updateBinCount)
+  }, [])
 
   // Calculate admission chances based on ranking
   const results = useMemo(() => {
@@ -223,31 +245,63 @@ export default function AdmissionChanceCalculator({
   const rankingNumber = parseInt(ranking)
   const canConfirm = !isNaN(rankingNumber) && rankingNumber > 0
   const isChinese = t('calc.title') === '录取概率分析'
+  const yearRankRange = useMemo(() => {
+    const ranks = data
+      .filter((item) => item.年份 === selectedYear && item.最低排名)
+      .map((item) => item.最低排名!)
+
+    return {
+      min: 1,
+      max: ranks.length ? Math.max(...ranks) : 0,
+    }
+  }, [data, selectedYear])
+  const rankDistributionBins = useMemo(() => {
+    const ranks = data
+      .filter((item) => item.年份 === selectedYear && item.最低排名)
+      .map((item) => item.最低排名!)
+    const maxRank = ranks.length ? Math.max(...ranks) : 0
+    const bins = Array.from({ length: rankBinCount }, () => 0)
+
+    if (maxRank <= 1) return bins.map(() => 0.25)
+
+    ranks.forEach((rankValue) => {
+      const index = Math.min(
+        bins.length - 1,
+        Math.max(0, Math.floor(((rankValue - 1) / (maxRank - 1)) * bins.length))
+      )
+      bins[index] += 1
+    })
+
+    const maxBin = Math.max(...bins, 1)
+    return bins.map((count) => (count / maxBin) * 0.74 + 0.26)
+  }, [data, rankBinCount, selectedYear])
 
   return (
     <div className="space-y-8">
       {/* Main Calculator Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: embedded ? 10 : 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={embedded ? 'rounded-lg border border-stone-200 bg-white/75 p-4 sm:p-5' : 'workbench-card rounded-lg p-5 sm:p-6'}
+        className={embedded ? 'border-t border-stone-200/80 pt-5 sm:pt-6' : 'workbench-card rounded-lg p-5 sm:p-6'}
       >
-        <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--brand-soft)]">
-            <Target className="h-5 w-5 text-[color:var(--brand-dark)]" />
+        {!embedded && (
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--brand-soft)]">
+              <Target className="h-5 w-5 text-[color:var(--brand-dark)]" />
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
+                {t('calc.title')}
+              </h2>
+              <p className="text-sm text-slate-500">{t('calc.subtitle')}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
-              {t('calc.title')}
-            </h2>
-            <p className="text-sm text-slate-500">{t('calc.subtitle')}</p>
-          </div>
-        </div>
+        )}
 
         <div className="grid gap-4">
           {/* Ranking Input */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-800">
               {t('calc.yourRanking')}
             </label>
             <div className="relative">
@@ -256,7 +310,7 @@ export default function AdmissionChanceCalculator({
                 value={ranking}
                 onChange={(e) => handleRankingChange(e.target.value)}
                 placeholder={t('calc.placeholder')}
-                className="focus-ring h-[54px] w-full rounded-lg border border-stone-300 bg-white px-4 text-lg font-medium placeholder:text-slate-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="focus-ring h-[56px] w-full rounded-lg border border-stone-300 bg-white px-4 text-xl font-semibold placeholder:text-slate-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 min="1"
               />
               {isCalculating && (
@@ -265,6 +319,13 @@ export default function AdmissionChanceCalculator({
                 </div>
               )}
             </div>
+            <RankDistribution
+              ranking={canConfirm ? rankingNumber : null}
+              minRank={yearRankRange.min}
+              maxRank={yearRankRange.max}
+              bins={rankDistributionBins}
+              reduceMotion={shouldReduceMotion}
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px_128px] sm:items-end">
@@ -273,14 +334,14 @@ export default function AdmissionChanceCalculator({
               {rankPresets && rankPresets.length > 0 && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="text-xs font-medium text-slate-500">
-                    {isChinese ? '快速试算' : 'Try'}
+                    {isChinese ? '常见位次' : 'Try rank'}
                   </span>
                   {rankPresets.map((preset) => (
                     <button
                       key={preset}
                       type="button"
                       onClick={() => handleRankingChange(String(preset))}
-                      className={`focus-ring rounded-md border px-2.5 py-1 text-xs font-semibold transition ${
+                      className={`focus-ring rounded-md border px-2.5 py-1 text-xs font-semibold transition active:scale-[0.98] ${
                         ranking === String(preset)
                           ? 'border-[var(--brand)] bg-[var(--brand-soft)] text-[color:var(--brand-dark)]'
                           : 'border-stone-200 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
@@ -317,7 +378,7 @@ export default function AdmissionChanceCalculator({
                 type="button"
                 disabled={!canConfirm}
                 onClick={() => canConfirm && onConfirm?.(ranking)}
-                className="focus-ring inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-dark)] px-6 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand)] disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="focus-ring inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-dark)] px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--brand)] active:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:translate-y-0"
               >
                 {t('calc.confirm')}
                 <ArrowRight className="h-4 w-4" />
@@ -352,6 +413,83 @@ export default function AdmissionChanceCalculator({
           </p>
         </motion.div>
       )}
+    </div>
+  )
+}
+
+function RankDistribution({
+  ranking,
+  minRank,
+  maxRank,
+  bins,
+  reduceMotion,
+}: {
+  ranking: number | null
+  minRank: number
+  maxRank: number
+  bins: number[]
+  reduceMotion: boolean | null
+}) {
+  const { t } = useLanguage()
+  const hasRange = maxRank > minRank
+  const rawPosition = hasRange && ranking ? ((ranking - minRank) / (maxRank - minRank)) * 100 : 0
+  const position = Math.min(100, Math.max(0, rawPosition))
+  const percentText =
+    hasRange && ranking
+      ? Math.max(1, Math.min(100, Math.round((ranking / maxRank) * 100)))
+      : null
+  const isBeyondRange = Boolean(ranking && hasRange && ranking > maxRank)
+  const markerLeft = hasRange && ranking ? position : 8
+  const transition = reduceMotion ? { duration: 0 } : { duration: 0.36, ease: [0.22, 1, 0.36, 1] }
+
+  return (
+    <div className="mt-3 rounded-md border border-stone-200/80 bg-white/52 px-3 py-3">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="text-xs font-semibold text-[color:var(--ink)]">
+          {t('calc.rankPosition.title')}
+        </span>
+        <span className="text-xs text-[color:var(--ink-soft)]">
+          {ranking && percentText
+            ? isBeyondRange
+              ? t('calc.rankPosition.beyond')
+              : t('calc.rankPosition.summary', { percent: percentText })
+            : t('calc.rankPosition.empty')}
+        </span>
+      </div>
+
+      <div className="relative h-12">
+        <div className="absolute inset-x-0 top-4 flex h-7 items-end gap-0.5 overflow-hidden rounded-md bg-[color-mix(in_oklch,var(--brand-soft)_34%,white)] px-1.5 pb-1 sm:gap-1">
+          {bins.map((height, index) => (
+            <span
+              key={index}
+              className="flex-1 rounded-sm bg-[color-mix(in_oklch,var(--brand)_44%,white)]"
+              style={{
+                height: `${height * 100}%`,
+                opacity: 0.32 + height * 0.28,
+              }}
+            />
+          ))}
+        </div>
+
+        {ranking && (
+          <motion.div
+            className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
+            initial={false}
+            animate={{ left: `${markerLeft}%` }}
+            transition={transition}
+          >
+            <div className="rounded-md bg-[var(--brand-dark)] px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
+              {ranking.toLocaleString()}
+            </div>
+            <div className="h-7 w-px bg-[var(--brand-dark)]" />
+          </motion.div>
+        )}
+      </div>
+
+      <div className="mt-1 flex items-center justify-between text-[11px] font-medium text-[color:var(--ink-soft)]">
+        <span>{t('calc.rankPosition.front')}</span>
+        <span>{t('calc.rankPosition.back')}</span>
+      </div>
     </div>
   )
 }

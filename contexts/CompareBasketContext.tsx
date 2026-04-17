@@ -133,17 +133,19 @@ export function CompareBasketProvider({ children }: { children: React.ReactNode 
       {children}
       <AnimatePresence>
         {limitNotice && (
-          <motion.div
-            key={limitNotice.id}
-            initial={{ opacity: 0, y: -12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="pointer-events-none fixed left-1/2 top-20 z-[70] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-lg"
-            role="status"
-          >
-            {limitNotice.message}
-          </motion.div>
+          <div className="pointer-events-none fixed inset-x-4 top-20 z-[70] flex justify-center">
+            <motion.div
+              key={limitNotice.id}
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="w-full max-w-sm rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-lg"
+              role="status"
+            >
+              {limitNotice.message}
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </CompareBasketContext.Provider>

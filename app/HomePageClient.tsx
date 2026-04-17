@@ -109,8 +109,6 @@ export default function HomePageClient({ data }: HomePageClientProps) {
     []
   )
 
-  const rankPresets = useMemo(() => [1000, 3000, 5000, 10000, 20000], [])
-
   const toggleFeaturedUniversity = (name: string) => {
     if (basket.hasUniversity(name)) {
       basket.removeUniversity(name)
@@ -127,38 +125,22 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="hero-workbench rounded-lg p-5 sm:p-6"
+              className="hero-workbench rounded-lg p-5 sm:p-6 lg:p-7"
             >
-              <div className="mb-5 flex flex-col gap-5 border-b border-stone-200/80 pb-5 lg:flex-row lg:items-end lg:justify-between">
-                <div className="max-w-2xl">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-md border border-white/70 bg-white/70 px-3 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
+              <div className="mb-5">
+                <div className="max-w-3xl">
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-white/55 px-2.5 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
                     <SearchCheck className="h-3.5 w-3.5" />
-                    {isChinese ? '从位次开始' : 'Start with rank'}
+                    {isChinese ? '第一步' : 'Step one'}
                   </div>
-                  <h1 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight text-[color:var(--ink)] sm:text-4xl lg:text-[2.75rem]">
-                    {isChinese ? '先看边界，再做取舍' : 'Find the boundary first'}
+                  <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[color:var(--ink)] sm:text-5xl lg:text-[3.35rem]">
+                    {isChinese ? '输入你的位次' : 'Enter your rank'}
                   </h1>
-                  <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)]">
+                  <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
                     {isChinese
-                      ? '输入高考位次，先得到可选专业组范围，再核对安全层级和多年趋势。'
-                      : 'Enter a rank, get the available major-group range, then check safety levels and multi-year trends.'}
+                      ? '得到安全、稳妥、冲刺的志愿选择。'
+                      : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
                   </p>
-                </div>
-
-                <div className="rounded-lg border border-white/70 bg-white/70 p-4 lg:min-w-[300px]">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-[color:var(--ink)]">
-                      {isChinese ? '数据基线' : 'Data baseline'}
-                    </span>
-                    <span className="rounded-md bg-[var(--brand-soft)] px-2 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
-                      {stats.latestYear}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Metric value={stats.totalUniversities} label={t('dashboard.stats.universities')} />
-                    <Metric value={stats.rankedRecords.toLocaleString()} label={t('dashboard.stats.records')} />
-                    <Metric value={stats.yearsCovered} label={t('dashboard.stats.years')} />
-                  </div>
                 </div>
               </div>
 
@@ -169,7 +151,6 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   selectedYear={selectedYear}
                   years={years}
                   onYearChange={setSelectedYear}
-                  rankPresets={rankPresets}
                   embedded
                   onRankingChange={setRankingValue}
                   showEmptyState={false}

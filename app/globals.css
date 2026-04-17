@@ -105,20 +105,14 @@
     position: relative;
     overflow: hidden;
     background:
-      linear-gradient(135deg, color-mix(in oklch, var(--paper-strong) 96%, white) 0%, color-mix(in oklch, var(--brand-soft) 42%, white) 54%, color-mix(in oklch, var(--sage-soft) 34%, white) 100%);
-    border: 1px solid color-mix(in oklch, var(--brand) 22%, var(--line));
-    box-shadow: 0 28px 70px -48px oklch(0.22 0.04 245 / 0.52);
+      linear-gradient(180deg, color-mix(in oklch, var(--brand-soft) 22%, transparent) 0%, transparent 58%),
+      linear-gradient(135deg, color-mix(in oklch, var(--paper-strong) 98%, white) 0%, color-mix(in oklch, var(--brand-soft) 24%, white) 62%, color-mix(in oklch, var(--sage-soft) 18%, white) 100%);
+    border: 1px solid color-mix(in oklch, var(--brand) 16%, var(--line));
+    box-shadow: 0 24px 60px -46px oklch(0.22 0.04 245 / 0.42);
   }
 
   .hero-workbench::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      repeating-linear-gradient(90deg, oklch(0.45 0.05 224 / 0.055) 0 1px, transparent 1px 56px),
-      repeating-linear-gradient(0deg, oklch(0.45 0.05 224 / 0.045) 0 1px, transparent 1px 36px);
-    mask-image: linear-gradient(120deg, transparent 0%, black 22%, black 68%, transparent 100%);
+    content: none;
   }
 
   .hero-workbench > * {
