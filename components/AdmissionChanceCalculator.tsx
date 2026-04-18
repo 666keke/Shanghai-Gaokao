@@ -1,18 +1,16 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import {
   Target,
-  TrendingUp,
   Shield,
   AlertTriangle,
   AlertCircle,
   ChevronRight,
   Sparkles,
-  BarChart3,
-  GraduationCap,
   ArrowRight,
   ChevronDown,
   HelpCircle,
@@ -715,59 +713,67 @@ export function AdmissionChanceResults({
 }) {
   const { t } = useLanguage()
   const [showPossiblySafeInfo, setShowPossiblySafeInfo] = useState(false)
+  const isChinese = t('calc.title') === '录取概率分析'
   
   const getSafetyConfig = (level: 'possiblySafe' | 'safe' | 'moderate' | 'risky') => {
     switch (level) {
       case 'possiblySafe':
         return {
           icon: HelpCircle,
-          color: 'sky',
-          bgClass: 'bg-sky-50',
-          borderClass: 'border-sky-200',
-          textClass: 'text-sky-700',
-          iconClass: 'text-sky-600',
           label: t('calc.possiblySafe'),
           description: t('calc.possiblySafe.desc'),
           hasInfo: true,
+          accent: 'oklch(0.47 0.095 224)',
+          surface: 'color-mix(in oklch, var(--brand-soft) 34%, white)',
+          surfaceSoft: 'color-mix(in oklch, var(--brand-soft) 18%, white)',
+          border: 'color-mix(in oklch, var(--brand) 24%, var(--line))',
+          row: 'color-mix(in oklch, white 76%, var(--brand-soft))',
         }
       case 'safe':
         return {
           icon: Shield,
-          color: 'emerald',
-          bgClass: 'bg-emerald-50',
-          borderClass: 'border-emerald-200',
-          textClass: 'text-emerald-700',
-          iconClass: 'text-emerald-600',
           label: t('calc.safe'),
           description: t('calc.safe.desc'),
           hasInfo: false,
+          accent: 'var(--sage)',
+          surface: 'color-mix(in oklch, var(--sage-soft) 42%, white)',
+          surfaceSoft: 'color-mix(in oklch, var(--sage-soft) 22%, white)',
+          border: 'color-mix(in oklch, var(--sage) 24%, var(--line))',
+          row: 'color-mix(in oklch, white 78%, var(--sage-soft))',
         }
       case 'moderate':
         return {
           icon: AlertTriangle,
-          color: 'amber',
-          bgClass: 'bg-amber-50',
-          borderClass: 'border-amber-200',
-          textClass: 'text-amber-700',
-          iconClass: 'text-amber-600',
           label: t('calc.moderate'),
           description: t('calc.moderate.desc'),
           hasInfo: false,
+          accent: 'oklch(0.55 0.115 72)',
+          surface: 'color-mix(in oklch, var(--amber-soft) 36%, white)',
+          surfaceSoft: 'color-mix(in oklch, var(--amber-soft) 20%, white)',
+          border: 'color-mix(in oklch, oklch(0.55 0.115 72) 22%, var(--line))',
+          row: 'color-mix(in oklch, white 78%, var(--amber-soft))',
         }
       case 'risky':
         return {
           icon: AlertCircle,
-          color: 'rose',
-          bgClass: 'bg-rose-50',
-          borderClass: 'border-rose-200',
-          textClass: 'text-rose-700',
-          iconClass: 'text-rose-600',
           label: t('calc.risky'),
           description: t('calc.risky.desc'),
           hasInfo: false,
+          accent: 'oklch(0.52 0.115 18)',
+          surface: 'color-mix(in oklch, var(--rose-soft) 34%, white)',
+          surfaceSoft: 'color-mix(in oklch, var(--rose-soft) 20%, white)',
+          border: 'color-mix(in oklch, oklch(0.52 0.115 18) 22%, var(--line))',
+          row: 'color-mix(in oklch, white 78%, var(--rose-soft))',
         }
     }
   }
+
+  const safetyLevels = (['possiblySafe', 'safe', 'moderate', 'risky'] as const).map((level) => ({
+    level,
+    count: groupedResults[level].length,
+    config: getSafetyConfig(level),
+  }))
+  const totalVisible = safetyLevels.reduce((sum, item) => sum + item.count, 0)
 
   return (
     <AnimatePresence mode="wait">
@@ -778,83 +784,100 @@ export function AdmissionChanceResults({
         exit={{ opacity: 0, y: -20 }}
         className="space-y-6"
       >
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="workbench-card rounded-lg p-4 text-center"
-          >
-            <div className="flex items-center justify-center gap-2 text-[color:var(--brand)] mb-2">
-              <BarChart3 className="h-5 w-5" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">
-              {stats.accessiblePercent}%
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {t('calc.stats.accessible')}
-            </div>
-          </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12, duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+          className="workbench-card rounded-lg p-4 sm:p-5"
+        >
+          <div className="grid grid-cols-[34px_minmax(0,1fr)] gap-4 sm:grid-cols-[42px_minmax(0,1fr)] sm:gap-5">
+            <div className="flex h-full min-h-36 flex-col-reverse gap-1 rounded-md bg-[color-mix(in_oklch,var(--paper)_68%,white)] p-1 shadow-[inset_0_0_0_1px_var(--line)]">
+              {safetyLevels.map(({ level, count, config }) => {
+                const segmentStyle = {
+                  flexGrow: count > 0 ? Math.max(count, Math.max(totalVisible, 1) * 0.035) : 0,
+                  background: config.accent,
+                  opacity: count > 0 ? 0.88 : 0,
+                } as CSSProperties
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.15 }}
-            className="workbench-card rounded-lg p-4 text-center"
-          >
-            <div className="flex items-center justify-center gap-2 text-emerald-600 mb-2">
-              <Shield className="h-5 w-5" />
+                return (
+                  <motion.span
+                    key={level}
+                    initial={{ scaleY: 0.2, opacity: 0 }}
+                    animate={{ scaleY: 1, opacity: count > 0 ? 1 : 0 }}
+                    transition={{ delay: 0.18, duration: 0.42, ease: [0.25, 1, 0.5, 1] }}
+                    className="min-h-1 origin-bottom rounded-sm"
+                    style={segmentStyle}
+                    title={`${config.label}: ${count}`}
+                  />
+                )
+              })}
             </div>
-            <div className="text-3xl font-bold text-emerald-600">
-              {stats.safeCount + stats.possiblySafeCount}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {t('calc.stats.safe')}
-            </div>
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="workbench-card rounded-lg p-4 text-center"
-          >
-            <div className="flex items-center justify-center gap-2 text-[color:var(--sage)] mb-2">
-              <GraduationCap className="h-5 w-5" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">
-              {stats.uniqueUniversities}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {t('calc.stats.universities')}
-            </div>
-          </motion.div>
+            <div className="min-w-0">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-[color:var(--ink)]">
+                    {isChinese ? '层级分布' : 'Safety mix'}
+                  </h2>
+                  <p className="mt-1 text-sm leading-5 text-[color:var(--ink-soft)]">
+                    {isChinese
+                      ? `${Number(ranking).toLocaleString()} 位次下，共 ${totalVisible.toLocaleString()} 个可选专业组。`
+                      : `${totalVisible.toLocaleString()} reachable major groups at rank ${Number(ranking).toLocaleString()}.`}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-2xl font-semibold leading-none text-[color:var(--ink)]">
+                    {stats.accessiblePercent}%
+                  </div>
+                  <div className="mt-1 text-[11px] font-medium text-[color:var(--ink-soft)]">
+                    {isChinese ? '覆盖' : 'Reach'}
+                  </div>
+                </div>
+              </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.25 }}
-            className="workbench-card rounded-lg p-4 text-center"
-          >
-            <div className="flex items-center justify-center gap-2 text-[color:var(--brand)] mb-2">
-              <TrendingUp className="h-5 w-5" />
+              <div className="mt-4 grid gap-2">
+                {safetyLevels.map(({ level, count, config }, idx) => {
+                  const percent = totalVisible > 0 ? Math.round((count / totalVisible) * 100) : 0
+
+                  return (
+                    <motion.div
+                      key={level}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + idx * 0.04, duration: 0.2 }}
+                      className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-sm"
+                    >
+                      <span
+                        className="h-2.5 w-2.5 rounded-sm"
+                        style={{ background: config.accent }}
+                      />
+                      <span className="truncate font-medium text-[color:var(--ink)]">
+                        {config.label}
+                      </span>
+                      <span className="tabular-nums text-[color:var(--ink-soft)]">
+                        {count.toLocaleString()}
+                        <span className="ml-1 text-xs">/ {percent}%</span>
+                      </span>
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
-            <div className="text-3xl font-bold text-slate-900">
-              {stats.totalAccessible}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {t('calc.stats.totalPrograms')}
-            </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
 
         {/* Safety Level Breakdown */}
         <div className="grid gap-4 md:grid-cols-2">
-          {(['possiblySafe', 'safe', 'moderate', 'risky'] as const).map((level, idx) => {
-            const config = getSafetyConfig(level)
+          {safetyLevels.map(({ level, config }, idx) => {
             const Icon = config.icon
             const items = groupedResults[level]
+            const tierStyle = {
+              '--tier-accent': config.accent,
+              '--tier-surface': config.surface,
+              '--tier-surface-soft': config.surfaceSoft,
+              '--tier-border': config.border,
+              '--tier-row': config.row,
+            } as CSSProperties
 
             // Skip if no items for this level
             if (items.length === 0) return null
@@ -862,70 +885,88 @@ export function AdmissionChanceResults({
             return (
               <motion.div
                 key={level}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + idx * 0.1 }}
-                className={`rounded-lg border ${config.borderClass} ${config.bgClass} p-5`}
+                transition={{ delay: 0.22 + idx * 0.06, duration: 0.26, ease: [0.25, 1, 0.5, 1] }}
+                style={tierStyle}
+                className="rounded-lg border border-[var(--tier-border)] bg-[var(--tier-surface)] p-4 shadow-[0_16px_44px_-38px_oklch(0.22_0.04_245/0.38)] sm:p-5"
               >
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Icon className={`h-5 w-5 ${config.iconClass}`} />
-                    <span className={`whitespace-nowrap font-semibold ${config.textClass}`}>
-                      {config.label}
-                    </span>
-                    {config.hasInfo && (
-                      <button
-                        onClick={() => setShowPossiblySafeInfo(!showPossiblySafeInfo)}
-                        className="text-sky-500 hover:text-sky-600 transition-colors"
-                        title={t('calc.possiblySafe.info')}
-                      >
-                        <Info className="h-4 w-4" />
-                      </button>
-                    )}
+                <div className="mb-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 items-center gap-2 text-[var(--tier-accent)]">
+                        <Icon className="h-[18px] w-[18px] shrink-0" />
+                        <h3 className="truncate text-lg font-semibold leading-7">
+                          {config.label}
+                        </h3>
+                      </div>
+                      <p className="mt-1.5 max-w-[26rem] text-sm leading-6 text-[color:var(--ink-soft)]">
+                        {config.description}
+                      </p>
+                      {config.hasInfo && (
+                        <button
+                          type="button"
+                          aria-expanded={showPossiblySafeInfo}
+                          aria-label={t('calc.possiblySafe.info')}
+                          onClick={() => setShowPossiblySafeInfo(!showPossiblySafeInfo)}
+                          className="focus-ring mt-2 inline-flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-[var(--tier-accent)] transition hover:bg-white/60 active:scale-[0.98]"
+                          title={t('calc.possiblySafe.info')}
+                        >
+                          <Info className="h-3.5 w-3.5" />
+                          {isChinese ? '说明' : 'Note'}
+                        </button>
+                      )}
+                    </div>
+                    <div className="shrink-0 text-right text-[var(--tier-accent)]">
+                      <div className="text-3xl font-semibold leading-none tabular-nums">
+                        {items.length}
+                      </div>
+                    </div>
                   </div>
-                  <span className={`shrink-0 text-2xl font-bold ${config.textClass}`}>
-                    {items.length}
-                  </span>
                 </div>
-                
-                {/* Info tooltip for possiblySafe */}
-                {config.hasInfo && showPossiblySafeInfo && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mb-4 rounded-lg border border-sky-200 bg-sky-100/50 p-3"
-                  >
-                    <p className="text-xs text-sky-800">
-                      {t('calc.possiblySafe.info')}
-                    </p>
-                  </motion.div>
-                )}
-                
-                <p className="text-xs text-slate-600 mb-4">
-                  {config.description}
-                </p>
+
+                <AnimatePresence initial={false}>
+                  {config.hasInfo && showPossiblySafeInfo && (
+                    <motion.div
+                      key="possibly-safe-note"
+                      initial={{ opacity: 0, height: 0, y: -4 }}
+                      animate={{ opacity: 1, height: 'auto', y: 0 }}
+                      exit={{ opacity: 0, height: 0, y: -4 }}
+                      transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mb-3 rounded-md border border-[color-mix(in_oklch,var(--tier-accent)_18%,transparent)] bg-[var(--tier-surface-soft)] px-3 py-2">
+                        <p className="text-xs leading-5 text-[color:var(--ink-soft)]">
+                          {t('calc.possiblySafe.info')}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <div className="space-y-2">
                   {items.slice(0, 3).map((item, i) => (
-                    <div
+                    <motion.div
                       key={`${item.组名}-${i}`}
-                      className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-lg bg-white/70 px-3 py-2 text-sm"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.28 + idx * 0.04 + i * 0.03, duration: 0.18 }}
+                      className="grid min-h-11 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md bg-[var(--tier-row)] px-3 py-2 text-sm shadow-[inset_0_0_0_1px_oklch(1_0_0/0.42)]"
                     >
                       <div className="min-w-0">
-                        <span className="break-words font-medium leading-5 text-slate-900">
+                        <span className="break-words font-semibold leading-5 text-[color:var(--ink)]">
                           {item.组名}
                         </span>
                       </div>
-                      <span className="whitespace-nowrap pt-0.5 text-xs text-slate-500">
+                      <span className="whitespace-nowrap text-sm font-medium text-[color:var(--ink-soft)]">
                         {item.最低排名.toLocaleString()}
                       </span>
-                    </div>
+                    </motion.div>
                   ))}
                   {items.length > 3 && (
                     <Link
                       href={`/lookup?ranking=${ranking}&year=${selectedYear}&filter=${level}`}
-                      className="flex items-center justify-center gap-1 rounded-lg bg-white/70 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white"
+                      className="focus-ring flex min-h-11 items-center justify-center gap-1 rounded-md bg-white/65 px-3 py-2 text-sm font-semibold text-[color:var(--ink-soft)] transition hover:bg-white hover:text-[var(--tier-accent)] active:scale-[0.99]"
                     >
                       {t('calc.viewMore', { count: items.length - 3 })}
                       <ChevronRight className="h-4 w-4" />
