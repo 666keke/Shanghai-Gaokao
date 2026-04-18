@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import {
   Target,
@@ -65,6 +65,7 @@ function LookupContent() {
   const basket = useCompareBasket()
   const searchParams = useSearchParams()
   const isChinese = t('nav.title') === '上海高考志愿分析'
+  const reduceMotion = useReducedMotion()
 
   const [data, setData] = useState<UniversityData[]>([])
   const [loading, setLoading] = useState(true)
@@ -74,6 +75,10 @@ function LookupContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [displayLimit, setDisplayLimit] = useState(30)
   const [showPossiblySafeInfo, setShowPossiblySafeInfo] = useState(false)
+  const compareHref =
+    basket.universities.length === 0 && basket.majorGroups.length > 0
+      ? '/trends#major-groups'
+      : '/trends'
 
   // Initialize from URL params
   useEffect(() => {
@@ -636,6 +641,52 @@ function LookupContent() {
           </AnimatePresence>
         </div>
       </section>
+
+      <AnimatePresence>
+        {basket.hasHydrated && basket.totalItems > 0 && (
+          <motion.div
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.96 }}
+            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.98 }}
+            whileHover={reduceMotion ? undefined : { y: -2 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed right-4 z-[60] sm:right-6"
+            style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+          >
+            <div
+              className="pointer-events-none absolute -inset-x-3 bottom-[-10px] h-8 rounded-full bg-cyan-950/30 blur-2xl"
+              aria-hidden="true"
+            />
+            <div
+              className="pointer-events-none absolute inset-0 rounded-lg bg-cyan-100/30 blur-md"
+              aria-hidden="true"
+            />
+            <Link
+              href={compareHref}
+              aria-label={isChinese ? `查看对比篮，${basket.totalItems} 项` : `Open compare basket, ${basket.totalItems} items`}
+              className="focus-ring group relative inline-flex h-12 items-center gap-2 rounded-lg border border-white/20 bg-[var(--brand-dark)] px-3.5 text-sm font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.22)_inset,0_14px_24px_rgba(0,47,61,0.24),0_28px_60px_rgba(0,47,61,0.22)] transition-colors duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--brand)] motion-reduce:transition-none"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isChinese ? '查看对比篮' : 'Compare basket'}
+              </span>
+              <span className="sm:hidden">
+                {isChinese ? '对比' : 'Compare'}
+              </span>
+              <motion.span
+                key={basket.totalItems}
+                initial={reduceMotion ? false : { scale: 0.88, opacity: 0.82 }}
+                animate={reduceMotion ? undefined : { scale: 1, opacity: 1 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-white px-1.5 text-xs font-bold tabular-nums text-[color:var(--brand-dark)] shadow-[0_1px_0_rgba(255,255,255,0.55)_inset] transition group-hover:bg-white/95 motion-reduce:transition-none"
+              >
+                {basket.totalItems}
+              </motion.span>
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="mt-10 border-t border-stone-200 bg-stone-50/80">
