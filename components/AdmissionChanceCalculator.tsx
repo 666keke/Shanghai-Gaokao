@@ -250,7 +250,7 @@ export default function AdmissionChanceCalculator({
   const rankingNumber = parseInt(ranking)
   const canConfirm = !isNaN(rankingNumber) && rankingNumber > 0
   const isChinese = t('calc.title') === '录取概率分析'
-  const transition = shouldReduceMotion ? { duration: 0 } : { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const }
+  const transition = shouldReduceMotion ? { duration: 0 } : { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const }
   const handleConfirm = useCallback(() => {
     if (!canConfirm) return
     onConfirm?.(ranking)
@@ -301,13 +301,13 @@ export default function AdmissionChanceCalculator({
             : 'workbench-card rounded-lg p-5 sm:p-6'
         }
       >
-        <AnimatePresence initial={false} mode="wait">
+        <AnimatePresence initial={false}>
           {embedded && compact ? (
             <motion.div
               key="compact-rank-bar"
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -4 }}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 4 }}
+              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -6 }}
               transition={transition}
               className="grid grid-cols-[minmax(5.75rem,1fr)_4.75rem_4.75rem_2.5rem] items-center gap-2 sm:grid-cols-[minmax(12rem,1fr)_7rem_7rem_auto]"
             >
@@ -321,7 +321,7 @@ export default function AdmissionChanceCalculator({
                   onChange={(e) => handleRankingChange(e.target.value)}
                   placeholder={isChinese ? '输入' : 'Rank'}
                   aria-label={t('calc.yourRanking')}
-                  className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[color:var(--ink)] outline-none placeholder:text-slate-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none sm:text-base"
+                  className="min-w-0 flex-1 bg-transparent text-base font-semibold text-[color:var(--ink)] outline-none placeholder:text-slate-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   min="1"
                 />
               </label>
@@ -332,7 +332,7 @@ export default function AdmissionChanceCalculator({
                   value={selectedYear}
                   onChange={(e) => onYearChange(parseInt(e.target.value))}
                   aria-label={t('calc.referenceYear')}
-                  className="w-full bg-transparent text-xs font-semibold text-[color:var(--ink)] outline-none sm:text-sm"
+                  className="w-full bg-transparent text-base font-semibold text-[color:var(--ink)] outline-none sm:text-sm"
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -366,9 +366,9 @@ export default function AdmissionChanceCalculator({
           ) : (
             <motion.div
               key="expanded-rank-panel"
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -6 }}
               transition={transition}
             >
               {!embedded && (

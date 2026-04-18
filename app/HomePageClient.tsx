@@ -34,6 +34,66 @@ interface HomePageClientProps {
   data: UniversityData[]
 }
 
+function easeOutQuart(progress: number) {
+  return 1 - Math.pow(1 - progress, 4)
+}
+
+function scrollPageTopSmoothly(shouldReduceMotion: boolean | null) {
+  if (typeof window === 'undefined') return
+
+  const startY = window.scrollY
+  if (startY <= 1) return
+
+  if (shouldReduceMotion) {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    return
+  }
+
+  const duration = Math.min(340, Math.max(190, startY * 0.4))
+  const startedAt = window.performance.now()
+
+  const step = (now: number) => {
+    const progress = Math.min(1, (now - startedAt) / duration)
+    const nextY = startY * (1 - easeOutQuart(progress))
+    window.scrollTo({ top: nextY, left: 0, behavior: 'auto' })
+
+    if (progress < 1) {
+      window.requestAnimationFrame(step)
+    }
+  }
+
+  window.requestAnimationFrame(step)
+}
+
+function waitForViewportSettle(callback: () => void) {
+  if (typeof window === 'undefined') return
+
+  const viewport = window.visualViewport
+  if (!viewport) {
+    window.setTimeout(callback, 120)
+    return
+  }
+
+  let lastHeight = viewport.height
+  let stableFrames = 0
+  const startedAt = window.performance.now()
+
+  const check = () => {
+    const nextHeight = viewport.height
+    stableFrames = Math.abs(nextHeight - lastHeight) < 1 ? stableFrames + 1 : 0
+    lastHeight = nextHeight
+
+    if (stableFrames >= 3 || window.performance.now() - startedAt > 420) {
+      callback()
+      return
+    }
+
+    window.requestAnimationFrame(check)
+  }
+
+  window.requestAnimationFrame(check)
+}
+
 export default function HomePageClient({ data }: HomePageClientProps) {
   const { t } = useLanguage()
   const { hasAgreed, isLoading } = useDisclaimer()
@@ -65,7 +125,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
   const transition = shouldReduceMotion
     ? { duration: 0 }
-    : { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const }
+    : { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const }
 
   const years = useMemo(
     () => Array.from(new Set(data.map((item) => item.年份))).sort((a, b) => b - a),
@@ -115,8 +175,32 @@ export default function HomePageClient({ data }: HomePageClientProps) {
   }
 
   const handleConfirmRanking = (ranking: string) => {
-    setConfirmedRanking(ranking)
-    setIsQueryCompact(true)
+    const commitConfirm = () => {
+      setConfirmedRanking(ranking)
+      setIsQueryCompact(true)
+
+      if (typeof window === 'undefined' || !window.matchMedia('(max-width: 640px)').matches) return
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => scrollPageTopSmoothly(shouldReduceMotion))
+      })
+    }
+
+    if (typeof window === 'undefined' || !window.matchMedia('(max-width: 640px)').matches) {
+      commitConfirm()
+      return
+    }
+
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+
+    if (shouldReduceMotion) {
+      commitConfirm()
+      return
+    }
+
+    waitForViewportSettle(commitConfirm)
   }
 
   return (
@@ -128,7 +212,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={transition}
-              className={`hero-workbench rounded-lg ${
+              className={`hero-workbench rounded-lg transition-[padding] duration-200 ease-out ${
                 isQueryCompact ? 'p-3 sm:p-4' : 'p-5 sm:p-6 lg:p-7'
               }`}
             >
