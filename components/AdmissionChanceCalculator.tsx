@@ -250,7 +250,7 @@ export default function AdmissionChanceCalculator({
   const rankingNumber = parseInt(ranking)
   const canConfirm = !isNaN(rankingNumber) && rankingNumber > 0
   const isChinese = t('calc.title') === '录取概率分析'
-  const transition = shouldReduceMotion ? { duration: 0 } : { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const }
+  const transition = shouldReduceMotion ? { duration: 0 } : { duration: 0.28, ease: [0.25, 1, 0.5, 1] as const }
   const handleConfirm = useCallback(() => {
     if (!canConfirm) return
     onConfirm?.(ranking)
@@ -301,91 +301,93 @@ export default function AdmissionChanceCalculator({
             : 'workbench-card rounded-lg p-5 sm:p-6'
         }
       >
-        <AnimatePresence initial={false}>
-          {embedded && compact ? (
+        {embedded ? (
+          <>
             <motion.div
-              key="compact-rank-bar"
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -6 }}
+              initial={false}
+              animate={
+                compact
+                  ? { height: 'auto', opacity: 1, y: 0 }
+                  : { height: 0, opacity: 0, y: shouldReduceMotion ? 0 : 6 }
+              }
               transition={transition}
-              className="grid grid-cols-[minmax(5.75rem,1fr)_4.75rem_4.75rem_2.5rem] items-center gap-2 sm:grid-cols-[minmax(12rem,1fr)_7rem_7rem_auto]"
+              className="overflow-hidden"
+              aria-hidden={!compact}
             >
-              <label className="focus-within:border-[color:var(--brand)] flex h-11 min-w-0 items-center gap-1.5 rounded-md border border-stone-200 bg-white/80 px-2 transition-colors">
-                <span className="shrink-0 text-[11px] font-semibold text-[color:var(--ink-soft)]">
-                  {isChinese ? '位次' : 'Rank'}
-                </span>
-                <input
-                  type="number"
-                  value={ranking}
-                  onChange={(e) => handleRankingChange(e.target.value)}
-                  placeholder={isChinese ? '输入' : 'Rank'}
-                  aria-label={t('calc.yourRanking')}
-                  className="min-w-0 flex-1 bg-transparent text-base font-semibold text-[color:var(--ink)] outline-none placeholder:text-slate-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  min="1"
-                />
-              </label>
+              <div
+                className={`grid grid-cols-[minmax(5.75rem,1fr)_4.75rem_4.75rem_2.5rem] items-center gap-2 sm:grid-cols-[minmax(12rem,1fr)_7rem_7rem_auto] ${
+                  compact ? '' : 'pointer-events-none'
+                }`}
+              >
+                <label className="focus-within:border-[color:var(--brand)] flex h-11 min-w-0 items-center gap-1.5 rounded-md border border-stone-200 bg-white/80 px-2 transition-colors">
+                  <span className="shrink-0 text-[11px] font-semibold text-[color:var(--ink-soft)]">
+                    {isChinese ? '位次' : 'Rank'}
+                  </span>
+                  <input
+                    type="number"
+                    value={ranking}
+                    onChange={(e) => handleRankingChange(e.target.value)}
+                    placeholder={isChinese ? '输入' : 'Rank'}
+                    aria-label={t('calc.yourRanking')}
+                    className="min-w-0 flex-1 bg-transparent text-base font-semibold text-[color:var(--ink)] outline-none placeholder:text-slate-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    min="1"
+                    disabled={!compact}
+                  />
+                </label>
 
-              <label className="focus-within:border-[color:var(--brand)] flex h-11 min-w-0 items-center rounded-md border border-stone-200 bg-white/80 px-1.5 transition-colors sm:px-2">
-                <span className="sr-only">{t('calc.referenceYear')}</span>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => onYearChange(parseInt(e.target.value))}
-                  aria-label={t('calc.referenceYear')}
-                  className="w-full bg-transparent text-base font-semibold text-[color:var(--ink)] outline-none sm:text-sm"
+                <label className="focus-within:border-[color:var(--brand)] flex h-11 min-w-0 items-center rounded-md border border-stone-200 bg-white/80 px-1.5 transition-colors sm:px-2">
+                  <span className="sr-only">{t('calc.referenceYear')}</span>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => onYearChange(parseInt(e.target.value))}
+                    aria-label={t('calc.referenceYear')}
+                    className="w-full bg-transparent text-base font-semibold text-[color:var(--ink)] outline-none sm:text-sm"
+                    disabled={!compact}
+                  >
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <button
+                  type="button"
+                  disabled={!compact || !canConfirm}
+                  onClick={handleConfirm}
+                  className="focus-ring inline-flex h-11 min-w-0 items-center justify-center gap-1 rounded-md bg-[var(--brand-dark)] px-2 text-xs font-semibold text-white transition hover:bg-[var(--brand)] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-3 sm:text-sm"
                 >
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  {isChinese ? '确认' : 'Go'}
+                  <ArrowRight className="hidden h-3.5 w-3.5 sm:block" />
+                </button>
 
-              <button
-                type="button"
-                disabled={!canConfirm}
-                onClick={handleConfirm}
-                className="focus-ring inline-flex h-11 min-w-0 items-center justify-center gap-1 rounded-md bg-[var(--brand-dark)] px-2 text-xs font-semibold text-white transition hover:bg-[var(--brand)] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-3 sm:text-sm"
-              >
-                {isChinese ? '确认' : 'Go'}
-                <ArrowRight className="hidden h-3.5 w-3.5 sm:block" />
-              </button>
-
-              <button
-                type="button"
-                onClick={onExpand}
-                aria-expanded={false}
-                aria-label={isChinese ? '展开位次输入' : 'Expand rank input'}
-                className="focus-ring inline-flex h-11 min-w-0 items-center justify-center gap-1 rounded-md border border-stone-200 bg-white/70 px-2 text-xs font-semibold text-[color:var(--ink-soft)] transition hover:border-[color:var(--brand)] hover:text-[color:var(--brand)] active:scale-[0.98] sm:px-3"
-              >
-                <ChevronDown className="h-4 w-4" />
-                <span className="hidden sm:inline">{isChinese ? '展开' : 'Edit'}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={onExpand}
+                  aria-expanded={false}
+                  aria-label={isChinese ? '展开位次输入' : 'Expand rank input'}
+                  disabled={!compact}
+                  className="focus-ring inline-flex h-11 min-w-0 items-center justify-center gap-1 rounded-md border border-stone-200 bg-white/70 px-2 text-xs font-semibold text-[color:var(--ink-soft)] transition hover:border-[color:var(--brand)] hover:text-[color:var(--brand)] active:scale-[0.98] sm:px-3"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                  <span className="hidden sm:inline">{isChinese ? '展开' : 'Edit'}</span>
+                </button>
+              </div>
             </motion.div>
-          ) : (
-            <motion.div
-              key="expanded-rank-panel"
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -6 }}
-              transition={transition}
-            >
-              {!embedded && (
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--brand-soft)]">
-                    <Target className="h-5 w-5 text-[color:var(--brand-dark)]" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
-                      {t('calc.title')}
-                    </h2>
-                    <p className="text-sm text-slate-500">{t('calc.subtitle')}</p>
-                  </div>
-                </div>
-              )}
 
-              <div className="grid gap-4">
+            <motion.div
+              initial={false}
+              animate={
+                compact
+                  ? { height: 0, opacity: 0, y: shouldReduceMotion ? 0 : -6 }
+                  : { height: 'auto', opacity: 1, y: 0 }
+              }
+              transition={transition}
+              className="overflow-hidden"
+              aria-hidden={compact}
+            >
+              <div className={`grid gap-4 ${compact ? 'pointer-events-none' : ''}`}>
                 {/* Ranking Input */}
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-slate-800">
@@ -399,6 +401,7 @@ export default function AdmissionChanceCalculator({
                       placeholder={t('calc.placeholder')}
                       className="focus-ring h-[56px] w-full rounded-lg border border-stone-300 bg-white px-4 text-xl font-semibold placeholder:text-slate-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       min="1"
+                      disabled={compact}
                     />
                     {isCalculating && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -434,6 +437,7 @@ export default function AdmissionChanceCalculator({
                             <button
                               key={preset}
                               type="button"
+                              disabled={compact}
                               onClick={() => handleRankingChange(String(preset))}
                               className={`focus-ring rounded-md border px-2.5 py-1 text-xs font-semibold transition active:scale-[0.98] ${
                                 ranking === String(preset)
@@ -458,6 +462,7 @@ export default function AdmissionChanceCalculator({
                       value={selectedYear}
                       onChange={(e) => onYearChange(parseInt(e.target.value))}
                       className="focus-ring h-[54px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium"
+                      disabled={compact}
                     >
                       {years.map((year) => (
                         <option key={year} value={year}>
@@ -471,7 +476,7 @@ export default function AdmissionChanceCalculator({
                   <div className="flex items-end">
                     <button
                       type="button"
-                      disabled={!canConfirm}
+                      disabled={compact || !canConfirm}
                       onClick={handleConfirm}
                       className="focus-ring inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-dark)] px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--brand)] active:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:translate-y-0"
                     >
@@ -482,8 +487,113 @@ export default function AdmissionChanceCalculator({
                 </div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </>
+        ) : (
+          <>
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--brand-soft)]">
+                <Target className="h-5 w-5 text-[color:var(--brand-dark)]" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
+                  {t('calc.title')}
+                </h2>
+                <p className="text-sm text-slate-500">{t('calc.subtitle')}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              {/* Ranking Input */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
+                  {t('calc.yourRanking')}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={ranking}
+                    onChange={(e) => handleRankingChange(e.target.value)}
+                    placeholder={t('calc.placeholder')}
+                    className="focus-ring h-[56px] w-full rounded-lg border border-stone-300 bg-white px-4 text-xl font-semibold placeholder:text-slate-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    min="1"
+                  />
+                  {isCalculating && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--brand)] border-t-transparent" />
+                    </div>
+                  )}
+                </div>
+                <RankDistribution
+                  ranking={canConfirm ? rankingNumber : null}
+                  minRank={yearRankRange.min}
+                  maxRank={yearRankRange.max}
+                  bins={rankDistributionBins}
+                  reduceMotion={shouldReduceMotion}
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px_128px] sm:items-end">
+                {(!embedded || (rankPresets && rankPresets.length > 0)) && (
+                  <div>
+                    <p className="text-xs text-slate-500">{t('calc.hint')}</p>
+                    {rankPresets && rankPresets.length > 0 && (
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-medium text-slate-500">
+                          {isChinese ? '常见位次' : 'Try rank'}
+                        </span>
+                        {rankPresets.map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => handleRankingChange(String(preset))}
+                            className={`focus-ring rounded-md border px-2.5 py-1 text-xs font-semibold transition active:scale-[0.98] ${
+                              ranking === String(preset)
+                                ? 'border-[var(--brand)] bg-[var(--brand-soft)] text-[color:var(--brand-dark)]'
+                                : 'border-stone-200 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
+                            }`}
+                          >
+                            {preset.toLocaleString()}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Year Selector */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {t('calc.referenceYear')}
+                  </label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => onYearChange(parseInt(e.target.value))}
+                    className="focus-ring h-[54px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium"
+                  >
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Confirm Button */}
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    disabled={!canConfirm}
+                    onClick={handleConfirm}
+                    className="focus-ring inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-dark)] px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--brand)] active:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:translate-y-0"
+                  >
+                    {t('calc.confirm')}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </motion.div>
 
       {showResults && stats && ranking && groupedResults && (

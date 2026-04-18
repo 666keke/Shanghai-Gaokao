@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, BookOpenCheck, Building2, Check, GraduationCap, Plus, SearchCheck, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -38,14 +38,18 @@ function easeOutQuart(progress: number) {
   return 1 - Math.pow(1 - progress, 4)
 }
 
-function scrollPageTopSmoothly(shouldReduceMotion: boolean | null) {
+function scrollPageTopSmoothly(shouldReduceMotion: boolean | null, onComplete?: () => void) {
   if (typeof window === 'undefined') return
 
   const startY = window.scrollY
-  if (startY <= 1) return
+  if (startY <= 1) {
+    onComplete?.()
+    return
+  }
 
   if (shouldReduceMotion) {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    onComplete?.()
     return
   }
 
@@ -59,6 +63,8 @@ function scrollPageTopSmoothly(shouldReduceMotion: boolean | null) {
 
     if (progress < 1) {
       window.requestAnimationFrame(step)
+    } else {
+      onComplete?.()
     }
   }
 
@@ -125,7 +131,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
   const transition = shouldReduceMotion
     ? { duration: 0 }
-    : { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const }
+    : { duration: 0.28, ease: [0.25, 1, 0.5, 1] as const }
 
   const years = useMemo(
     () => Array.from(new Set(data.map((item) => item.年份))).sort((a, b) => b - a),
@@ -178,12 +184,6 @@ export default function HomePageClient({ data }: HomePageClientProps) {
     const commitConfirm = () => {
       setConfirmedRanking(ranking)
       setIsQueryCompact(true)
-
-      if (typeof window === 'undefined' || !window.matchMedia('(max-width: 640px)').matches) return
-
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => scrollPageTopSmoothly(shouldReduceMotion))
-      })
     }
 
     if (typeof window === 'undefined' || !window.matchMedia('(max-width: 640px)').matches) {
@@ -196,11 +196,12 @@ export default function HomePageClient({ data }: HomePageClientProps) {
     }
 
     if (shouldReduceMotion) {
+      scrollPageTopSmoothly(shouldReduceMotion)
       commitConfirm()
       return
     }
 
-    waitForViewportSettle(commitConfirm)
+    waitForViewportSettle(() => scrollPageTopSmoothly(shouldReduceMotion, commitConfirm))
   }
 
   return (
@@ -212,38 +213,40 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={transition}
-              className={`hero-workbench rounded-lg transition-[padding] duration-200 ease-out ${
+              className={`hero-workbench rounded-lg transition-[padding] duration-300 ${
                 isQueryCompact ? 'p-3 sm:p-4' : 'p-5 sm:p-6 lg:p-7'
               }`}
+              style={{
+                transitionTimingFunction: 'cubic-bezier(0.25, 1, 0.5, 1)',
+              }}
             >
-              <AnimatePresence initial={false}>
-                {!isQueryCompact && (
-                  <motion.div
-                    key="rank-workbench-intro"
-                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
-                    transition={transition}
-                    className="mb-5"
-                  >
-                    <div className="max-w-3xl">
-                      <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-white/55 px-2.5 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
-                        <SearchCheck className="h-3.5 w-3.5" />
-                        {isChinese ? '第一步' : 'Step one'}
-                      </div>
-                      <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[color:var(--ink)] sm:text-5xl lg:text-[3.35rem]">
-                        {isChinese ? '输入你的位次' : 'Enter your rank'}
-                      </h1>
-                      <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
-                        {isChinese
-                          ? '查看匹配院校与专业组。'
-                          : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
-                      </p>
-                    </div>
-                    <DisclaimerBanner />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <motion.div
+                initial={false}
+                animate={
+                  isQueryCompact
+                    ? { height: 0, opacity: 0, y: shouldReduceMotion ? 0 : -6, marginBottom: 0 }
+                    : { height: 'auto', opacity: 1, y: 0, marginBottom: 20 }
+                }
+                transition={transition}
+                className="overflow-hidden"
+                aria-hidden={isQueryCompact}
+              >
+                <div className="max-w-3xl">
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-white/55 px-2.5 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
+                    <SearchCheck className="h-3.5 w-3.5" />
+                    {isChinese ? '第一步' : 'Step one'}
+                  </div>
+                  <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[color:var(--ink)] sm:text-5xl lg:text-[3.35rem]">
+                    {isChinese ? '输入你的位次' : 'Enter your rank'}
+                  </h1>
+                  <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
+                    {isChinese
+                      ? '查看匹配院校与专业组。'
+                      : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
+                  </p>
+                </div>
+                <DisclaimerBanner />
+              </motion.div>
               <div className={!isLoading && !hasAgreed ? 'pointer-events-none opacity-50' : ''}>
                 <AdmissionChanceCalculator
                   data={data}
