@@ -19,7 +19,7 @@ interface UniversityData {
   组名: string
   院校名: string
   组号: string
-  投档线: string
+  投档线: string | null
   语文数学合计: number | null
   外语: number | null
   选考最高: number | null

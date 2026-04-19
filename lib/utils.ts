@@ -22,12 +22,15 @@ export function formatNumber(num: number | null): string {
   return num.toLocaleString()
 }
 
-export function formatScore(score: string): string {
-  if (score === '580及以上') return '580+'
+export function formatScore(score: string | null | undefined): string {
+  if (!score) return 'N/A'
+  const normalized = score.replace(/\s/g, '')
+  if (normalized === '580' || /^580(?:分)?(?:及)?以上$/.test(normalized)) return '580+'
   return score
 }
 
-export function getScoreColor(score: string): string {
+export function getScoreColor(score: string | null | undefined): string {
+  if (!score) return 'text-gray-600'
   const numScore = parseInt(score.replace(/[^\d]/g, ''))
   if (numScore >= 600) return 'text-red-600'
   if (numScore >= 550) return 'text-orange-600'
@@ -64,4 +67,4 @@ export function debounce<T extends (...args: any[]) => any>(
     clearTimeout(timeout)
     timeout = setTimeout(() => func(...args), wait)
   }
-} 
+}

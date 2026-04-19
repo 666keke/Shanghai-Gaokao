@@ -32,7 +32,7 @@ interface UniversityData {
   组名: string
   院校名: string
   组号: string
-  投档线: string
+  投档线: string | null
   语文数学合计: number | null
   外语: number | null
   选考最高: number | null
@@ -47,7 +47,7 @@ interface AvailableOption {
   组名: string
   院校名: string
   组号: string
-  投档线: string
+  投档线: string | null
   最低排名: number
   年份: number
   margin: number
@@ -55,8 +55,10 @@ interface AvailableOption {
 }
 
 // Helper function to check if the score is 580 or above (special case)
-function is580OrAbove(score: string): boolean {
-  return score.includes('580') && (score.includes('及以上') || score.includes('分及以上') || score === '580')
+function is580OrAbove(score: string | null | undefined): boolean {
+  if (typeof score !== 'string') return false
+  const normalized = score.replace(/\s/g, '')
+  return normalized === '580' || /^580(?:分)?(?:及)?以上$/.test(normalized)
 }
 
 function LookupContent() {
