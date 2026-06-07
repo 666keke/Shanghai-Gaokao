@@ -104,7 +104,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
   const { t } = useLanguage()
   const { hasAgreed, isLoading } = useDisclaimer()
   const basket = useCompareBasket()
-  const [selectedYear, setSelectedYear] = useState<number>(2024)
+  const [selectedYear, setSelectedYear] = useState<number>(2025)
   const [rankingValue, setRankingValue] = useState('')
   const [confirmedRanking, setConfirmedRanking] = useState<string | null>(null)
   const [isQueryCompact, setIsQueryCompact] = useState(false)
