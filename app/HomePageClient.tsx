@@ -331,6 +331,24 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       </span>
                       <ArrowRight className="h-4 w-4 text-[color:var(--brand)]" />
                     </Link>
+
+                    <Link
+                      href="/admission"
+                      className="hover-lift flex items-center justify-between rounded-lg border border-stone-200 bg-white/75 p-3"
+                    >
+                      <span className="flex items-center gap-3">
+                        <BookOpenCheck className="h-5 w-5 text-[color:var(--brand)]" />
+                        <span>
+                          <span className="block text-sm font-semibold text-[color:var(--ink)]">
+                            {isChinese ? '录取规则' : 'Admission guide'}
+                          </span>
+                          <span className="block text-xs text-[color:var(--ink-soft)]">
+                            {isChinese ? '看懂投档与调剂' : 'Understand filing'}
+                          </span>
+                        </span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 text-[color:var(--brand)]" />
+                    </Link>
                   </div>
                 </section>
 
@@ -375,6 +393,28 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     </li>
                   </ol>
                 </section>
+
+                <Link
+                  href="/admission"
+                  className="workbench-card group block rounded-lg p-5 transition hover:border-[color:var(--brand)] hover:bg-white focus-ring"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <BookOpenCheck className="h-5 w-5 text-[color:var(--brand)]" />
+                      <h2 className="text-base font-semibold text-[color:var(--ink)]">
+                        {isChinese ? '录取规则可视化' : 'Admission Guide'}
+                      </h2>
+                    </div>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-200 bg-white text-[color:var(--brand)] transition group-hover:border-[color:var(--brand)] group-hover:bg-[var(--brand-soft)]">
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
+                  <p className="text-sm leading-6 text-[color:var(--ink-soft)]">
+                    {isChinese
+                      ? '用分屏交互理解院校专业组、平行志愿、一轮投档、调剂和征求志愿。'
+                      : 'Explore major groups, parallel filing, adjustment, and call-up choices.'}
+                  </p>
+                </Link>
 
                 <Link
                   href="/trends"

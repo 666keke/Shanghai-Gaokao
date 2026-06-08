@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { BarChart3, Building2, GraduationCap, Home, Menu, ShoppingBasket, Target, Trash2, X } from 'lucide-react'
+import { BarChart3, BookOpenCheck, Building2, GraduationCap, Home, Menu, ShoppingBasket, Target, Trash2, X } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useCompareBasket } from '../contexts/CompareBasketContext'
 import LanguageSelector from './LanguageSelector'
@@ -20,6 +20,7 @@ export default function Navigation() {
     { href: '/', label: t('nav.dashboard'), icon: Home },
     { href: '/lookup', label: t('nav.lookup'), icon: Target },
     { href: '/trends', label: t('nav.library'), icon: Building2 },
+    { href: '/admission', label: isChinese ? '录取规则' : 'Admission', icon: BookOpenCheck },
   ]
 
   const isActiveRoute = (href: string) => {
@@ -53,7 +54,7 @@ export default function Navigation() {
                   {t('nav.title')}
                 </h1>
                 <p className="hidden text-xs text-[color:var(--ink-soft)] sm:block">
-                  2020-2024 admission data
+                  2020-2025 admission data
                 </p>
               </div>
             </Link>
