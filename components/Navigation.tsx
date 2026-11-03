@@ -54,18 +54,19 @@ export default function Navigation() {
                   {t('nav.title')}
                 </h1>
                 <p className="hidden text-xs text-[color:var(--ink-soft)] sm:block">
-                  2020-2025 admission data
+                  {isChinese ? '2020—2025 录取数据参考' : '2020—2025 admission data'}
                 </p>
               </div>
             </Link>
 
-            <div className="hidden items-center gap-3 md:flex">
+            <div className="hidden items-center gap-3 lg:flex">
               <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white/70 p-1">
                 {navItems.map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
-                    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
+                    aria-current={isActiveRoute(href) ? 'page' : undefined}
+                    className={`focus-ring flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
                       isActiveRoute(href)
                         ? 'bg-[var(--brand-dark)] text-white'
                         : 'text-[color:var(--ink-soft)] hover:bg-stone-100 hover:text-[color:var(--ink)]'
@@ -81,6 +82,7 @@ export default function Navigation() {
                 <button
                   type="button"
                   onClick={() => setIsBasketOpen((open) => !open)}
+                  aria-expanded={isBasketOpen}
                   className="focus-ring flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:bg-stone-100 hover:text-[color:var(--ink)]"
                 >
                   <ShoppingBasket className="h-4 w-4" />
@@ -98,13 +100,14 @@ export default function Navigation() {
               <LanguageSelector />
             </div>
 
-            <div className="flex items-center gap-2 md:hidden">
+            <div className="flex items-center gap-2 lg:hidden">
               <LanguageSelector />
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen((open) => !open)}
                 className="focus-ring rounded-lg border border-stone-200 bg-white/80 p-2 text-[color:var(--ink-soft)]"
-                aria-label="Toggle mobile menu"
+                aria-expanded={isMobileMenuOpen}
+                aria-label={isChinese ? '打开导航菜单' : 'Toggle navigation'}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
@@ -114,7 +117,7 @@ export default function Navigation() {
       </nav>
 
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="fixed inset-0 z-40 lg:hidden">
           <button
             type="button"
             aria-label="Close menu"

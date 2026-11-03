@@ -7,24 +7,21 @@ import Link from 'next/link'
 import {
   Target,
   ChevronRight,
-  Filter,
   Shield,
   AlertTriangle,
   AlertCircle,
   Search,
-  SlidersHorizontal,
-  ArrowUpDown,
   GraduationCap,
   BarChart3,
   Home,
   HelpCircle,
-  Info,
-  Plus,
-  Check,
+  X,
 } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useDisclaimer } from '../../contexts/DisclaimerContext'
 import { useCompareBasket } from '../../contexts/CompareBasketContext'
+import CompareMenu from '../../components/CompareMenu'
+import MobileNavigation from '../../components/MobileNavigation'
 import DisclaimerBanner from '../../components/DisclaimerBanner'
 import { getDataPath } from '../../lib/utils'
 
@@ -72,11 +69,14 @@ function LookupContent() {
   const [data, setData] = useState<UniversityData[]>([])
   const [loading, setLoading] = useState(true)
   const [userRanking, setUserRanking] = useState<string>('')
-  const [selectedYear, setSelectedYear] = useState<number>(2024)
+  const [selectedYear, setSelectedYear] = useState<number>(2025)
   const [safetyFilter, setSafetyFilter] = useState<'all' | 'possiblySafe' | 'safe' | 'moderate' | 'risky' | 'notAdmitted'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [displayLimit, setDisplayLimit] = useState(30)
-  const [showPossiblySafeInfo, setShowPossiblySafeInfo] = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const validRanking = /^[1-9]\d*$/.test(userRanking) && Number.isSafeInteger(Number(userRanking))
+  useEffect(() => { setDisplayLimit(30) }, [userRanking, selectedYear, safetyFilter, searchTerm])
   const compareHref =
     basket.universities.length === 0 && basket.majorGroups.length > 0
       ? '/trends#major-groups'
@@ -97,13 +97,14 @@ function LookupContent() {
 
   useEffect(() => {
     fetch(getDataPath())
-      .then((res) => res.json())
+      .then((res) => { if (!res.ok) throw new Error(String(res.status)); return res.json() })
       .then((jsonData: UniversityData[]) => {
         setData(jsonData)
         setLoading(false)
       })
       .catch((err) => {
         console.error('Error loading data:', err)
+        setLoadError(true)
         setLoading(false)
       })
   }, [])
@@ -116,7 +117,7 @@ function LookupContent() {
   // Calculate results (including not-admitted for filtering)
   const searchResults = useMemo(() => {
     const ranking = parseInt(userRanking)
-    if (isNaN(ranking) || ranking <= 0) return []
+    if (!/^[1-9]\d*$/.test(userRanking) || !Number.isSafeInteger(ranking)) return []
 
     const options: AvailableOption[] = []
 
@@ -208,7 +209,7 @@ function LookupContent() {
       if (a.safetyLevel === 'notAdmitted' && b.safetyLevel === 'notAdmitted') {
         return b.margin - a.margin // Less negative first
       }
-      
+
       // possiblySafe items first (among admitted)
       if (a.safetyLevel === 'possiblySafe' && b.safetyLevel !== 'possiblySafe' && b.safetyLevel !== 'notAdmitted') return -1
       if (a.safetyLevel !== 'possiblySafe' && a.safetyLevel !== 'notAdmitted' && b.safetyLevel === 'possiblySafe') return 1
@@ -243,7 +244,7 @@ function LookupContent() {
           borderClass: 'border-slate-300',
           textClass: 'text-slate-600',
           badgeClass: 'bg-slate-200 text-slate-700',
-          label: t('calc.notAdmitted'),
+          label: isChinese ? '未达往年位次' : 'Below past cutoff',
           hasInfo: false,
         }
       case 'possiblySafe':
@@ -301,11 +302,11 @@ function LookupContent() {
   }
 
   return (
-    <div className="min-h-screen pb-16">
+    <div className="lookup-page min-h-screen pb-16">
       {/* Header */}
-      <section className="pb-6 pt-8">
+      <section className="lookup-heading">
         <div className="page-wrap">
-          <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+          <div className="hidden sm:flex items-center gap-2 text-sm text-slate-500 mb-4">
             <Link href="/" className="flex items-center gap-1 hover:text-[color:var(--brand)]">
               <Home className="h-4 w-4" />
               {t('nav.dashboard')}
@@ -316,35 +317,14 @@ function LookupContent() {
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <Target className="h-8 w-8 text-[color:var(--brand)]" />
+              <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 flex items-center gap-3">
+
                 {t('lookup.title')}
               </h1>
-              <p className="text-slate-600 mt-1">{t('lookup.subtitle')}</p>
+              <p className="hidden sm:block text-slate-600 mt-1">{isChinese ? '输入全市排名，筛选院校专业组，再对比历年录取数据。' : 'Enter your rank, explore major groups and compare admission history.'}</p>
             </div>
 
-            {userRanking && stats.total > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {stats.possiblySafe > 0 && (
-                  <div className="flex items-center gap-2 rounded-md bg-sky-100 px-3 py-1.5 text-sm">
-                    <HelpCircle className="h-4 w-4 text-sky-600" />
-                    <span className="font-medium text-sky-700">{stats.possiblySafe}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-1.5 text-sm">
-                  <Shield className="h-4 w-4 text-emerald-600" />
-                  <span className="font-medium text-emerald-700">{stats.safe}</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-md bg-amber-100 px-3 py-1.5 text-sm">
-                  <AlertTriangle className="h-4 w-4 text-amber-600" />
-                  <span className="font-medium text-amber-700">{stats.moderate}</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-md bg-rose-100 px-3 py-1.5 text-sm">
-                  <AlertCircle className="h-4 w-4 text-rose-600" />
-                  <span className="font-medium text-rose-700">{stats.risky}</span>
-                </div>
-              </div>
-            )}
+
           </div>
           {/* Disclaimer Banner */}
           <DisclaimerBanner />
@@ -352,44 +332,50 @@ function LookupContent() {
       </section>
 
       {/* Search Controls */}
-      <section className={`pb-6 ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
+      <section className={`lookup-input-section ${!isLoading && !hasAgreed ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="page-wrap">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="workbench-card rounded-lg p-5"
+            className="lookup-inputs"
           >
-            <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+            <div className="grid grid-cols-[minmax(0,1fr)_100px] gap-3 sm:grid-cols-[minmax(0,1fr)_140px] sm:gap-4">
               {/* Ranking Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('calc.yourRanking')}
+                <label htmlFor="ranking" className="block text-sm font-medium text-slate-700 mb-2">
+                  {isChinese ? '全市排名' : 'Your rank'}
                 </label>
                 <div className="relative">
                   <Target className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
-                    type="number"
+                    id="ranking"
+                    type="text"
+                    inputMode="numeric"
+                    aria-invalid={!!userRanking && !validRanking}
+                    aria-describedby="ranking-help"
                     placeholder={t('calc.placeholder')}
                     value={userRanking}
                     onChange={(e) => {
                       setUserRanking(e.target.value)
                       setDisplayLimit(30)
                     }}
-                    className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    min="1"
+                    className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-base [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+
                   />
                 </div>
               </div>
 
+              <p id="ranking-help" className={`${userRanking && !validRanking ? '' : 'hidden sm:block'} col-span-2 order-last text-xs text-slate-500`}>{userRanking && !validRanking ? (isChinese ? '请输入大于 0 的整数排名。' : 'Enter a positive whole-number rank.') : (isChinese ? '输入后自动更新结果 · 排名数字越小，位次越靠前' : 'Results update automatically · Lower rank is better')}</p>
               {/* Year Selector */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('calc.referenceYear')}
+                <label htmlFor="reference-year" className="block text-sm font-medium text-slate-700 mb-2">
+                  {isChinese ? '年份' : 'Year'}
                 </label>
                 <select
+                  id="reference-year"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
+                  className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white px-4 text-base"
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -399,43 +385,9 @@ function LookupContent() {
                 </select>
               </div>
 
-              {/* Safety Filter */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('lookup.safetyLevel')}
-                </label>
-                <select
-                  value={safetyFilter}
-                  onChange={(e) =>
-                    setSafetyFilter(e.target.value as typeof safetyFilter)
-                  }
-                  className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
-                >
-                  <option value="all">{t('lookup.allLevels')}</option>
-                  <option value="possiblySafe">{t('calc.possiblySafe')}</option>
-                  <option value="safe">{t('calc.safe')}</option>
-                  <option value="moderate">{t('calc.moderate')}</option>
-                  <option value="risky">{t('calc.risky')}</option>
-                  <option value="notAdmitted">{t('calc.notAdmitted')}</option>
-                </select>
-              </div>
             </div>
+            {loadError && <p role="alert" className="mt-3 text-sm text-rose-700">{isChinese ? '数据加载失败，请刷新页面重试。' : 'Unable to load data. Refresh to retry.'}</p>}
 
-            {/* Search within results */}
-            {userRanking && searchResults.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-100">
-                <div className="relative max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder={t('dashboard.search.placeholder')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="focus-ring w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-10 pr-4 text-sm"
-                  />
-                </div>
-              </div>
-            )}
           </motion.div>
         </div>
       </section>
@@ -443,27 +395,28 @@ function LookupContent() {
       {/* Results */}
       <section className="pb-10">
         <div className="page-wrap">
-          {/* Results Header */}
-          {userRanking && (
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-600">
-                {t('lookup.searchResults', {
-                  count: filteredResults.length,
-                  ranking: userRanking,
-                  year: selectedYear,
+          {validRanking && !loadError && (
+            <div className="lookup-toolbar mb-3 space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <h2 aria-live="polite" className="text-sm font-medium text-slate-500">{isChinese ? '专业组' : 'Groups'} <span className="font-semibold text-slate-900">{filteredResults.length.toLocaleString()}</span></h2>
+                <div className="flex items-center gap-1">
+                  {(safetyFilter !== 'all' || searchTerm) && <button className="focus-ring min-h-[44px] rounded-md px-3 text-xs text-slate-500" onClick={() => { setSafetyFilter('all'); setSearchTerm('') }}>{isChinese ? '重置' : 'Reset'}</button>}
+                  <button type="button" className="focus-ring inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-600" aria-expanded={searchOpen} aria-controls="result-search" aria-label={isChinese ? (searchOpen ? '关闭搜索' : '搜索院校') : 'Toggle search'} onClick={() => { if (searchOpen) setSearchTerm(''); setSearchOpen(open => !open) }}>{searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}</button>
+                </div>
+              </div>
+              <div className="filter-tabs" role="group" aria-label={isChinese ? '按录取参考类别筛选' : 'Filter by category'}>
+                {(['all', 'possiblySafe', 'safe', 'moderate', 'risky', 'notAdmitted'] as const).map(level => {
+                  const count = level === 'all' ? stats.total : stats[level]
+                  return <button key={level} type="button" aria-pressed={safetyFilter === level} onClick={() => setSafetyFilter(level)} className={`focus-ring filter-tab ${safetyFilter === level ? 'is-active' : ''}`}>
+                    {level === 'all' ? (isChinese ? '全部' : 'All') : level === 'possiblySafe' ? (isChinese ? '待核实' : 'Uncertain') : level === 'notAdmitted' ? (isChinese ? '未达线' : 'Below cutoff') : getSafetyConfig(level).label}<span>{count.toLocaleString()}</span>
+                  </button>
                 })}
-              </p>
-              {filteredResults.length !== searchResults.length && (
-                <button
-                  onClick={() => {
-                    setSafetyFilter('all')
-                    setSearchTerm('')
-                  }}
-                  className="text-sm text-[color:var(--brand)] hover:underline"
-                >
-                  {t('common.clearSearch')}
-                </button>
-              )}
+              </div>
+              {(searchOpen || searchTerm) && <div id="result-search" className="relative">
+                <Search className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+                <input autoFocus aria-label={isChinese ? '筛选院校或专业组' : 'Filter universities or groups'} className="focus-ring h-11 w-full rounded-lg border border-stone-200 bg-white pl-10 pr-4 text-base" placeholder={isChinese ? '搜索院校、专业组' : 'Search universities or groups'} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+              </div>}
+
             </div>
           )}
 
@@ -475,120 +428,36 @@ function LookupContent() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-3"
+                className="result-list"
               >
                 {filteredResults.slice(0, displayLimit).map((option, index) => {
                   const config = getSafetyConfig(option.safetyLevel)
                   const Icon = config.icon
-                  const isUniversityAdded = basket.hasUniversity(option.院校名)
-                  const isMajorGroupAdded = basket.hasMajorGroup(option.组名)
 
                   return (
-                    <motion.div
-                      key={`${option.组名}-${index}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(index * 0.02, 0.3) }}
-                      className={`rounded-lg border ${config.borderClass} ${config.bgClass} p-4 transition-all hover:bg-white/80`}
-                    >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="font-semibold text-slate-900 truncate">
-                              {option.院校名}
-                            </h3>
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${config.badgeClass}`}
-                            >
-                              <Icon className="h-3 w-3" />
-                              {config.label}
-                              {config.hasInfo && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setShowPossiblySafeInfo(!showPossiblySafeInfo)
-                                  }}
-                                  className="ml-0.5 hover:opacity-70"
-                                >
-                                  <Info className="h-3 w-3" />
-                                </button>
-                              )}
-                            </span>
-                          </div>
-                          <p className="text-sm text-slate-600 truncate">
-                            {option.组名} · {option.组号}
-                          </p>
-                          {config.hasInfo && showPossiblySafeInfo && (
-                            <p className="text-xs text-sky-600 mt-1 bg-sky-50 rounded-lg px-2 py-1">
-                              {t('calc.possiblySafe.info')}
-                            </p>
-                          )}
+                    <article key={`${option.组名}-${index}`} className="result-row">
+                      <div className="result-topline">
+                        <div className="result-identity">
+                          <h3 className="text-base font-semibold text-slate-900">{option.院校名}<span className="ml-2 text-sm font-normal text-slate-500">{option.组号}{isChinese ? '组' : ''}</span></h3>
+                          <span className={`mt-1 inline-flex items-center gap-1 text-xs ${config.textClass}`}><Icon className="h-3 w-3" />{config.hasInfo ? (isChinese ? '待核实' : 'Verify cutoff') : config.label}</span>
                         </div>
-
-                        <div className="flex flex-wrap items-center gap-3 text-sm sm:justify-end">
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              aria-pressed={isUniversityAdded}
-                              onClick={() =>
-                                isUniversityAdded
-                                  ? basket.removeUniversity(option.院校名)
-                                  : basket.addUniversity(option.院校名)
-                              }
-                              className={`focus-ring inline-flex h-9 items-center gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-semibold transition ${
-                                isUniversityAdded
-                                  ? 'border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50'
-                                  : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
-                              }`}
-                            >
-                              {isUniversityAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                              {isUniversityAdded ? (isChinese ? '已加院校' : 'Added') : (isChinese ? '院校' : 'School')}
-                            </button>
-                            <button
-                              type="button"
-                              aria-pressed={isMajorGroupAdded}
-                              onClick={() =>
-                                isMajorGroupAdded
-                                  ? basket.removeMajorGroup(option.组名)
-                                  : basket.addMajorGroup(option.组名)
-                              }
-                              className={`focus-ring inline-flex h-9 items-center gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-semibold transition ${
-                                isMajorGroupAdded
-                                  ? 'border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50'
-                                  : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
-                              }`}
-                            >
-                              {isMajorGroupAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                              {isMajorGroupAdded ? (isChinese ? '已加专业组' : 'Added') : (isChinese ? '专业组' : 'Group')}
-                            </button>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xs text-slate-500">
-                              {t('lookup.minRanking')}
-                            </p>
-                            <p className="font-semibold text-slate-900">
-                              {option.最低排名.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xs text-slate-500">
-                              {option.safetyLevel === 'notAdmitted' ? t('lookup.gap') : t('lookup.yourMargin')}
-                            </p>
-                            <p className={`font-semibold ${config.textClass}`}>
-                              {option.margin >= 0 ? '+' : ''}{option.margin.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xs text-slate-500">
-                              {t('lookup.scoreLine')}
-                            </p>
-                            <p className="font-semibold text-slate-900">
-                              {option.投档线}
-                            </p>
-                          </div>
-                        </div>
+                        <CompareMenu universityName={option.院校名} groupName={option.组名} />
                       </div>
-                    </motion.div>
+                      <dl className="result-metrics">
+                        <div><dt>{isChinese ? (config.hasInfo ? '580分位次' : '往年位次') : 'Past rank'}</dt><dd>{option.最低排名.toLocaleString()}</dd></div>
+                        <div><dt>{isChinese ? '位次差' : 'Rank gap'}</dt><dd className={config.textClass}>{option.margin >= 0 ? '+' : ''}{option.margin.toLocaleString()}</dd></div>
+                        <div><dt>{isChinese ? '投档线' : 'Cutoff'}</dt><dd>{config.hasInfo ? '580+' : option.投档线 || '—'}</dd></div>
+                      </dl>
+                      <details className="result-details">
+                        <summary className="focus-ring">{isChinese ? '详情' : 'Details'}<ChevronRight className="h-3.5 w-3.5" /></summary>
+                        <div className="result-detail-content">
+                          <p className="font-medium text-slate-700">{option.组名} · {selectedYear}</p>
+                          <p>{isChinese ? '位次差 = 往年参考位次 − 你的排名，仅供参考。' : 'Rank gap = historical reference rank minus your rank. For reference only.'}</p>
+                          {config.hasInfo && <p>{t('calc.possiblySafe.info')}</p>}
+
+                        </div>
+                      </details>
+                    </article>
                   )
                 })}
 
@@ -606,7 +475,7 @@ function LookupContent() {
                   </div>
                 )}
               </motion.div>
-            ) : userRanking ? (
+            ) : validRanking ? (
               <motion.div
                 key="empty"
                 initial={{ opacity: 0 }}
@@ -618,10 +487,7 @@ function LookupContent() {
                   {t('lookup.noResults')}
                 </h3>
                 <p className="text-sm text-slate-600">
-                  {t('lookup.noResults.message', {
-                    ranking: userRanking,
-                    year: selectedYear,
-                  })}
+                  {isChinese ? (searchTerm ? '换个关键词，或重置筛选。' : '试试其他排名或筛选条件。') : 'Try another search or reset your filters.'}
                 </p>
               </motion.div>
             ) : (
@@ -653,21 +519,13 @@ function LookupContent() {
             whileHover={reduceMotion ? undefined : { y: -2 }}
             whileTap={reduceMotion ? undefined : { scale: 0.98 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed right-4 z-[60] sm:right-6"
+            className="hidden sm:block fixed right-4 z-[60] sm:right-6"
             style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
           >
-            <div
-              className="pointer-events-none absolute -inset-x-3 bottom-[-10px] h-8 rounded-full bg-cyan-950/30 blur-2xl"
-              aria-hidden="true"
-            />
-            <div
-              className="pointer-events-none absolute inset-0 rounded-lg bg-cyan-100/30 blur-md"
-              aria-hidden="true"
-            />
             <Link
               href={compareHref}
               aria-label={isChinese ? `查看对比篮，${basket.totalItems} 项` : `Open compare basket, ${basket.totalItems} items`}
-              className="focus-ring group relative inline-flex h-12 items-center gap-2 rounded-lg border border-white/20 bg-[var(--brand-dark)] px-3.5 text-sm font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.22)_inset,0_14px_24px_rgba(0,47,61,0.24),0_28px_60px_rgba(0,47,61,0.22)] transition-colors duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--brand)] motion-reduce:transition-none"
+              className="focus-ring group relative inline-flex h-12 items-center gap-2 rounded-lg border border-white/20 bg-[var(--brand-dark)] px-3.5 text-sm font-semibold text-white shadow-lg transition-colors duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--brand)] motion-reduce:transition-none"
             >
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">
@@ -689,6 +547,8 @@ function LookupContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <MobileNavigation active="lookup" />
 
       {/* Footer */}
       <footer className="mt-10 border-t border-stone-200 bg-stone-50/80">

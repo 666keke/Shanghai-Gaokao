@@ -133,7 +133,7 @@ export function CompareBasketProvider({ children }: { children: React.ReactNode 
       {children}
       <AnimatePresence>
         {limitNotice && (
-          <div className="pointer-events-none fixed inset-x-4 top-20 z-[70] flex justify-center">
+          <div className="pointer-events-none fixed inset-x-4 top-20 z-[120] flex justify-center">
             <motion.div
               key={limitNotice.id}
               initial={{ opacity: 0, y: -12, scale: 0.98 }}

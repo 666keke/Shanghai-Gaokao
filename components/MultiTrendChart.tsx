@@ -9,9 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
 import { TrendingUp } from 'lucide-react'
 
@@ -50,6 +49,7 @@ export default function MultiTrendChart({
   title,
 }: MultiTrendChartProps) {
   const { t } = useLanguage()
+  const reduceMotion = useReducedMotion()
 
   const chartData = useMemo(() => {
     // Get all unique years
@@ -145,7 +145,7 @@ export default function MultiTrendChart({
 
   if (items.length === 0) {
     return (
-      <div className="workbench-card rounded-lg p-6">
+      <div className="trend-content">
         <h3 className="text-lg font-semibold mb-4">{t('chart.admissionTrends')}</h3>
         <div className="text-center text-slate-500 py-12">
           <TrendingUp className="h-12 w-12 text-slate-300 mx-auto mb-4" />
@@ -157,7 +157,7 @@ export default function MultiTrendChart({
 
   if (chartData.every((row) => items.every((item) => row[item] === undefined))) {
     return (
-      <div className="workbench-card rounded-lg p-6">
+      <div className="trend-content">
         <h3 className="text-lg font-semibold mb-4">{t('chart.admissionTrends')}</h3>
         <div className="text-center text-slate-500 py-8">
           {t('chart.noData', { name: title || items.join(', ') })}
@@ -171,49 +171,22 @@ export default function MultiTrendChart({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="workbench-card rounded-lg p-6"
+      className="trend-content"
     >
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
-        <h3 className="text-lg font-semibold text-slate-900">
-          {title || t('chart.admissionTrends')}
-        </h3>
-        <div className="text-sm text-slate-500">
-          {items.length} {mode === 'university' ? t('library.universitiesComparing') : t('library.majorGroupsComparing')}
-        </div>
-      </div>
+      <div className="trend-heading"><h3>{title || t('chart.admissionTrends')}</h3><span>{mode === 'university' ? (t('nav.title') === '上海高考志愿分析' ? '各组平均位次' : 'Average group rank') : (t('nav.title') === '上海高考志愿分析' ? '最低录取位次' : 'Minimum rank')}</span></div>
+      <div className="trend-legend">{itemStats.map(stat => <span key={stat.name}><span className="series-dot" style={{backgroundColor: stat.color}} />{stat.name}</span>)}</div>
+      <div className="trend-canvas">
 
-      {/* Legend with stats */}
-      <div className="flex flex-wrap gap-3 mb-4">
-        {itemStats.map((stat) => (
-          <div
-            key={stat.name}
-            className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
-            style={{ backgroundColor: `${stat.color}15` }}
-          >
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: stat.color }}
-            />
-            <span className="font-medium" style={{ color: stat.color }}>
-              {stat.name}
-            </span>
-            {stat.avgRanking && (
-              <span className="text-slate-500">
-                ({t('chart.averageRanking')}: {stat.avgRanking.toLocaleString()})
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="year" stroke="#64748b" fontSize={12} />
+          <LineChart data={chartData} margin={{top: 12, right: 8, left: 0, bottom: 0}}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="year" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} minTickGap={10} />
             <YAxis
               stroke="#64748b"
-              fontSize={12}
+              fontSize={11}
+              width={50}
+              tickLine={false}
+              axisLine={false}
               domain={[minRanking, maxRanking]}
               tickFormatter={(value) => value.toLocaleString()}
             />
@@ -230,17 +203,18 @@ export default function MultiTrendChart({
               ]}
               labelFormatter={(label) => `${label} ${t('common.year')}`}
             />
-            <Legend />
             {items.map((itemName, index) => (
               <Line
                 key={itemName}
-                type="monotone"
+                type="linear"
                 dataKey={itemName}
                 stroke={COLORS[index % COLORS.length]}
                 strokeWidth={2.5}
+                isAnimationActive={!reduceMotion}
+                animationDuration={220}
                 dot={{ fill: COLORS[index % COLORS.length], strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: COLORS[index % COLORS.length], strokeWidth: 2 }}
-                connectNulls
+                connectNulls={false}
               />
             ))}
           </LineChart>
@@ -248,8 +222,8 @@ export default function MultiTrendChart({
       </div>
 
       {/* Summary statistics */}
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        {itemStats.slice(0, 4).map((stat) => (
+      <details className="trend-statistics"><summary className="focus-ring">{t('nav.title') === '上海高考志愿分析' ? '统计详情' : 'Statistics'}</summary><div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
+        {itemStats.map((stat) => (
           <div
             key={stat.name}
             className="rounded-lg p-3 text-center"
@@ -258,6 +232,7 @@ export default function MultiTrendChart({
             <p className="text-xs text-slate-500 truncate" title={stat.name}>
               {stat.name}
             </p>
+            <p className="text-xs text-slate-500">{t('library.avgRanking')}</p>
             <p className="font-semibold text-lg" style={{ color: stat.color }}>
               {stat.avgRanking ? stat.avgRanking.toLocaleString() : 'N/A'}
             </p>
@@ -270,7 +245,7 @@ export default function MultiTrendChart({
             </p>
           </div>
         ))}
-      </div>
+      </div></details>
     </motion.div>
   )
 }
