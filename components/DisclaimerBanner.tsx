@@ -22,22 +22,22 @@ export default function DisclaimerBanner() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="my-5 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:p-5"
+      className="my-5 rounded-lg border border-stone-200 bg-stone-50 p-4"
     >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">
-          <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <AlertTriangle className="h-4 w-4 text-[color:var(--ink-soft)]" />
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-amber-800 mb-1">
+          <h3 className="text-sm font-medium text-[color:var(--ink)] mb-1">
             {t('disclaimer.title')}
           </h3>
-          <p className="text-sm text-amber-700 mb-4">
+          <p className="text-sm text-[color:var(--ink-soft)] mb-4">
             {t('disclaimer.content')}
           </p>
           <button
             onClick={setAgreed}
-            className="focus-ring inline-flex items-center gap-2 rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-600"
+            className="focus-ring inline-flex items-center gap-2 rounded-lg min-h-11 border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-[color:var(--ink)] transition-colors hover:bg-stone-100"
           >
             <CheckCircle2 className="h-4 w-4" />
             {t('disclaimer.agree')}

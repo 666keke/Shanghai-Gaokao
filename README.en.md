@@ -2,7 +2,7 @@
 
 [简体中文](./README.md)
 
-A web-based admission analysis workbench for Shanghai Gaokao candidates and families. It uses 2020-2024 Shanghai general undergraduate batch admission data to help users start from their citywide rank, inspect reachable major-group ranges, compare risk levels, and review multi-year trends.
+A web-based admission analysis workbench for Shanghai Gaokao candidates and families. It uses 2020-2025 Shanghai general undergraduate batch admission data to help users start from their citywide rank, inspect reachable major-group ranges, compare risk levels, and review multi-year trends.
 
 Live site: [https://666keke.github.io/Shanghai-Gaokao/](https://666keke.github.io/Shanghai-Gaokao/)
 

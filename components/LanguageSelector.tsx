@@ -17,7 +17,7 @@ export default function LanguageSelector() {
     return (
       <div className="relative">
         <button
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[color:var(--ink-soft)] transition-colors hover:bg-stone-100 hover:text-[color:var(--ink)]"
+          className="flex min-h-11 items-center gap-2 rounded-lg px-2 py-2 sm:px-3 text-sm text-[color:var(--ink-soft)] transition-colors hover:bg-stone-100 hover:text-[color:var(--ink)]"
           disabled
         >
           <Globe size={16} />
@@ -31,7 +31,7 @@ export default function LanguageSelector() {
     <div className="relative">
       <button
         onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
-        className="focus-ring flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[color:var(--ink-soft)] transition-colors hover:bg-stone-100 hover:text-[color:var(--ink)]"
+        className="focus-ring flex min-h-11 items-center gap-2 rounded-lg px-2 py-2 sm:px-3 text-sm text-[color:var(--ink-soft)] transition-colors hover:bg-stone-100 hover:text-[color:var(--ink)]"
         title={t('language.select')}
       >
         <Globe size={16} />

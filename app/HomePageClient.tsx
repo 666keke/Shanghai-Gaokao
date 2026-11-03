@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, BookOpenCheck, Building2, Check, GraduationCap, Plus, SearchCheck, ShieldCheck } from 'lucide-react'
+import { ArrowRight, BookOpenCheck, Building2, Check, GraduationCap, Plus, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useDisclaimer } from '../contexts/DisclaimerContext'
@@ -131,7 +131,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
   const transition = shouldReduceMotion
     ? { duration: 0 }
-    : { duration: 0.28, ease: [0.25, 1, 0.5, 1] as const }
+    : { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const }
 
   const years = useMemo(
     () => Array.from(new Set(data.map((item) => item.年份))).sort((a, b) => b - a),
@@ -207,46 +207,32 @@ export default function HomePageClient({ data }: HomePageClientProps) {
   return (
     <div className="min-h-screen pb-14">
       <main className="page-wrap pt-8 sm:pt-10">
-        <section className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_310px] lg:items-start lg:gap-7">
+        <section className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6">
           <div className="grid gap-6">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={transition}
-              className={`hero-workbench rounded-lg transition-[padding] duration-300 ${
-                isQueryCompact ? 'p-3 sm:p-4' : 'p-5 sm:p-6 lg:p-7'
+              className={`hero-workbench rounded-lg ${
+                isQueryCompact ? 'p-4' : 'p-5 sm:p-6'
               }`}
-              style={{
-                transitionTimingFunction: 'cubic-bezier(0.25, 1, 0.5, 1)',
-              }}
             >
-              <motion.div
-                initial={false}
-                animate={
-                  isQueryCompact
-                    ? { height: 0, opacity: 0, y: shouldReduceMotion ? 0 : -6, marginBottom: 0 }
-                    : { height: 'auto', opacity: 1, y: 0, marginBottom: 20 }
-                }
-                transition={transition}
-                className="overflow-hidden"
-                aria-hidden={isQueryCompact}
-              >
+              <div hidden={isQueryCompact} className="mb-6">
                 <div className="max-w-3xl">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-md bg-white/55 px-2.5 py-1 text-xs font-semibold text-[color:var(--brand-dark)]">
-                    <SearchCheck className="h-3.5 w-3.5" />
+                  <div className="mb-3 text-xs text-[color:var(--ink-soft)]">
                     {isChinese ? '第一步' : 'Step one'}
                   </div>
-                  <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-[color:var(--ink)] sm:text-5xl lg:text-[3.35rem]">
+                  <h1 className="max-w-3xl text-[32px] font-medium leading-tight text-[color:var(--ink)] sm:text-[40px]">
                     {isChinese ? '输入你的位次' : 'Enter your rank'}
                   </h1>
                   <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
                     {isChinese
-                      ? '查看匹配院校与专业组。'
-                      : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
+                      ? '从全市位次，查看历史投档范围'
+                      : 'Find universities and major groups by historical admission rank'}
                   </p>
                 </div>
                 <DisclaimerBanner />
-              </motion.div>
+              </div>
               <div className={!isLoading && !hasAgreed ? 'pointer-events-none opacity-50' : ''}>
                 <AdmissionChanceCalculator
                   data={data}
@@ -280,12 +266,12 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           <aside className="grid gap-4">
             {confirmedRanking && resultPayload ? (
               <>
-                <section className="workbench-card rounded-lg p-5">
+                <section className="workbench-card rounded-lg p-6">
                   <div className="mb-4">
-                    <p className="text-xs font-semibold uppercase text-[color:var(--brand)]">
+                    <p className="text-xs font-medium text-[color:var(--ink-soft)]">
                       {isChinese ? '下一步' : 'Next'}
                     </p>
-                    <h2 className="mt-1 text-base font-semibold text-[color:var(--ink)]">
+                    <h2 className="mt-1 text-base font-medium text-[color:var(--ink)]">
                       {isChinese ? '把结果变成清单' : 'Turn results into a list'}
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-[color:var(--ink-soft)]">
@@ -301,9 +287,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       className="hover-lift flex items-center justify-between rounded-lg border border-stone-200 bg-white/75 p-3"
                     >
                       <span className="flex items-center gap-3">
-                        <BookOpenCheck className="h-5 w-5 text-[color:var(--brand)]" />
+                        <BookOpenCheck className="h-4 w-4 text-[color:var(--ink-soft)]" />
                         <span>
-                          <span className="block text-sm font-semibold text-[color:var(--ink)]">
+                          <span className="block text-sm font-medium text-[color:var(--ink)]">
                             {isChinese ? '完整清单' : 'Full list'}
                           </span>
                           <span className="block text-xs text-[color:var(--ink-soft)]">
@@ -311,7 +297,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                           </span>
                         </span>
                       </span>
-                      <ArrowRight className="h-4 w-4 text-[color:var(--brand)]" />
+                      <ArrowRight className="h-4 w-4 text-[color:var(--ink-soft)]" />
                     </Link>
 
                     <Link
@@ -319,9 +305,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       className="hover-lift flex items-center justify-between rounded-lg border border-stone-200 bg-white/75 p-3"
                     >
                       <span className="flex items-center gap-3">
-                        <Building2 className="h-5 w-5 text-[color:var(--sage)]" />
+                        <Building2 className="h-4 w-4 text-[color:var(--ink-soft)]" />
                         <span>
-                          <span className="block text-sm font-semibold text-[color:var(--ink)]">
+                          <span className="block text-sm font-medium text-[color:var(--ink)]">
                             {isChinese ? '趋势核对' : 'Trend check'}
                           </span>
                           <span className="block text-xs text-[color:var(--ink-soft)]">
@@ -329,7 +315,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                           </span>
                         </span>
                       </span>
-                      <ArrowRight className="h-4 w-4 text-[color:var(--brand)]" />
+                      <ArrowRight className="h-4 w-4 text-[color:var(--ink-soft)]" />
                     </Link>
 
                     <Link
@@ -337,9 +323,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       className="hover-lift flex items-center justify-between rounded-lg border border-stone-200 bg-white/75 p-3"
                     >
                       <span className="flex items-center gap-3">
-                        <BookOpenCheck className="h-5 w-5 text-[color:var(--brand)]" />
+                        <BookOpenCheck className="h-4 w-4 text-[color:var(--ink-soft)]" />
                         <span>
-                          <span className="block text-sm font-semibold text-[color:var(--ink)]">
+                          <span className="block text-sm font-medium text-[color:var(--ink)]">
                             {isChinese ? '录取规则' : 'Admission guide'}
                           </span>
                           <span className="block text-xs text-[color:var(--ink-soft)]">
@@ -347,14 +333,14 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                           </span>
                         </span>
                       </span>
-                      <ArrowRight className="h-4 w-4 text-[color:var(--brand)]" />
+                      <ArrowRight className="h-4 w-4 text-[color:var(--ink-soft)]" />
                     </Link>
                   </div>
                 </section>
 
                 <section className="rounded-lg border border-stone-200 bg-white/55 p-4">
                   <div className="flex items-start gap-3">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--sage)]" />
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--ink-soft)]" />
                     <p className="text-xs leading-5 text-[color:var(--ink-soft)]">
                       {isChinese
                         ? '安全等级用于缩小范围，不替代招生章程、专业限制和当年官方数据。'
@@ -365,47 +351,47 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               </>
             ) : (
               <>
-                <section className="workbench-card rounded-lg p-5">
+                <section className="workbench-card rounded-lg p-6">
                   <div className="mb-4 flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-[color:var(--sage)]" />
-                    <h2 className="text-base font-semibold text-[color:var(--ink)]">
-                      {isChinese ? '工作流' : 'Workflow'}
+                    <ShieldCheck className="h-4 w-4 text-[color:var(--ink-soft)]" />
+                    <h2 className="text-base font-medium text-[color:var(--ink)]">
+                      {isChinese ? '使用步骤' : 'How to use'}
                     </h2>
                   </div>
                   <ol className="grid gap-3 text-sm text-[color:var(--ink-soft)]">
                     <li className="flex gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--brand-soft)] text-xs font-semibold text-[color:var(--brand-dark)]">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-stone-100 text-xs font-medium text-[color:var(--brand-dark)]">
                         1
                       </span>
-                      {isChinese ? '输入位次并选择参考年份。' : 'Enter your rank and choose a reference year.'}
+                      {isChinese ? '输入位次并选择参考年份' : 'Enter your rank and choose a reference year.'}
                     </li>
                     <li className="flex gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--brand-soft)] text-xs font-semibold text-[color:var(--brand-dark)]">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-stone-100 text-xs font-medium text-[color:var(--brand-dark)]">
                         2
                       </span>
-                      {isChinese ? '按安全、稳妥、冲刺分组检查专业组。' : 'Review major groups by safety category.'}
+                      {isChinese ? '按位次余量查看专业组分层' : 'Review major groups by safety category.'}
                     </li>
                     <li className="flex gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--brand-soft)] text-xs font-semibold text-[color:var(--brand-dark)]">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-stone-100 text-xs font-medium text-[color:var(--brand-dark)]">
                         3
                       </span>
-                      {isChinese ? '进入院校库核对多年趋势。' : 'Check multi-year trends in the library.'}
+                      {isChinese ? '进入院校库核对多年趋势' : 'Check multi-year trends in the library.'}
                     </li>
                   </ol>
                 </section>
 
                 <Link
                   href="/admission"
-                  className="workbench-card group block rounded-lg p-5 transition hover:border-[color:var(--brand)] hover:bg-white focus-ring"
+                  className="workbench-card group block rounded-lg p-6 transition hover:border-[color:var(--brand)] hover:bg-white focus-ring"
                 >
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <BookOpenCheck className="h-5 w-5 text-[color:var(--brand)]" />
-                      <h2 className="text-base font-semibold text-[color:var(--ink)]">
+                      <BookOpenCheck className="h-4 w-4 text-[color:var(--ink-soft)]" />
+                      <h2 className="text-base font-medium text-[color:var(--ink)]">
                         {isChinese ? '录取规则可视化' : 'Admission Guide'}
                       </h2>
                     </div>
-                    <span className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-200 bg-white text-[color:var(--brand)] transition group-hover:border-[color:var(--brand)] group-hover:bg-[var(--brand-soft)]">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-200 bg-white text-[color:var(--ink-soft)] transition group-hover:border-[color:var(--brand)] group-hover:bg-[var(--brand-soft)]">
                       <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                     </span>
                   </div>
@@ -418,20 +404,20 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
                 <Link
                   href="/trends"
-                  className="workbench-card group block rounded-lg p-5 transition hover:border-[color:var(--brand)] hover:bg-white focus-ring"
+                  className="workbench-card group block rounded-lg p-6 transition hover:border-[color:var(--brand)] hover:bg-white focus-ring"
                 >
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-[color:var(--brand)]" />
-                      <h2 className="text-base font-semibold text-[color:var(--ink)]">
+                      <Building2 className="h-4 w-4 text-[color:var(--ink-soft)]" />
+                      <h2 className="text-base font-medium text-[color:var(--ink)]">
                         {t('nav.library')}
                       </h2>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-stone-100 px-2 py-1 text-xs font-semibold text-[color:var(--ink-soft)]">
+                      <span className="rounded-md bg-stone-100 px-2 py-1 text-xs font-medium text-[color:var(--ink-soft)]">
                         {stats.latestYear}
                       </span>
-                      <span className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-200 bg-white text-[color:var(--brand)] transition group-hover:border-[color:var(--brand)] group-hover:bg-[var(--brand-soft)]">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-200 bg-white text-[color:var(--ink-soft)] transition group-hover:border-[color:var(--brand)] group-hover:bg-[var(--brand-soft)]">
                         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                       </span>
                     </div>
@@ -441,19 +427,19 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   </p>
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <Metric value={stats.latestRecords.toLocaleString()} label={t('dashboard.stats.records')} />
-                    <Metric value={stats.totalUniversities} label={t('dashboard.stats.universities')} />
+                    <Metric value={stats.totalUniversities.toLocaleString()} label={t('dashboard.stats.universities')} />
                   </div>
-                  <div className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[color:var(--brand)]">
+                  <div className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-[color:var(--ink-soft)]">
                     {isChinese ? '进入院校库' : 'Open library'}
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-4 w-4" />
                   </div>
                 </Link>
 
-                <section className="workbench-card rounded-lg p-5">
+                <section className="workbench-card rounded-lg p-6">
                   <div className="mb-4">
                     <div className="flex items-center gap-2">
-                      <GraduationCap className="h-5 w-5 text-[color:var(--brand)]" />
-                      <h2 className="text-base font-semibold text-[color:var(--ink)]">
+                      <GraduationCap className="h-4 w-4 text-[color:var(--ink-soft)]" />
+                      <h2 className="text-base font-medium text-[color:var(--ink)]">
                         {isChinese ? '常看院校' : 'Featured Schools'}
                       </h2>
                     </div>
@@ -478,7 +464,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                             />
                           </div>
                           <div className="min-w-0">
-                            <div className="truncate text-sm font-semibold text-[color:var(--ink)]">
+                            <div className="truncate text-sm font-medium text-[color:var(--ink)]">
                               {isChinese ? logo.name : logo.englishName}
                             </div>
                             <div className="truncate text-xs text-[color:var(--ink-soft)]">
@@ -489,13 +475,13 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                             type="button"
                             aria-pressed={isAdded}
                             onClick={() => toggleFeaturedUniversity(logo.name)}
-                            className={`focus-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-xs font-semibold transition ${
+                            className={`focus-ring inline-flex h-11 items-center sm:h-9 gap-1 rounded-md border px-2 text-xs font-medium transition ${
                               isAdded
                                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100'
-                                : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
+                                : 'border-stone-200 text-[color:var(--ink-soft)] hover:border-[var(--brand)]'
                             }`}
                           >
-                            {isAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                            {isAdded ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                             {isAdded ? (isChinese ? '已加' : 'Added') : (isChinese ? '对比' : 'Add')}
                           </button>
                         </div>
@@ -515,7 +501,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="font-medium text-[color:var(--ink)]">{t('nav.title')}</span>
             <span>
-              {stats.totalRecords.toLocaleString()} records · {stats.yearsCovered} years
+              {isChinese
+                ? `${stats.totalRecords.toLocaleString()} 条记录 · ${stats.yearsCovered} 年数据`
+                : `${stats.totalRecords.toLocaleString()} records · ${stats.yearsCovered} years`}
             </span>
           </div>
         </div>
@@ -527,8 +515,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 function Metric({ value, label }: { value: string | number; label: string }) {
   return (
     <div className="rounded-lg border border-stone-200 bg-white/70 p-3">
-      <div className="text-lg font-semibold text-[color:var(--ink)]">{value}</div>
-      <div className="mt-1 text-[11px] font-medium uppercase text-[color:var(--ink-soft)]">
+      <div className="text-lg font-medium text-[color:var(--ink)]">{value}</div>
+      <div className="mt-1 text-xs font-medium text-[color:var(--ink-soft)]">
         {label}
       </div>
     </div>

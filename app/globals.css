@@ -67,6 +67,17 @@
       "Segoe UI",
       sans-serif;
     text-rendering: optimizeLegibility;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lucide {
+    stroke-width: 1.5;
+    flex-shrink: 0;
+  }
+
+  :where(a, button, input, select):focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
   }
 
   ::selection {
@@ -77,16 +88,7 @@
 
 @layer utilities {
   .app-shell {
-    background:
-      linear-gradient(180deg, oklch(0.99 0.007 86) 0%, var(--paper) 42%, oklch(0.955 0.014 88) 100%);
-  }
-
-  .grid-overlay {
-    background-image:
-      linear-gradient(oklch(0.68 0.018 78 / 0.18) 1px, transparent 1px),
-      linear-gradient(90deg, oklch(0.68 0.018 78 / 0.18) 1px, transparent 1px);
-    background-size: 32px 32px;
-    mask-image: linear-gradient(180deg, black 0%, transparent 55%);
+    background: var(--paper);
   }
 
   .page-wrap {
@@ -98,17 +100,14 @@
   .glass-card {
     background: color-mix(in oklch, var(--paper-strong) 88%, white);
     border: 1px solid var(--line);
-    box-shadow: 0 18px 42px -36px oklch(0.22 0.04 245 / 0.42);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
   }
 
   .hero-workbench {
     position: relative;
     overflow: hidden;
-    background:
-      linear-gradient(180deg, color-mix(in oklch, var(--brand-soft) 22%, transparent) 0%, transparent 58%),
-      linear-gradient(135deg, color-mix(in oklch, var(--paper-strong) 98%, white) 0%, color-mix(in oklch, var(--brand-soft) 24%, white) 62%, color-mix(in oklch, var(--sage-soft) 18%, white) 100%);
-    border: 1px solid color-mix(in oklch, var(--brand) 16%, var(--line));
-    box-shadow: 0 24px 60px -46px oklch(0.22 0.04 245 / 0.42);
+    background: var(--paper-strong);
+    border: 1px solid var(--line);
   }
 
   .hero-workbench::before {
@@ -120,16 +119,16 @@
   }
 
   .soft-shadow {
-    box-shadow: 0 18px 42px -36px oklch(0.22 0.04 245 / 0.42);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
   }
 
   .hover-lift {
-    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+    transition: border-color 160ms ease-out, background-color 160ms ease-out;
   }
 
   .hover-lift:hover {
-    transform: translateY(-2px);
     border-color: color-mix(in oklch, var(--brand) 38%, var(--line));
+    background-color: white;
   }
 
   .pill {
@@ -160,7 +159,7 @@
   }
 
   .data-table th {
-    @apply px-4 py-3 text-left text-xs font-semibold uppercase;
+    @apply px-4 py-3 text-left text-xs font-medium;
     background: color-mix(in oklch, var(--paper) 85%, white);
     color: var(--ink-soft);
     letter-spacing: 0;
@@ -178,5 +177,17 @@
 
   .hide-scrollbar {
     scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

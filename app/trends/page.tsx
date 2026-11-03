@@ -308,8 +308,7 @@ export default function LibraryPage() {
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <Building2 className="h-8 w-8 text-[color:var(--brand)]" />
+              <h1 className="text-[28px] sm:text-[32px] font-medium leading-tight text-[color:var(--ink)]">
                 {t('library.title')}
               </h1>
               <p className="text-slate-600 mt-1">{t('library.subtitle')}</p>
@@ -317,11 +316,11 @@ export default function LibraryPage() {
 
             <div className="flex items-center gap-3">
               <span className="pill">
-                <GraduationCap className="h-3.5 w-3.5 text-[color:var(--brand)]" />
+                <GraduationCap className="h-4 w-4 text-[color:var(--brand)]" />
                 {stats.universities} {t('dashboard.stats.universities')}
               </span>
               <span className="pill">
-                <BarChart3 className="h-3.5 w-3.5 text-[color:var(--sage)]" />
+                <BarChart3 className="h-4 w-4 text-[color:var(--sage)]" />
                 {stats.totalRecords.toLocaleString()} {t('dashboard.stats.records')}
               </span>
             </div>
@@ -345,7 +344,7 @@ export default function LibraryPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewMode('university')}
-                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  className={`flex items-center gap-2 min-h-11 rounded-lg px-4 py-2 text-sm font-medium transition ${
                     viewMode === 'university'
                       ? 'bg-[var(--brand-dark)] text-white'
                       : 'border border-stone-300 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
@@ -356,7 +355,7 @@ export default function LibraryPage() {
                 </button>
                 <button
                   onClick={() => setViewMode('majorGroup')}
-                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  className={`flex items-center gap-2 min-h-11 rounded-lg px-4 py-2 text-sm font-medium transition ${
                     viewMode === 'majorGroup'
                       ? 'bg-[var(--brand-dark)] text-white'
                       : 'border border-stone-300 bg-white text-slate-600 hover:border-[var(--brand)] hover:text-[color:var(--brand)]'
@@ -405,7 +404,7 @@ export default function LibraryPage() {
                           onClick={() => removeUniversity(uni)}
                           className="hover:opacity-70"
                         >
-                          <X className="h-3.5 w-3.5" />
+                          <X className="h-4 w-4" />
                         </button>
                       </motion.span>
                     ))
@@ -436,7 +435,7 @@ export default function LibraryPage() {
                           onClick={() => removeMajorGroup(group)}
                           className="hover:opacity-70"
                         >
-                          <X className="h-3.5 w-3.5" />
+                          <X className="h-4 w-4" />
                         </button>
                       </motion.span>
                     ))
@@ -451,9 +450,9 @@ export default function LibraryPage() {
             <AnimatePresence>
               {showAddPanel && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   className="overflow-hidden"
                 >
                   <div className="pt-4 border-t border-slate-200">
@@ -586,8 +585,8 @@ export default function LibraryPage() {
                   className="workbench-card rounded-lg p-6"
                 >
                   <div className="flex items-center gap-2 mb-6">
-                    <Table2 className="h-5 w-5 text-[color:var(--brand)]" />
-                    <h3 className="text-lg font-semibold text-slate-900">
+                    <Table2 className="h-4 w-4 text-[color:var(--brand)]" />
+                    <h3 className="text-lg font-medium text-slate-900">
                       {t('library.yearlyComparison')}
                     </h3>
                   </div>
@@ -608,7 +607,7 @@ export default function LibraryPage() {
                                 }}
                               />
                               <div>
-                                <h4 className="text-sm font-semibold leading-5 text-slate-900">
+                                <h4 className="text-sm font-medium leading-5 text-slate-900">
                                   {item.groupName}
                                 </h4>
                                 <p className="text-xs text-slate-500">{item.universityName}</p>
@@ -616,16 +615,16 @@ export default function LibraryPage() {
                             </div>
                           </div>
                           <div className="flex-shrink-0 text-right">
-                            <div className="text-[10px] font-medium text-slate-500">
+                            <div className="text-xs font-medium text-slate-500">
                               {t('library.avgRanking')}
                             </div>
-                            <div className="text-sm font-semibold text-[color:var(--brand)]">
+                            <div className="text-sm font-medium text-[color:var(--brand)]">
                               {item.avgRanking?.toLocaleString() || '-'}
                             </div>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-5 gap-1">
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                           {allYears.map((year) => {
                             const yearItem = item.yearData[year]
 
@@ -634,15 +633,15 @@ export default function LibraryPage() {
                                 key={year}
                                 className="min-h-[72px] rounded-md border border-stone-200 bg-stone-50 px-1.5 py-2 text-center"
                               >
-                                <div className="text-[10px] font-semibold text-slate-500">
+                                <div className="text-xs font-medium text-slate-500">
                                   {year}
                                 </div>
                                 {yearItem?.ranking ? (
                                   <>
-                                    <div className="mt-1 text-xs font-semibold leading-4 text-slate-900">
+                                    <div className="mt-1 text-xs font-medium leading-4 text-slate-900">
                                       {yearItem.ranking.toLocaleString()}
                                     </div>
-                                    <div className="mt-0.5 break-words text-[10px] leading-3 text-slate-500">
+                                    <div className="mt-0.5 break-words text-xs leading-4 text-slate-500">
                                       {yearItem.score}
                                     </div>
                                   </>
@@ -680,7 +679,7 @@ export default function LibraryPage() {
                             key={item.groupName}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
+                            transition={{ delay: Math.min(index, 5) * 0.03, duration: 0.18 }}
                             className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                           >
                             <td className="py-3 px-4 sticky left-0 bg-white/95 backdrop-blur z-10">
@@ -697,7 +696,7 @@ export default function LibraryPage() {
                               </div>
                             </td>
                             <td className="py-3 px-4 text-center">
-                              <span className="font-semibold text-[color:var(--brand)]">
+                              <span className="font-medium text-[color:var(--brand)]">
                                 {item.avgRanking?.toLocaleString() || '-'}
                               </span>
                             </td>
@@ -740,7 +739,7 @@ export default function LibraryPage() {
                   className="workbench-card rounded-lg p-8 text-center"
                 >
                   <TrendingUp className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">
                     {t('library.noMajorGroupsSelected')}
                   </h3>
                   <p className="text-sm text-slate-600">
@@ -757,8 +756,8 @@ export default function LibraryPage() {
       <footer className="mt-10 border-t border-stone-200 bg-stone-50/80">
         <div className="page-wrap py-8 text-center">
           <div className="flex items-center justify-center space-x-2 mb-2 text-slate-700">
-            <GraduationCap className="h-5 w-5" />
-            <span className="text-base font-semibold">{t('nav.title')}</span>
+            <GraduationCap className="h-4 w-4" />
+            <span className="text-base font-medium">{t('nav.title')}</span>
           </div>
           <p className="text-sm text-slate-500">{t('library.subtitle')}</p>
         </div>

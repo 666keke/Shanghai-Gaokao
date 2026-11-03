@@ -44,30 +44,31 @@ export default function Navigation() {
     <>
       <nav className="sticky top-0 z-50 border-b border-stone-200/80 bg-stone-50/95 backdrop-blur">
         <div className="page-wrap">
-          <div className="flex min-h-[72px] items-center justify-between gap-4">
-            <Link href="/" className="flex min-w-0 items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_oklch,var(--brand-soft)_76%,white)] text-[color:var(--brand-dark)]">
-                <GraduationCap className="h-5 w-5" />
+          <div className="flex min-h-16 items-center justify-between gap-4">
+            <Link href="/" className="focus-ring flex min-w-0 items-center gap-3 rounded-md">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-stone-100 text-[color:var(--brand-dark)]">
+                <GraduationCap className="h-4 w-4" />
               </span>
               <div className="min-w-0">
                 <h1 className="truncate text-base font-semibold tracking-tight text-[color:var(--ink)] sm:text-lg">
                   {t('nav.title')}
                 </h1>
                 <p className="hidden text-xs text-[color:var(--ink-soft)] sm:block">
-                  2020-2025 admission data
+                  {isChinese ? '2020–2025 年历史投档数据' : '2020–2025 admission data'}
                 </p>
               </div>
             </Link>
 
-            <div className="hidden items-center gap-3 md:flex">
+            <div className="hidden items-center gap-3 xl:flex">
               <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white/70 p-1">
                 {navItems.map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
-                    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
+                    aria-current={isActiveRoute(href) ? 'page' : undefined}
+                    className={`focus-ring flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
                       isActiveRoute(href)
-                        ? 'bg-[var(--brand-dark)] text-white'
+                        ? 'bg-stone-100 text-[color:var(--brand-dark)]'
                         : 'text-[color:var(--ink-soft)] hover:bg-stone-100 hover:text-[color:var(--ink)]'
                     }`}
                   >
@@ -81,6 +82,8 @@ export default function Navigation() {
                 <button
                   type="button"
                   onClick={() => setIsBasketOpen((open) => !open)}
+                  aria-expanded={isBasketOpen}
+                  aria-controls="compare-basket-panel"
                   className="focus-ring flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:bg-stone-100 hover:text-[color:var(--ink)]"
                 >
                   <ShoppingBasket className="h-4 w-4" />
@@ -98,15 +101,17 @@ export default function Navigation() {
               <LanguageSelector />
             </div>
 
-            <div className="flex items-center gap-2 md:hidden">
+            <div className="flex items-center gap-2 xl:hidden">
               <LanguageSelector />
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen((open) => !open)}
-                className="focus-ring rounded-lg border border-stone-200 bg-white/80 p-2 text-[color:var(--ink-soft)]"
-                aria-label="Toggle mobile menu"
+                className="focus-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-stone-200 bg-white/80 text-[color:var(--ink-soft)]"
+                aria-label={isChinese ? '打开或关闭导航' : 'Toggle navigation'}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-navigation"
               >
-                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -114,14 +119,14 @@ export default function Navigation() {
       </nav>
 
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="fixed inset-0 z-40 xl:hidden">
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label={isChinese ? '关闭导航' : 'Close navigation'}
             className="absolute inset-0 bg-slate-900/20"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="absolute left-4 right-4 top-20 rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-3 shadow-xl">
+          <div id="mobile-navigation" className="absolute left-4 right-4 top-20 rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-3 shadow-xl">
             <div className="mb-2 flex items-center gap-2 px-2 py-2 text-sm font-semibold text-[color:var(--ink)]">
               <BarChart3 className="h-4 w-4 text-[color:var(--brand)]" />
               {isChinese ? '导航' : 'Navigation'}
@@ -131,9 +136,10 @@ export default function Navigation() {
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center justify-between rounded-md px-3 py-3 text-sm font-medium ${
+                  aria-current={isActiveRoute(href) ? 'page' : undefined}
+                  className={`focus-ring flex items-center justify-between rounded-md px-3 py-3 text-sm font-medium ${
                     isActiveRoute(href)
-                      ? 'bg-[var(--brand-dark)] text-white'
+                      ? 'bg-stone-100 text-[color:var(--brand-dark)]'
                       : 'text-[color:var(--ink-soft)] hover:bg-stone-100'
                   }`}
                 >
@@ -168,7 +174,7 @@ function BasketPanel({ isChinese }: { isChinese: boolean }) {
   const hasItems = basket.totalItems > 0
 
   return (
-    <div className="absolute right-0 top-12 z-50 w-[360px] rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-4 shadow-xl">
+    <div id="compare-basket-panel" className="absolute right-0 top-12 z-50 w-[360px] rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-4 shadow-xl">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-[color:var(--ink)]">
@@ -233,7 +239,7 @@ function BasketSection({
 
   return (
     <div>
-      <div className="mb-1 text-xs font-semibold uppercase text-[color:var(--ink-soft)]">{title}</div>
+      <div className="mb-1 text-xs font-semibold text-[color:var(--ink-soft)]">{title}</div>
       <div className="grid gap-1">
         {items.map((item) => (
           <div
@@ -247,7 +253,7 @@ function BasketSection({
               className="focus-ring rounded-md p-1 text-slate-400 hover:bg-stone-100 hover:text-rose-700"
               aria-label={`Remove ${item}`}
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         ))}

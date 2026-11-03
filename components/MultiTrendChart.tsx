@@ -9,9 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
 import { TrendingUp } from 'lucide-react'
 
@@ -50,6 +49,7 @@ export default function MultiTrendChart({
   title,
 }: MultiTrendChartProps) {
   const { t } = useLanguage()
+  const reduceMotion = useReducedMotion()
 
   const chartData = useMemo(() => {
     // Get all unique years
@@ -146,7 +146,7 @@ export default function MultiTrendChart({
   if (items.length === 0) {
     return (
       <div className="workbench-card rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">{t('chart.admissionTrends')}</h3>
+        <h3 className="text-lg font-medium mb-4">{t('chart.admissionTrends')}</h3>
         <div className="text-center text-slate-500 py-12">
           <TrendingUp className="h-12 w-12 text-slate-300 mx-auto mb-4" />
           <p>{mode === 'university' ? t('trends.selectUniversity') : t('trends.noMajorGroups')}</p>
@@ -158,7 +158,7 @@ export default function MultiTrendChart({
   if (chartData.every((row) => items.every((item) => row[item] === undefined))) {
     return (
       <div className="workbench-card rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">{t('chart.admissionTrends')}</h3>
+        <h3 className="text-lg font-medium mb-4">{t('chart.admissionTrends')}</h3>
         <div className="text-center text-slate-500 py-8">
           {t('chart.noData', { name: title || items.join(', ') })}
         </div>
@@ -168,13 +168,13 @@ export default function MultiTrendChart({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       className="workbench-card rounded-lg p-6"
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
-        <h3 className="text-lg font-semibold text-slate-900">
+        <h3 className="text-lg font-medium text-slate-900">
           {title || t('chart.admissionTrends')}
         </h3>
         <div className="text-sm text-slate-500">
@@ -187,14 +187,13 @@ export default function MultiTrendChart({
         {itemStats.map((stat) => (
           <div
             key={stat.name}
-            className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
-            style={{ backgroundColor: `${stat.color}15` }}
+            className="flex flex-wrap items-center gap-2 text-sm"
           >
             <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: stat.color }}
             />
-            <span className="font-medium" style={{ color: stat.color }}>
+            <span className="font-medium text-[color:var(--ink)]">
               {stat.name}
             </span>
             {stat.avgRanking && (
@@ -206,14 +205,17 @@ export default function MultiTrendChart({
         ))}
       </div>
 
-      <div className="h-80">
+      <div className="h-72 sm:h-80" role="img" aria-label={`${title || t('chart.admissionTrends')}: ${items.join(', ')}`}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="year" stroke="#64748b" fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" vertical={false} />
+            <XAxis dataKey="year" stroke="#64748b" fontSize={12} axisLine={false} tickLine={false} tickMargin={12} />
             <YAxis
               stroke="#64748b"
               fontSize={12}
+              axisLine={false}
+              tickLine={false}
+              width={64}
               domain={[minRanking, maxRanking]}
               tickFormatter={(value) => value.toLocaleString()}
             />
@@ -230,14 +232,15 @@ export default function MultiTrendChart({
               ]}
               labelFormatter={(label) => `${label} ${t('common.year')}`}
             />
-            <Legend />
             {items.map((itemName, index) => (
               <Line
                 key={itemName}
                 type="monotone"
                 dataKey={itemName}
                 stroke={COLORS[index % COLORS.length]}
-                strokeWidth={2.5}
+                isAnimationActive={!reduceMotion}
+                animationDuration={300}
+                strokeWidth={index === 0 ? 3 : 2}
                 dot={{ fill: COLORS[index % COLORS.length], strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: COLORS[index % COLORS.length], strokeWidth: 2 }}
                 connectNulls
@@ -252,16 +255,15 @@ export default function MultiTrendChart({
         {itemStats.slice(0, 4).map((stat) => (
           <div
             key={stat.name}
-            className="rounded-lg p-3 text-center"
-            style={{ backgroundColor: `${stat.color}10` }}
+            className="rounded-lg border border-stone-200 bg-stone-50 p-3 text-center"
           >
             <p className="text-xs text-slate-500 truncate" title={stat.name}>
               {stat.name}
             </p>
-            <p className="font-semibold text-lg" style={{ color: stat.color }}>
+            <p className="font-medium text-2xl text-[color:var(--ink)]">
               {stat.avgRanking ? stat.avgRanking.toLocaleString() : 'N/A'}
             </p>
-            <p className="text-xs" style={{ color: stat.color }}>
+            <p className="text-xs text-[color:var(--ink-soft)]">
               {stat.trend === 'up'
                 ? t('chart.improving')
                 : stat.trend === 'down'

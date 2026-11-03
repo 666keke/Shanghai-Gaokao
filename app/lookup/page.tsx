@@ -316,8 +316,7 @@ function LookupContent() {
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <Target className="h-8 w-8 text-[color:var(--brand)]" />
+              <h1 className="text-[28px] sm:text-[32px] font-medium leading-tight text-[color:var(--ink)]">
                 {t('lookup.title')}
               </h1>
               <p className="text-slate-600 mt-1">{t('lookup.subtitle')}</p>
@@ -328,20 +327,20 @@ function LookupContent() {
                 {stats.possiblySafe > 0 && (
                   <div className="flex items-center gap-2 rounded-md bg-sky-100 px-3 py-1.5 text-sm">
                     <HelpCircle className="h-4 w-4 text-sky-600" />
-                    <span className="font-medium text-sky-700">{stats.possiblySafe}</span>
+                    <span className="font-medium text-sky-700">{stats.possiblySafe.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 rounded-md bg-emerald-100 px-3 py-1.5 text-sm">
                   <Shield className="h-4 w-4 text-emerald-600" />
-                  <span className="font-medium text-emerald-700">{stats.safe}</span>
+                  <span className="font-medium text-emerald-700">{stats.safe.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center gap-2 rounded-md bg-amber-100 px-3 py-1.5 text-sm">
                   <AlertTriangle className="h-4 w-4 text-amber-600" />
-                  <span className="font-medium text-amber-700">{stats.moderate}</span>
+                  <span className="font-medium text-amber-700">{stats.moderate.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center gap-2 rounded-md bg-rose-100 px-3 py-1.5 text-sm">
                   <AlertCircle className="h-4 w-4 text-rose-600" />
-                  <span className="font-medium text-rose-700">{stats.risky}</span>
+                  <span className="font-medium text-rose-700">{stats.risky.toLocaleString()}</span>
                 </div>
               </div>
             )}
@@ -362,20 +361,21 @@ function LookupContent() {
             <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
               {/* Ranking Input */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label htmlFor="lookup-rank" className="block text-sm font-medium text-slate-700 mb-2">
                   {t('calc.yourRanking')}
                 </label>
                 <div className="relative">
                   <Target className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="number"
+                    id="lookup-rank"
                     placeholder={t('calc.placeholder')}
                     value={userRanking}
                     onChange={(e) => {
                       setUserRanking(e.target.value)
                       setDisplayLimit(30)
                     }}
-                    className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="focus-ring h-12 w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     min="1"
                   />
                 </div>
@@ -383,13 +383,14 @@ function LookupContent() {
 
               {/* Year Selector */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label htmlFor="lookup-year" className="block text-sm font-medium text-slate-700 mb-2">
                   {t('calc.referenceYear')}
                 </label>
                 <select
+                  id="lookup-year"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
+                  className="focus-ring h-12 w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -401,15 +402,16 @@ function LookupContent() {
 
               {/* Safety Filter */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label htmlFor="lookup-safety" className="block text-sm font-medium text-slate-700 mb-2">
                   {t('lookup.safetyLevel')}
                 </label>
                 <select
+                  id="lookup-safety"
                   value={safetyFilter}
                   onChange={(e) =>
                     setSafetyFilter(e.target.value as typeof safetyFilter)
                   }
-                  className="focus-ring h-[46px] w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
+                  className="focus-ring h-12 w-full rounded-lg border border-stone-300 bg-white px-4 text-sm"
                 >
                   <option value="all">{t('lookup.allLevels')}</option>
                   <option value="possiblySafe">{t('calc.possiblySafe')}</option>
@@ -431,7 +433,8 @@ function LookupContent() {
                     placeholder={t('dashboard.search.placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="focus-ring w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-10 pr-4 text-sm"
+                    aria-label={t('common.search')}
+                  className="focus-ring h-12 w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-sm"
                   />
                 </div>
               </div>
@@ -448,8 +451,8 @@ function LookupContent() {
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-slate-600">
                 {t('lookup.searchResults', {
-                  count: filteredResults.length,
-                  ranking: userRanking,
+                  count: filteredResults.length.toLocaleString(),
+                  ranking: Number(userRanking).toLocaleString(),
                   year: selectedYear,
                 })}
               </p>
@@ -488,19 +491,19 @@ function LookupContent() {
                       key={`${option.组名}-${index}`}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(index * 0.02, 0.3) }}
-                      className={`rounded-lg border ${config.borderClass} ${config.bgClass} p-4 transition-all hover:bg-white/80`}
+                      transition={{ delay: Math.min(index, 5) * 0.02, duration: 0.18 }}
+                      className={`rounded-lg border ${config.borderClass} ${config.bgClass} p-4 transition-colors hover:bg-white/80`}
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="font-semibold text-slate-900 truncate">
+                            <h3 className="font-medium text-slate-900 break-words">
                               {option.院校名}
                             </h3>
                             <span
                               className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${config.badgeClass}`}
                             >
-                              <Icon className="h-3 w-3" />
+                              <Icon className="h-4 w-4" />
                               {config.label}
                               {config.hasInfo && (
                                 <button
@@ -510,12 +513,12 @@ function LookupContent() {
                                   }}
                                   className="ml-0.5 hover:opacity-70"
                                 >
-                                  <Info className="h-3 w-3" />
+                                  <Info className="h-4 w-4" />
                                 </button>
                               )}
                             </span>
                           </div>
-                          <p className="text-sm text-slate-600 truncate">
+                          <p className="text-sm text-slate-600 break-words">
                             {option.组名} · {option.组号}
                           </p>
                           {config.hasInfo && showPossiblySafeInfo && (
@@ -535,13 +538,13 @@ function LookupContent() {
                                   ? basket.removeUniversity(option.院校名)
                                   : basket.addUniversity(option.院校名)
                               }
-                              className={`focus-ring inline-flex h-9 items-center gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-semibold transition ${
+                              className={`focus-ring inline-flex h-11 items-center sm:h-9 gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-medium transition ${
                                 isUniversityAdded
                                   ? 'border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50'
                                   : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
                               }`}
                             >
-                              {isUniversityAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                              {isUniversityAdded ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                               {isUniversityAdded ? (isChinese ? '已加院校' : 'Added') : (isChinese ? '院校' : 'School')}
                             </button>
                             <button
@@ -552,13 +555,13 @@ function LookupContent() {
                                   ? basket.removeMajorGroup(option.组名)
                                   : basket.addMajorGroup(option.组名)
                               }
-                              className={`focus-ring inline-flex h-9 items-center gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-semibold transition ${
+                              className={`focus-ring inline-flex h-11 items-center sm:h-9 gap-1 rounded-md border bg-white/75 px-2.5 text-xs font-medium transition ${
                                 isMajorGroupAdded
                                   ? 'border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50'
                                   : 'border-stone-200 text-[color:var(--brand)] hover:border-[var(--brand)]'
                               }`}
                             >
-                              {isMajorGroupAdded ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                              {isMajorGroupAdded ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                               {isMajorGroupAdded ? (isChinese ? '已加专业组' : 'Added') : (isChinese ? '专业组' : 'Group')}
                             </button>
                           </div>
@@ -566,7 +569,7 @@ function LookupContent() {
                             <p className="text-xs text-slate-500">
                               {t('lookup.minRanking')}
                             </p>
-                            <p className="font-semibold text-slate-900">
+                            <p className="font-medium text-slate-900">
                               {option.最低排名.toLocaleString()}
                             </p>
                           </div>
@@ -574,7 +577,7 @@ function LookupContent() {
                             <p className="text-xs text-slate-500">
                               {option.safetyLevel === 'notAdmitted' ? t('lookup.gap') : t('lookup.yourMargin')}
                             </p>
-                            <p className={`font-semibold ${config.textClass}`}>
+                            <p className={`font-medium ${config.textClass}`}>
                               {option.margin >= 0 ? '+' : ''}{option.margin.toLocaleString()}
                             </p>
                           </div>
@@ -582,7 +585,7 @@ function LookupContent() {
                             <p className="text-xs text-slate-500">
                               {t('lookup.scoreLine')}
                             </p>
-                            <p className="font-semibold text-slate-900">
+                            <p className="font-medium text-slate-900">
                               {option.投档线}
                             </p>
                           </div>
@@ -597,7 +600,7 @@ function LookupContent() {
                   <div className="text-center pt-4">
                     <button
                       onClick={() => setDisplayLimit((prev) => prev + 30)}
-                      className="focus-ring inline-flex items-center gap-2 rounded-lg bg-[var(--brand-dark)] px-6 py-3 text-sm font-semibold text-white hover:bg-[var(--brand)]"
+                      className="focus-ring inline-flex items-center gap-2 rounded-lg bg-[var(--brand-dark)] px-6 py-3 text-sm font-medium text-white hover:bg-[var(--brand)]"
                     >
                       {t('dashboard.loadMore', {
                         remaining: filteredResults.length - displayLimit,
@@ -614,7 +617,7 @@ function LookupContent() {
                 className="workbench-card rounded-lg p-8 text-center"
               >
                 <Target className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                <h3 className="text-lg font-medium text-slate-900 mb-2">
                   {t('lookup.noResults')}
                 </h3>
                 <p className="text-sm text-slate-600">
@@ -632,7 +635,7 @@ function LookupContent() {
                 className="workbench-card rounded-lg p-8 text-center"
               >
                 <Target className="h-12 w-12 text-[color:var(--brand)] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                <h3 className="text-lg font-medium text-slate-900 mb-2">
                   {t('calc.empty.title')}
                 </h3>
                 <p className="text-sm text-slate-600 max-w-md mx-auto">
@@ -650,24 +653,15 @@ function LookupContent() {
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.96 }}
             animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.98 }}
-            whileHover={reduceMotion ? undefined : { y: -2 }}
             whileTap={reduceMotion ? undefined : { scale: 0.98 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             className="fixed right-4 z-[60] sm:right-6"
             style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
           >
-            <div
-              className="pointer-events-none absolute -inset-x-3 bottom-[-10px] h-8 rounded-full bg-cyan-950/30 blur-2xl"
-              aria-hidden="true"
-            />
-            <div
-              className="pointer-events-none absolute inset-0 rounded-lg bg-cyan-100/30 blur-md"
-              aria-hidden="true"
-            />
             <Link
               href={compareHref}
               aria-label={isChinese ? `查看对比篮，${basket.totalItems} 项` : `Open compare basket, ${basket.totalItems} items`}
-              className="focus-ring group relative inline-flex h-12 items-center gap-2 rounded-lg border border-white/20 bg-[var(--brand-dark)] px-3.5 text-sm font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.22)_inset,0_14px_24px_rgba(0,47,61,0.24),0_28px_60px_rgba(0,47,61,0.22)] transition-colors duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--brand)] motion-reduce:transition-none"
+              className="focus-ring group relative inline-flex h-12 items-center gap-2 rounded-lg border border-transparent bg-[var(--brand-dark)] px-4 text-sm font-medium text-white shadow-[0_4px_12px_rgb(0_0_0/0.12)] transition-colors duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[var(--brand)] motion-reduce:transition-none"
             >
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">
@@ -681,7 +675,7 @@ function LookupContent() {
                 initial={reduceMotion ? false : { scale: 0.88, opacity: 0.82 }}
                 animate={reduceMotion ? undefined : { scale: 1, opacity: 1 }}
                 transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-white px-1.5 text-xs font-bold tabular-nums text-[color:var(--brand-dark)] shadow-[0_1px_0_rgba(255,255,255,0.55)_inset] transition group-hover:bg-white/95 motion-reduce:transition-none"
+                className="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-white px-1.5 text-xs font-medium tabular-nums text-[color:var(--brand-dark)] transition group-hover:bg-white/95 motion-reduce:transition-none"
               >
                 {basket.totalItems}
               </motion.span>
@@ -694,8 +688,8 @@ function LookupContent() {
       <footer className="mt-10 border-t border-stone-200 bg-stone-50/80">
         <div className="page-wrap py-8 text-center">
           <div className="flex items-center justify-center space-x-2 mb-2 text-slate-700">
-            <GraduationCap className="h-5 w-5" />
-            <span className="text-base font-semibold">{t('nav.title')}</span>
+            <GraduationCap className="h-4 w-4" />
+            <span className="text-base font-medium">{t('nav.title')}</span>
           </div>
           <p className="text-sm text-slate-500">{t('lookup.subtitle')}</p>
         </div>

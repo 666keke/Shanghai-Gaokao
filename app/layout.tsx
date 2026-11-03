@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="zh" className="scroll-smooth">
       <body>
         <LanguageProvider>
           <DisclaimerProvider>
@@ -31,7 +31,6 @@ export default function RootLayout({
               <DynamicLayout>
                 <div className="min-h-screen app-shell">
                   <div className="relative min-h-screen">
-                    <div className="pointer-events-none absolute inset-0 grid-overlay opacity-40" />
                     <div className="relative min-h-screen">
                       <Navigation />
                       {children}
