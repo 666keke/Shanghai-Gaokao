@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { MotionScope, PanelSwap, SelectionMarker, StateSlot } from '../../components/ui/Motion'
+import { motionEase, motionTime } from '../../lib/motion'
 import * as Dialog from '@radix-ui/react-dialog'
+import EmptyState from '../../components/ui/EmptyState'
 import MobileNavigation from '../../components/MobileNavigation'
 import MultiTrendChart from '../../components/MultiTrendChart'
 import MajorGroupsTable from '../../components/MajorGroupsTable'
@@ -37,6 +41,7 @@ const SERIES_COLORS = ['#256f8f', '#8f4b3f', '#3f7f63', '#9a6a25', '#6d5b8f', '#
 
 export default function LibraryPage() {
   const { t } = useLanguage()
+  const reducedMotion = useReducedMotion()
   const isChinese = t('nav.title') === '上海高考志愿分析'
   const { hasAgreed, isLoading } = useDisclaimer()
   const basket = useCompareBasket()
@@ -209,19 +214,19 @@ export default function LibraryPage() {
       <div className="page-wrap"><DisclaimerBanner /></div>
       <section className="page-wrap library-controls">
         <div className="library-mode-row">
-          <div className="library-mode" role="group" aria-label={isChinese ? '对比类型' : 'Comparison type'}>
+          <MotionScope><div className="library-mode" role="group" aria-label={isChinese ? '对比类型' : 'Comparison type'}>
             {(['university', 'majorGroup'] as const).map(mode => <button key={mode} type="button" className="focus-ring" aria-pressed={viewMode === mode} onClick={() => { setViewMode(mode); setSearchTerm('') }}>
-              {mode === 'university' ? (isChinese ? '院校' : 'Universities') : (isChinese ? '专业组' : 'Groups')}
+              {viewMode === mode && <SelectionMarker id="library-mode" surface />}<span className="motion-tab-label">{mode === 'university' ? (isChinese ? '院校' : 'Universities') : (isChinese ? '专业组' : 'Groups')}</span>
             </button>)}
-          </div>
+          </div></MotionScope>
           <button type="button" className="focus-ring library-add" disabled={!hasAgreed || isLoading || loadError} onClick={() => { setSearchTerm(''); setShowAddPanel(true) }}><Plus className="h-4 w-4" />{isChinese ? '添加' : 'Add'}</button>
         </div>
         {selectedItems.length > 0 && <div className="library-selection" aria-label={isChinese ? '已选对比项' : 'Selected comparisons'}>
-          {selectedItems.map((name, index) => <span key={name} className="library-chip">
+          <AnimatePresence initial={false}>{selectedItems.map((name, index) => <motion.span layout="position" key={name} className="library-chip" initial={reducedMotion ? false : { opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: reducedMotion ? 0 : -4 }} transition={{ duration: reducedMotion ? 0 : motionTime.feedback, ease: motionEase.arrive }}>
             <span className="series-dot" style={{ backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length] }} />
             <span>{name}</span>
             <button type="button" className="focus-ring" aria-label={`${isChinese ? '移除' : 'Remove'} ${name}`} onClick={() => viewMode === 'university' ? removeUniversity(name) : removeMajorGroup(name)}><X className="h-3.5 w-3.5" /></button>
-          </span>)}
+          </motion.span>)}</AnimatePresence>
         </div>}
         {loadError && <p role="alert" className="py-3 text-sm text-rose-700">{isChinese ? '数据加载失败，请刷新重试。' : 'Unable to load data. Refresh to retry.'}</p>}
       </section>
@@ -242,17 +247,17 @@ export default function LibraryPage() {
                 return <button key={name} type="button" className="focus-ring" aria-pressed={selected} onClick={() => {
                   if (viewMode === 'university') selected ? removeUniversity(name) : addUniversity(name)
                   else selected ? removeMajorGroup(name) : addMajorGroup(name)
-                }}><span>{name}</span>{selected ? <Check className="h-5 w-5" /> : <Plus className="h-4 w-4" />}</button>
+                }}><span>{name}</span><StateSlot value={String(selected)}>{selected ? <Check className="h-5 w-5" /> : <Plus className="h-4 w-4" />}</StateSlot></button>
               })}
               {candidates.length === 0 && <p className="py-10 text-center text-sm text-slate-500">{isChinese ? '没有找到，试试其他名称' : 'No matches. Try another name.'}</p>}
             </div>
-            <div className="selection-sheet-footer"><span>{selectedItems.length} / 6</span><Dialog.Close className="focus-ring">{isChinese ? '完成' : 'Done'}</Dialog.Close></div>
+            <div className="selection-sheet-footer"><span><StateSlot value={selectedItems.length} /> / 6</span><Dialog.Close className="focus-ring">{isChinese ? '完成' : 'Done'}</Dialog.Close></div>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
 
       {selectedItems.length > 0 ? <main className="page-wrap library-content">
-        <div className="library-data-tabs" role="tablist" aria-label={isChinese ? '数据视图' : 'Data view'}>
+        <MotionScope><div className="library-data-tabs" role="tablist" aria-label={isChinese ? '数据视图' : 'Data view'}>
           {(['trend', 'history'] as const).map(panel => <button key={panel} id={`library-tab-${panel}`} type="button" role="tab" aria-selected={dataPanel === panel} aria-controls={`library-panel-${panel}`} tabIndex={dataPanel === panel ? 0 : -1} className="focus-ring" onClick={() => setDataPanel(panel)} onKeyDown={event => {
             if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
               event.preventDefault()
@@ -260,17 +265,17 @@ export default function LibraryPage() {
               setDataPanel(next)
               document.getElementById(`library-tab-${next}`)?.focus()
             }
-          }}>{panel === 'trend' ? (isChinese ? '趋势' : 'Trend') : (isChinese ? '历年数据' : 'History')}</button>)}
-          <span>{selectedItems.length} / 6</span>
-        </div>
-        <section role="tabpanel" id={`library-panel-${dataPanel}`} aria-labelledby={`library-tab-${dataPanel}`} tabIndex={0} className={`focus-ring library-panel ${dataPanel === 'history' ? 'is-history' : ''}`}>
-          {dataPanel === 'trend' ? <><MultiTrendChart items={selectedItems} data={viewMode === 'university' ? universityChartData : data} mode={viewMode} title={isChinese ? '录取位次趋势' : 'Admission rank trends'} />
+          }}>{dataPanel === panel && <SelectionMarker id="library-panel" />}<span className="motion-tab-label">{panel === 'trend' ? (isChinese ? '趋势' : 'Trend') : (isChinese ? '历年数据' : 'History')}</span></button>)}
+          <span><StateSlot value={selectedItems.length} /> / 6</span>
+        </div></MotionScope>
+        <section role="tabpanel" id={`library-panel-${dataPanel}`} aria-labelledby={`library-tab-${dataPanel}`} tabIndex={0} className="focus-ring library-panel-host">
+          <PanelSwap value={`${viewMode}-${dataPanel}`}><div className={`library-panel ${dataPanel === 'history' ? 'is-history' : ''}`}>{dataPanel === 'trend' ? <><MultiTrendChart items={selectedItems} data={viewMode === 'university' ? universityChartData : data} mode={viewMode} title={isChinese ? '录取位次趋势' : 'Admission rank trends'} />
             {viewMode === 'university' && ignoredTrendGroups.length > 0 && <p className="ignored-trend-note" role="status">{isChinese ? '已忽略：' : 'Ignored: '}{ignoredTrendGroups.join('、')}{isChinese ? '（不计入当前趋势）' : ' (excluded from this chart)'}</p>}
           </> : <>
             <MajorGroupsTable universityNames={historyNames} data={historyData} years={allYears} mode={viewMode} onRemoveUniversity={removeUniversity} onRemoveMajorGroup={removeMajorGroup} seriesColors={SERIES_COLORS} excludedMajorGroups={viewMode === 'university' ? excludedMajorGroups : []} onToggleGroupExclusion={viewMode === 'university' ? toggleGroupExclusion : undefined} />
-          </>}
+          </>}</div></PanelSwap>
         </section>
-      </main> : <div className="page-wrap"><div className="library-empty"><Building2 className="h-8 w-8" /><p>{isChinese ? '选好院校，再看看历年变化' : 'Choose universities to explore admission history'}</p><button type="button" className="focus-ring library-add" disabled={!hasAgreed || isLoading || loadError} onClick={() => setShowAddPanel(true)}><Plus className="h-4 w-4" />{isChinese ? '开始选择' : 'Choose comparisons'}</button></div></div>}
+      </main> : <div className="page-wrap"><EmptyState icon={<Building2 className="h-8 w-8" />} action={<button type="button" className="focus-ring library-add" disabled={!hasAgreed || isLoading || loadError} onClick={() => setShowAddPanel(true)}><Plus className="h-4 w-4" />{isChinese ? '开始选择' : 'Choose comparisons'}</button>}>{isChinese ? '添加院校或专业组，查看历年数据' : 'Add universities or groups to compare admission history'}</EmptyState></div>}
       <MobileNavigation active="library" />
     </div>
   )

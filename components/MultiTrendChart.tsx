@@ -12,6 +12,8 @@ import {
 } from 'recharts'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
+import { motionEase, motionTime } from '../lib/motion'
+import { MotionDisclosure } from './ui/Motion'
 import { TrendingUp } from 'lucide-react'
 
 interface UniversityData {
@@ -50,6 +52,7 @@ export default function MultiTrendChart({
 }: MultiTrendChartProps) {
   const { t } = useLanguage()
   const reduceMotion = useReducedMotion()
+  const reducedDuration = reduceMotion ? 0 : 280
 
   const chartData = useMemo(() => {
     // Get all unique years
@@ -168,9 +171,9 @@ export default function MultiTrendChart({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: reduceMotion ? 0 : motionTime.content, ease: motionEase.arrive }}
       className="trend-content"
     >
       <div className="trend-heading"><h3>{title || t('chart.admissionTrends')}</h3><span>{mode === 'university' ? (t('nav.title') === '上海高考志愿分析' ? '各组平均位次' : 'Average group rank') : (t('nav.title') === '上海高考志愿分析' ? '最低录取位次' : 'Minimum rank')}</span></div>
@@ -211,7 +214,7 @@ export default function MultiTrendChart({
                 stroke={COLORS[index % COLORS.length]}
                 strokeWidth={2.5}
                 isAnimationActive={!reduceMotion}
-                animationDuration={220}
+                animationDuration={reducedDuration}
                 dot={{ fill: COLORS[index % COLORS.length], strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: COLORS[index % COLORS.length], strokeWidth: 2 }}
                 connectNulls={false}
@@ -222,7 +225,7 @@ export default function MultiTrendChart({
       </div>
 
       {/* Summary statistics */}
-      <details className="trend-statistics"><summary className="focus-ring">{t('nav.title') === '上海高考志愿分析' ? '统计详情' : 'Statistics'}</summary><div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
+      <MotionDisclosure className="trend-statistics"><summary className="focus-ring">{t('nav.title') === '上海高考志愿分析' ? '统计详情' : 'Statistics'}</summary><div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
         {itemStats.map((stat) => (
           <div
             key={stat.name}
@@ -245,7 +248,7 @@ export default function MultiTrendChart({
             </p>
           </div>
         ))}
-      </div></details>
+      </div></MotionDisclosure>
     </motion.div>
   )
 }

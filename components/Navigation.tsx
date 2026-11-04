@@ -2,19 +2,49 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BarChart3, BookOpenCheck, Building2, GraduationCap, Home, Menu, ShoppingBasket, Target, Trash2, X } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useCompareBasket } from '../contexts/CompareBasketContext'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motionEase, motionTime } from '../lib/motion'
+import { StateSlot } from './ui/Motion'
 import LanguageSelector from './LanguageSelector'
 
 export default function Navigation() {
   const pathname = usePathname()
+  const navRef = useRef<HTMLDivElement>(null)
+  const [activeNavBox, setActiveNavBox] = useState<{ left: number; width: number } | null>(null)
+  const reduced = useReducedMotion()
   const { t } = useLanguage()
   const basket = useCompareBasket()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isBasketOpen, setIsBasketOpen] = useState(false)
   const isChinese = t('nav.title') === '上海高考志愿分析'
+
+  useEffect(() => {
+    const mobile = window.matchMedia('(max-width: 639px)')
+    let frame = 0
+    let previous = ''
+    const update = () => {
+      frame = 0
+      const value = (mobile.matches ? Math.min(1, Math.max(0, window.scrollY / 100)) : 0).toFixed(3)
+      if (value !== previous) {
+        document.documentElement.style.setProperty('--header-collapse', value)
+        previous = value
+      }
+    }
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update) }
+    update()
+    window.addEventListener('scroll', schedule, { passive: true })
+    mobile.addEventListener('change', schedule)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', schedule)
+      mobile.removeEventListener('change', schedule)
+      document.documentElement.style.removeProperty('--header-collapse')
+    }
+  }, [])
 
   const navItems = [
     { href: '/', label: t('nav.dashboard'), icon: Home },
@@ -27,6 +57,23 @@ export default function Navigation() {
     if (href === '/') return pathname === '/'
     return pathname.startsWith(href)
   }
+
+  // Measure within the navigation itself; document scroll never enters the animation.
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const measure = () => {
+      const active = nav.querySelector<HTMLElement>('a[aria-current="page"]')
+      if (!active) return
+      const left = active.offsetLeft
+      const width = active.offsetWidth
+      setActiveNavBox(previous => previous?.left === left && previous.width === width ? previous : { left, width })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(nav)
+    return () => observer.disconnect()
+  }, [pathname, isChinese])
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
@@ -42,33 +89,34 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-stone-200/80 bg-stone-50/95 backdrop-blur">
+      <nav className="site-header sticky top-0 z-50 border-b border-stone-200/80 bg-stone-50/95 backdrop-blur">
         <div className="page-wrap">
-          <div className="flex min-h-[72px] items-center justify-between gap-4">
-            <Link href="/" className="flex min-w-0 items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_oklch,var(--brand-soft)_76%,white)] text-[color:var(--brand-dark)]">
+          <div className="site-header-row flex items-center justify-between gap-4">
+            <Link href="/" className="site-brand flex min-w-0 items-center">
+              <span className="site-brand-mark flex items-center justify-center rounded-lg bg-[color-mix(in_oklch,var(--brand-soft)_76%,white)] text-[color:var(--brand-dark)]">
                 <GraduationCap className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <h1 className="truncate text-base font-semibold tracking-tight text-[color:var(--ink)] sm:text-lg">
+                <h1 className="site-brand-title truncate font-semibold tracking-tight text-[color:var(--ink)] sm:text-lg">
                   {t('nav.title')}
                 </h1>
                 <p className="hidden text-xs text-[color:var(--ink-soft)] sm:block">
-                  {isChinese ? '2020—2025 录取数据参考' : '2020—2025 admission data'}
+                  {isChinese ? '2020至2025年录取数据' : '2020 to 2025 admission data'}
                 </p>
               </div>
             </Link>
 
             <div className="hidden items-center gap-3 lg:flex">
-              <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white/70 p-1">
+              <div ref={navRef} className="desktop-motion-nav flex items-center gap-1 rounded-lg border border-stone-200 bg-white/70 p-1">
+                {activeNavBox && <motion.span aria-hidden="true" className="motion-selection-surface desktop-nav-indicator" initial={false} animate={{ x: activeNavBox.left, width: activeNavBox.width }} transition={{ duration: reduced ? 0 : motionTime.surface, ease: motionEase.travel }} />}
                 {navItems.map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
                     aria-current={isActiveRoute(href) ? 'page' : undefined}
-                    className={`focus-ring flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
+                    className={`motion-nav-link focus-ring flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
                       isActiveRoute(href)
-                        ? 'bg-[var(--brand-dark)] text-white'
+                        ? `text-white ${activeNavBox ? '' : 'bg-[var(--brand-dark)]'}`
                         : 'text-[color:var(--ink-soft)] hover:bg-stone-100 hover:text-[color:var(--ink)]'
                     }`}
                   >
@@ -89,12 +137,12 @@ export default function Navigation() {
                   <span>{isChinese ? '对比篮' : 'Basket'}</span>
                   {basket.totalItems > 0 && (
                     <span className="rounded-md bg-[var(--brand-soft)] px-1.5 py-0.5 text-xs font-semibold text-[color:var(--brand-dark)]">
-                      {basket.totalItems}
+                      <StateSlot value={basket.totalItems} />
                     </span>
                   )}
                 </button>
 
-                {isBasketOpen && <BasketPanel isChinese={isChinese} />}
+                <AnimatePresence>{isBasketOpen && <BasketPanel key="basket-panel" isChinese={isChinese} />}</AnimatePresence>
               </div>
               <div className="h-8 w-px bg-stone-200" />
               <LanguageSelector />
@@ -116,15 +164,15 @@ export default function Navigation() {
         </div>
       </nav>
 
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+      <AnimatePresence>{isMobileMenuOpen && (
+        <motion.div key="mobile-menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : motionTime.feedback }} className="fixed inset-0 z-40 lg:hidden">
           <button
             type="button"
             aria-label="Close menu"
             className="absolute inset-0 bg-slate-900/20"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="absolute left-4 right-4 top-20 rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-3 shadow-xl">
+          <motion.div initial={reduced ? false : { y: -6 }} animate={{ y: 0 }} exit={{ y: reduced ? 0 : -6 }} transition={{ duration: reduced ? 0 : motionTime.content, ease: motionEase.arrive }} className="mobile-menu-panel absolute left-4 right-4 rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-3 shadow-xl">
             <div className="mb-2 flex items-center gap-2 px-2 py-2 text-sm font-semibold text-[color:var(--ink)]">
               <BarChart3 className="h-4 w-4 text-[color:var(--brand)]" />
               {isChinese ? '导航' : 'Navigation'}
@@ -159,19 +207,20 @@ export default function Navigation() {
                 </span>
               </Link>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        </motion.div>
+      )}</AnimatePresence>
     </>
   )
 }
 
 function BasketPanel({ isChinese }: { isChinese: boolean }) {
+  const reduced = useReducedMotion()
   const basket = useCompareBasket()
   const hasItems = basket.totalItems > 0
 
   return (
-    <div className="absolute right-0 top-12 z-50 w-[360px] rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-4 shadow-xl">
+    <motion.div initial={reduced ? false : { opacity: 0, y: -4, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: reduced ? 0 : -4 }} transition={{ duration: reduced ? 0 : motionTime.feedback, ease: motionEase.arrive }} className="absolute right-0 top-12 z-50 w-[360px] rounded-lg border border-stone-200 bg-[var(--paper-strong)] p-4 shadow-xl">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-[color:var(--ink)]">
@@ -219,7 +268,7 @@ function BasketPanel({ isChinese }: { isChinese: boolean }) {
             : 'Use “Add to compare” in lookup results or the library to save candidates here.'}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

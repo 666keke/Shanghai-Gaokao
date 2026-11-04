@@ -226,9 +226,8 @@
 
 /* Compact lookup: scan first, expand details when needed. */
 @layer components {
-  .lookup-heading { padding: 24px 0 20px; }
-  .lookup-input-section { padding-bottom: 24px; }
-  .lookup-inputs { padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-strong); }
+  .lookup-input-section { padding-bottom: 12px; }
+  .lookup-inputs { border: 0; padding: 0; background: transparent; }
   .lookup-page .filter-tabs { flex-wrap: nowrap; overflow-x: auto; gap: 18px; border-bottom: 1px solid var(--line); scrollbar-width: none; }
   .lookup-page .filter-tabs::-webkit-scrollbar { display: none; }
   .lookup-page .filter-tab { flex: 0 0 auto; min-height: 44px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 8px 0; background: transparent; font-size: 14px; }
@@ -251,8 +250,6 @@
   .result-detail-content .compare-action { justify-self: start; min-height: 44px; }
   .lookup-bottom-nav { display: none; }
   @media (max-width: 639px) {
-    .lookup-heading { padding-top: 16px; padding-bottom: 12px; }
-    .lookup-heading h1 { font-size: 22px; }
     .lookup-input-section { padding-bottom: 6px; }
     .lookup-inputs { border: 0; border-radius: 0; padding: 0; box-shadow: none; background: transparent; }
     .lookup-inputs input, .lookup-inputs select { font-size: 16px; }
@@ -307,7 +304,7 @@
   .library-data-tabs > span { margin-left: auto; color: var(--ink-soft); font-size: 12px; }
   .library-panel { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-strong); }
   .library-panel.is-history { padding: 0; border: 0; background: transparent; }
-  .library-empty { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 64px 12px; color: var(--ink-soft); font-size: 14px; }
+  .workbench-empty { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 64px 12px; color: var(--ink-soft); font-size: 14px; }
   .trend-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 12px; }
   .trend-heading h3 { font-size: 15px; font-weight: 600; }
   .trend-heading > span { font-size: 11px; color: var(--ink-soft); }
@@ -397,4 +394,87 @@
   .history-university-chevron { color: var(--ink-soft); flex-shrink: 0; }
   .history-university[open] > summary .history-university-chevron { transform: rotate(90deg); }
   .history-university:not([open]) > summary { margin-bottom: 0; }
+}
+
+/* StageShow-inspired motion: a fixed frame, quick feedback, retained exits. */
+@layer components {
+  .page-motion { min-width: 0; animation: page-content-enter 180ms ease-out both; }
+  .motion-collapse { overflow: hidden; min-width: 0; }
+  .motion-collapse[aria-hidden='true'] { pointer-events: none; }
+  .motion-slot { display: inline-grid; position: relative; overflow: hidden; vertical-align: middle; line-height: 1.4; font-variant-numeric: tabular-nums; }
+  .motion-slot-value { display: inline-flex; align-items: center; justify-content: center; grid-area: 1 / 1; white-space: nowrap; }
+  .compare-state-label { min-width: 3.2em; text-align: center; }
+  .motion-panel-stack { position: relative; min-width: 0; }
+  .motion-result-list { position: relative; }
+  .motion-tab-label { position: relative; z-index: 1; }
+  .motion-selection-line { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--brand); pointer-events: none; }
+  .motion-selection-surface { position: absolute; inset: 0; border-radius: inherit; background: var(--paper-strong); pointer-events: none; }
+  .library-mode button, .library-data-tabs button, .lookup-page .filter-tab, .motion-nav-link { position: relative; }
+  .library-mode button[aria-pressed='true'] { background: transparent; }
+  .library-data-tabs button[aria-selected='true'], .lookup-page .filter-tab.is-active { border-bottom-color: transparent; }
+  .desktop-motion-nav { position: relative; }
+  .desktop-motion-nav .motion-selection-surface { background: var(--brand-dark); }
+  .desktop-motion-nav > .desktop-nav-indicator { left: 0; right: auto; top: 4px; bottom: 4px; border-radius: 6px; }
+  .motion-nav-link > svg, .motion-nav-link > span:not(.motion-selection-surface) { position: relative; z-index: 1; }
+  .motion-disclosure.result-details[data-expanded='false'] > summary svg { transform: rotate(0); }
+  .motion-disclosure.result-details[data-expanded='true'] > summary svg { transform: rotate(90deg); }
+  .motion-disclosure.history-university[data-expanded='false'] > summary .history-university-chevron { transform: rotate(0); }
+  .motion-disclosure.history-university[data-expanded='true'] > summary .history-university-chevron { transform: rotate(90deg); }
+  .motion-disclosure.history-university > summary .history-university-chevron, .result-details > summary svg { transition: transform 220ms cubic-bezier(0.45, 0, 0.1, 1); }
+  .motion-disclosure.trend-statistics[data-expanded='false'] > summary::after { content: '+'; }
+  .motion-disclosure.trend-statistics[data-expanded='true'] > summary::after { content: '−'; }
+  .selection-overlay[data-state='open'] { animation: surface-backdrop-in 180ms ease-out both; }
+  .selection-overlay[data-state='closed'] { animation: surface-backdrop-out 140ms ease-in both; }
+  .selection-sheet[data-state='open'] { animation: selection-sheet-in 300ms cubic-bezier(0.25, 0.8, 0.25, 1) both; }
+  .selection-sheet[data-state='closed'] { animation: selection-sheet-out 180ms cubic-bezier(0.45, 0, 0.1, 1) both; }
+  .compare-trigger[aria-expanded='true'] { border-color: var(--brand); background: var(--brand-soft); }
+  .selection-candidates button { transition: background-color 140ms ease-out, color 140ms ease-out; }
+  .app-shell :where(button, summary, select, input, .library-chip, .history-group) { -webkit-tap-highlight-color: transparent; }
+  .app-shell :where(button, select, input, summary) { transition-property: background-color, border-color, color, box-shadow; transition-duration: 140ms; transition-timing-function: ease-out; }
+  .app-shell :where(button:enabled):active { translate: 0 1px; }
+  @media (min-width: 640px) {
+    .selection-sheet[data-state='open'] { animation-name: selection-dialog-in; }
+    .selection-sheet[data-state='closed'] { animation-name: selection-dialog-out; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .app-shell :where(button):active { translate: none; }
+    .selection-overlay, .selection-sheet { animation-duration: 0.01ms !important; }
+  }
+}
+@keyframes surface-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes surface-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes selection-sheet-in { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes selection-sheet-out { from { transform: translateY(0); } to { transform: translateY(100%); } }
+@keyframes selection-dialog-in { from { transform: translate(-50%, -47%) scale(0.985); opacity: 0.98; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+@keyframes selection-dialog-out { from { transform: translate(-50%, -50%) scale(1); opacity: 1; } to { transform: translate(-50%, -48%) scale(0.99); opacity: 0.98; } }
+
+@keyframes page-content-enter { from { opacity: 0.78; } to { opacity: 1; } }
+
+@layer components {
+  .library-panel-host { min-width: 0; }
+  .motion-disclosure.history-university > summary { margin-bottom: 0; }
+  .motion-disclosure.history-university > .motion-collapse > .space-y-3,
+  .motion-disclosure.history-university > .motion-collapse > .history-scroll { margin-top: 10px; }
+}
+@layer components {
+  .lookup-page .filter-tab.is-active .motion-selection-line { background: var(--brand); }
+  .lookup-page .filter-tab .motion-tab-label { font-size: inherit; font-weight: inherit; }
+}
+
+@layer base {
+  :root { --header-collapse: 0; --app-header-height: 72px; }
+}
+@layer components {
+  .site-header-row { min-height: var(--app-header-height); }
+  .site-brand { min-height: 44px; gap: 12px; }
+  .site-brand-mark { flex-shrink: 0; width: 40px; height: 40px; }
+  .mobile-menu-panel { top: calc(var(--app-header-height) + 9px); }
+  @media (max-width: 639px) {
+    :root { --app-header-height: calc(72px - 20px * var(--header-collapse)); }
+    .site-header-row { height: var(--app-header-height); }
+    .site-brand { gap: calc(12px - 4px * var(--header-collapse)); }
+    .site-brand .site-brand-mark { width: calc(40px - 10px * var(--header-collapse)); height: calc(40px - 10px * var(--header-collapse)); }
+    .site-brand .site-brand-title { font-size: calc(16px - 2px * var(--header-collapse)); }
+    .site-header button { min-height: 44px; }
+  }
 }

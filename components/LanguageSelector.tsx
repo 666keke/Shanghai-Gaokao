@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { StateSlot } from './ui/Motion'
 import { Globe } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 
@@ -35,9 +36,9 @@ export default function LanguageSelector() {
         title={t('language.select')}
       >
         <Globe size={16} />
-        <span className="font-medium">
+        <StateSlot className="font-medium" value={language}>
           {language === 'zh' ? '中文' : 'English'}
-        </span>
+        </StateSlot>
       </button>
     </div>
   )

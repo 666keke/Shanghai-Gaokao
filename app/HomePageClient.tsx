@@ -12,6 +12,7 @@ import AdmissionChanceCalculator, {
   AdmissionStats,
   GroupedResults,
 } from '../components/AdmissionChanceCalculator'
+import { motionEase, motionTime } from '../lib/motion'
 import DisclaimerBanner from '../components/DisclaimerBanner'
 import { getSvgPath } from '../lib/utils'
 
@@ -114,7 +115,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
     stats: AdmissionStats
     groupedResults: GroupedResults
   } | null>(null)
-  const isChinese = t('dashboard.title') === '大学录取智能分析'
+  const isChinese = t('nav.title') === '上海高考志愿分析'
   const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
@@ -131,7 +132,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
   const transition = shouldReduceMotion
     ? { duration: 0 }
-    : { duration: 0.28, ease: [0.25, 1, 0.5, 1] as const }
+    : { duration: motionTime.content, ease: motionEase.travel }
 
   const years = useMemo(
     () => Array.from(new Set(data.map((item) => item.年份))).sort((a, b) => b - a),
@@ -210,7 +211,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
         <section className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_310px] lg:items-start lg:gap-7">
           <div className="grid gap-6">
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={transition}
               className={`hero-workbench rounded-lg transition-[padding] duration-300 ${
@@ -242,7 +243,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   <p className="mt-4 max-w-2xl text-base leading-7 text-[color:var(--ink-soft)] sm:text-lg">
                     {isChinese
                       ? '查看匹配院校与专业组。'
-                      : 'Start with eligible major groups, then sort choices by safe, steady, and reach.'}
+                      : 'Compare historical cutoff ranks for university major groups.'}
                   </p>
                 </div>
                 <DisclaimerBanner />
@@ -307,7 +308,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                             {isChinese ? '完整清单' : 'Full list'}
                           </span>
                           <span className="block text-xs text-[color:var(--ink-soft)]">
-                            {isChinese ? '筛选院校和安全等级' : 'Filter options'}
+                            {isChinese ? '筛选院校和位次分类' : 'Filter options'}
                           </span>
                         </span>
                       </span>
@@ -322,7 +323,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                         <Building2 className="h-5 w-5 text-[color:var(--sage)]" />
                         <span>
                           <span className="block text-sm font-semibold text-[color:var(--ink)]">
-                            {isChinese ? '趋势核对' : 'Trend check'}
+                            {isChinese ? '历年对比' : 'Compare years'}
                           </span>
                           <span className="block text-xs text-[color:var(--ink-soft)]">
                             {isChinese ? '比较多年变化' : 'Compare years'}
@@ -357,7 +358,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--sage)]" />
                     <p className="text-xs leading-5 text-[color:var(--ink-soft)]">
                       {isChinese
-                        ? '安全等级用于缩小范围，不替代招生章程、专业限制和当年官方数据。'
+                        ? '分类按往年位次差计算。填报前仍需核对当年招生计划、专业要求和招生章程。'
                         : 'Safety levels narrow the range; confirm official rules and current-year data.'}
                     </p>
                   </div>
@@ -369,7 +370,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   <div className="mb-4 flex items-center gap-2">
                     <ShieldCheck className="h-5 w-5 text-[color:var(--sage)]" />
                     <h2 className="text-base font-semibold text-[color:var(--ink)]">
-                      {isChinese ? '工作流' : 'Workflow'}
+                      {isChinese ? '使用步骤' : 'How to use'}
                     </h2>
                   </div>
                   <ol className="grid gap-3 text-sm text-[color:var(--ink-soft)]">
@@ -402,7 +403,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     <div className="flex items-center gap-2">
                       <BookOpenCheck className="h-5 w-5 text-[color:var(--brand)]" />
                       <h2 className="text-base font-semibold text-[color:var(--ink)]">
-                        {isChinese ? '录取规则可视化' : 'Admission Guide'}
+                        {isChinese ? '投档与录取规则' : 'Admission rules'}
                       </h2>
                     </div>
                     <span className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-200 bg-white text-[color:var(--brand)] transition group-hover:border-[color:var(--brand)] group-hover:bg-[var(--brand-soft)]">
@@ -411,7 +412,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   </div>
                   <p className="text-sm leading-6 text-[color:var(--ink-soft)]">
                     {isChinese
-                      ? '用分屏交互理解院校专业组、平行志愿、一轮投档、调剂和征求志愿。'
+                      ? '查看投档顺序、专业调剂和退档后的处理办法。'
                       : 'Explore major groups, parallel filing, adjustment, and call-up choices.'}
                   </p>
                 </Link>
@@ -510,16 +511,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
       </main>
 
-      <footer className="mt-10 border-t border-stone-200 bg-stone-50/80">
-        <div className="page-wrap py-6 text-sm text-[color:var(--ink-soft)]">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <span className="font-medium text-[color:var(--ink)]">{t('nav.title')}</span>
-            <span>
-              {stats.totalRecords.toLocaleString()} records · {stats.yearsCovered} years
-            </span>
-          </div>
-        </div>
-      </footer>
+
     </div>
   )
 }

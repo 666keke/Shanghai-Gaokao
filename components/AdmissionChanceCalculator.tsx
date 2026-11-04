@@ -249,7 +249,7 @@ export default function AdmissionChanceCalculator({
 
   const rankingNumber = parseInt(ranking)
   const canConfirm = !isNaN(rankingNumber) && rankingNumber > 0
-  const isChinese = t('calc.title') === '录取概率分析'
+  const isChinese = t('nav.title') === '上海高考志愿分析'
   const transition = shouldReduceMotion ? { duration: 0 } : { duration: 0.28, ease: [0.25, 1, 0.5, 1] as const }
   const handleConfirm = useCallback(() => {
     if (!canConfirm) return
@@ -714,8 +714,9 @@ export function AdmissionChanceResults({
   groupedResults: GroupedResults
 }) {
   const { t } = useLanguage()
+  const reduceMotion = useReducedMotion()
   const [showPossiblySafeInfo, setShowPossiblySafeInfo] = useState(false)
-  const isChinese = t('calc.title') === '录取概率分析'
+  const isChinese = t('nav.title') === '上海高考志愿分析'
   
   const getSafetyConfig = (level: 'possiblySafe' | 'safe' | 'moderate' | 'risky') => {
     switch (level) {
@@ -781,15 +782,15 @@ export function AdmissionChanceResults({
     <AnimatePresence mode="wait">
       <motion.div
         key="results"
-        initial={{ opacity: 0, y: 20 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
+        exit={{ opacity: 0, y: reduceMotion ? 0 : -4 }}
         className="space-y-6"
       >
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12, duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+          transition={{ delay: reduceMotion ? 0 : 0.04, duration: reduceMotion ? 0 : 0.22, ease: [0.25, 0.8, 0.25, 1] }}
           className="workbench-card rounded-lg p-4 sm:p-5"
         >
           <div className="grid grid-cols-[34px_minmax(0,1fr)] gap-4 sm:grid-cols-[42px_minmax(0,1fr)] sm:gap-5">
@@ -804,9 +805,9 @@ export function AdmissionChanceResults({
                 return (
                   <motion.span
                     key={level}
-                    initial={{ scaleY: 0.2, opacity: 0 }}
+                    initial={reduceMotion ? false : { scaleY: 0.2, opacity: 0 }}
                     animate={{ scaleY: 1, opacity: count > 0 ? 1 : 0 }}
-                    transition={{ delay: 0.18, duration: 0.42, ease: [0.25, 1, 0.5, 1] }}
+                    transition={{ delay: reduceMotion ? 0 : 0.06, duration: reduceMotion ? 0 : 0.28, ease: [0.25, 0.8, 0.25, 1] }}
                     className="min-h-1 origin-bottom rounded-sm"
                     style={segmentStyle}
                     title={`${config.label}: ${count}`}
@@ -819,7 +820,7 @@ export function AdmissionChanceResults({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-base font-semibold text-[color:var(--ink)]">
-                    {isChinese ? '层级分布' : 'Safety mix'}
+                    {isChinese ? '位次参考分组' : 'Historical rank groups'}
                   </h2>
                   <p className="mt-1 text-sm leading-5 text-[color:var(--ink-soft)]">
                     {isChinese
